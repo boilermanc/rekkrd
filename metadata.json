@@ -1,0 +1,7 @@
+{
+  "name": "The Crowe Collection",
+  "description": "A hip, vinyl record cataloging app that uses AI to identify records from photos and fetch high-quality metadata from the web.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
