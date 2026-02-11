@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isSupabaseReady = !!supabase;
 
   useEffect(() => {
@@ -152,6 +153,32 @@ const App: React.FC = () => {
   const handleCapture = (base64: string) => {
     setIsCameraOpen(false);
     processImage(base64);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const max = 1080;
+        let w = img.width, h = img.height;
+        if (w > max || h > max) {
+          const scale = max / Math.max(w, h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        processImage(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleDelete = async (id: string) => {
@@ -384,8 +411,8 @@ const App: React.FC = () => {
           </svg>
         </button>
 
-        <button 
-          onClick={() => setIsCameraOpen(true)} 
+        <button
+          onClick={() => setIsCameraOpen(true)}
           className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-white/20"
         >
           <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,6 +421,23 @@ const App: React.FC = () => {
           </svg>
           <span className="font-syncopate tracking-[0.2em] text-[9px] md:text-xs whitespace-nowrap">SCAN COVER</span>
         </button>
+
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-white/10 backdrop-blur-md hover:bg-indigo-500/20 text-white font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-white/20 group flex-shrink-0"
+          title="Upload Album Cover"
+        >
+          <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:-translate-y-0.5 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
       </div>
 
       {isCameraOpen && <CameraModal onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}
