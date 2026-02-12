@@ -69,11 +69,14 @@ export const supabaseService = {
   async saveAlbum(album: Album): Promise<Album> {
     if (!supabase) throw new Error("Supabase not initialized");
     
-    let photoUrl = album.original_photo_url;
-    
-    if (photoUrl && photoUrl.startsWith('data:image')) {
-      const uploadedUrl = await this.uploadPhoto(photoUrl);
+    let photoUrl: string | undefined = undefined;
+
+    if (album.original_photo_url && album.original_photo_url.startsWith('data:image')) {
+      const uploadedUrl = await this.uploadPhoto(album.original_photo_url);
       if (uploadedUrl) photoUrl = uploadedUrl;
+      // If upload fails, don't store the raw base64 — it's too large for a text column
+    } else if (album.original_photo_url) {
+      photoUrl = album.original_photo_url;
     }
 
     const { data, error } = await supabase
@@ -110,10 +113,10 @@ export const supabaseService = {
   async updateAlbum(id: string, updates: Partial<Album>): Promise<void> {
     if (!supabase) return;
     
-    const dbUpdates: any = { ...updates };
-    if ('isFavorite' in updates) {
-      dbUpdates.is_favorite = updates.isFavorite;
-      delete dbUpdates.isFavorite;
+    const { isFavorite, ...rest } = updates;
+    const dbUpdates: Record<string, unknown> = { ...rest };
+    if (isFavorite !== undefined) {
+      dbUpdates.is_favorite = isFavorite;
     }
 
     const { error } = await supabase

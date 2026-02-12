@@ -12,14 +12,19 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
   const [isStreaming, setIsStreaming] = useState(false);
 
   useEffect(() => {
+    let activeStream: MediaStream | null = null;
+
     async function startCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } } 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } }
         });
+        activeStream = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsStreaming(true);
+        } else {
+          stream.getTracks().forEach(track => track.stop());
         }
       } catch (err) {
         console.error('Camera access error:', err);
@@ -29,9 +34,8 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
     startCamera();
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
       }
     };
   }, []);

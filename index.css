@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background-color: #050505;
+  color: #e5e7eb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.neon-border {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4), 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #10b981; }
+
+/* Custom animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+@keyframes ken-burns {
+  0% { transform: scale(1.1) translate3d(0, 0, 0); }
+  25% { transform: scale(1.15) translate3d(-1%, 1%, 0); }
+  50% { transform: scale(1.1) translate3d(-1.5%, -0.5%, 0); }
+  75% { transform: scale(1.2) translate3d(1%, -1.5%, 0); }
+  100% { transform: scale(1.1) translate3d(0, 0, 0); }
+}
+
+/* animate-in utilities (used in modals/panels) */
+@keyframes enter {
+  from { opacity: 0; transform: var(--tw-enter-translate, ) var(--tw-enter-scale, ); }
+  to { opacity: 1; transform: none; }
+}
+
+.animate-in {
+  animation: enter 0.3s ease-out;
+}
+
+.fade-in {
+  --tw-enter-translate: ;
+  --tw-enter-scale: ;
+}
+
+.slide-in-from-top {
+  --tw-enter-translate: translateY(-1rem);
+}
+
+.zoom-in-95 {
+  --tw-enter-scale: scale(0.95);
+}
+
+/* Print styles */
+@media print {
+  body { background: white !important; color: black !important; }
+  .glass-morphism, header, .fixed, main { display: none !important; }
+  .print-visible { display: block !important; }
+}
+
+/* Disable hover transforms on touch devices */
+@media (pointer: coarse) {
+  .hover\:scale-110:hover { transform: none !important; }
+}

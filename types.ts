@@ -4,7 +4,6 @@ export interface Album {
   artist: string;
   title: string;
   year?: string;
-  year_range?: string;
   genre?: string;
   cover_url: string;
   original_photo_url?: string;
@@ -19,7 +18,6 @@ export interface Album {
   // Collector fields
   condition?: string;
   personal_notes?: string;
-  price_estimate?: string;
   price_low?: number;
   price_median?: number;
   price_high?: number;
@@ -40,17 +38,4 @@ export interface Playlist {
   name: string;
   items: PlaylistItem[];
   mood: string;
-}
-
-export interface RecognitionResult {
-  artist: string;
-  title: string;
-  confidence: number;
-}
-
-export interface AppState {
-  albums: Album[];
-  loading: boolean;
-  error: string | null;
-  searchQuery: string;
 }

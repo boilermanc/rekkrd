@@ -40,6 +40,7 @@ const App: React.FC = () => {
     }
   }, [isSupabaseReady]);
 
+  const isAlbumDeselected = selectedAlbum === null;
   useEffect(() => {
     if (albums.length > 0) {
       const randomIndex = Math.floor(Math.random() * albums.length);
@@ -48,7 +49,7 @@ const App: React.FC = () => {
         setHeroBg(selected.cover_url);
       }
     }
-  }, [albums.length, isStudioOpen, selectedAlbum === null]);
+  }, [albums.length, isStudioOpen, isAlbumDeselected]);
 
   const loadAlbums = async () => {
     setLoading(true);
@@ -111,17 +112,18 @@ const App: React.FC = () => {
 
       setProcessingStatus(`Appraising ${identity.title}...`);
       const metadata = await geminiService.fetchAlbumMetadata(identity.artist, identity.title);
+      const { artist: mArtist, title: mTitle, cover_url: mCover, ...rest } = metadata;
       const saved = await supabaseService.saveAlbum({
-        ...metadata,
+        ...rest,
         original_photo_url: base64,
-        artist: metadata.artist || identity.artist,
-        title: metadata.title || identity.title,
-        cover_url: metadata.cover_url || '',
+        artist: mArtist || identity.artist,
+        title: mTitle || identity.title,
+        cover_url: mCover || '',
         tags: metadata.tags || [],
         isFavorite: false,
         condition: 'Near Mint',
         play_count: 0
-      } as Album);
+      });
       
       setAlbums(prev => [saved, ...prev]);
       setSelectedAlbum(saved);
@@ -183,9 +185,14 @@ const App: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm("Delete this masterpiece?")) {
-      await supabaseService.deleteAlbum(id);
-      setAlbums(prev => prev.filter(a => a.id !== id));
-      if (selectedAlbum?.id === id) setSelectedAlbum(null);
+      try {
+        await supabaseService.deleteAlbum(id);
+        setAlbums(prev => prev.filter(a => a.id !== id));
+        if (selectedAlbum?.id === id) setSelectedAlbum(null);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete album. Please try again.");
+      }
     }
   };
 
@@ -390,6 +397,14 @@ const App: React.FC = () => {
             </div>
             <h2 className="text-white/60 font-syncopate tracking-widest text-lg uppercase mb-2">CRATE IS EMPTY</h2>
             <p className="text-white/30 text-sm max-w-xs">Scan your first record cover to begin your digital archive.</p>
+          </div>
+        ) : filteredAlbums.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+            <svg className="w-16 h-16 text-white/10 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <h2 className="text-white/60 font-syncopate tracking-widest text-lg uppercase mb-2">No Matches</h2>
+            <p className="text-white/30 text-sm max-w-xs">No albums match your current filters. Try adjusting your search or clearing filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">

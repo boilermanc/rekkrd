@@ -62,7 +62,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
 
   const handlePlaySample = () => {
     const currentPlays = album.play_count || 0;
-    onUpdateAlbum?.(album.id!, { play_count: currentPlays + 1 });
+    if (album.id) onUpdateAlbum?.(album.id, { play_count: currentPlays + 1 });
     if (album.sample_url) window.open(album.sample_url, '_blank');
     else setToastMessage('Sample playback not available.');
   };
@@ -150,7 +150,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
 
             {/* Quick Actions */}
             <section className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => onToggleFavorite?.(album.id!)} className={`flex-1 font-bold py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 ${album.isFavorite ? 'bg-emerald-600 text-white' : 'bg-white text-black hover:bg-emerald-500 hover:text-white'}`}>
+              <button onClick={() => album.id && onToggleFavorite?.(album.id)} className={`flex-1 font-bold py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 ${album.isFavorite ? 'bg-emerald-600 text-white' : 'bg-white text-black hover:bg-emerald-500 hover:text-white'}`}>
                 {album.isFavorite ? 'Saved to Crate' : 'Add to Crate'}
               </button>
               <button onClick={handlePlaySample} className="flex-1 border border-white/10 text-white font-bold py-4 rounded-xl hover:bg-white/10 transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
@@ -204,6 +204,50 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 </section>
               )}
             </div>
+
+            {/* Tags */}
+            {album.tags && album.tags.length > 0 && (
+              <section>
+                <h4 className="text-white/30 text-[9px] font-syncopate tracking-[0.3em] uppercase mb-4">Tags</h4>
+                <div className="flex flex-wrap gap-2">
+                  {album.tags.map((tag, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[10px] text-white/60">
+                      {tag}
+                      {album.id && onUpdateTags && (
+                        <button
+                          onClick={() => onUpdateTags(album.id!, album.tags!.filter((_, j) => j !== i))}
+                          className="ml-1 text-white/30 hover:text-red-400 transition-colors"
+                        >
+                          &times;
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Personal Notes */}
+            {album.id && onUpdateAlbum && (
+              <section>
+                <h4 className="text-white/30 text-[9px] font-syncopate tracking-[0.3em] uppercase mb-4">Personal Notes</h4>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add your notes about this record..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
+                  rows={3}
+                />
+                {notes !== (album.personal_notes || '') && (
+                  <button
+                    onClick={() => onUpdateAlbum(album.id!, { personal_notes: notes })}
+                    className="mt-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-emerald-500/30 transition-all"
+                  >
+                    Save Notes
+                  </button>
+                )}
+              </section>
+            )}
           </div>
         </div>
       </div>

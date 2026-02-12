@@ -10,17 +10,24 @@ interface AlbumCardProps {
 
 const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
   return (
-    <div 
+    <div
       onClick={() => onSelect(album)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(album);
+        }
+      }}
       className="group relative glass-morphism rounded-xl overflow-hidden hover:neon-border transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-white/5"
       role="button"
       tabIndex={0}
       aria-label={`View details for ${album.title} by ${album.artist}`}
     >
       <div className="aspect-square overflow-hidden bg-black/40 relative">
-        <img 
-          src={album.cover_url || `https://picsum.photos/seed/${album.id}/400/400`} 
+        <img
+          src={album.cover_url || `https://picsum.photos/seed/${album.id}/400/400`}
           alt={album.title}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/vinyl/400/400';
