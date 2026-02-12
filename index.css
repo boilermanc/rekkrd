@@ -64,6 +64,10 @@ body {
   --tw-enter-translate: translateY(-1rem);
 }
 
+.slide-in-from-bottom-4 {
+  --tw-enter-translate: translateY(1rem);
+}
+
 .zoom-in-95 {
   --tw-enter-scale: scale(0.95);
 }
@@ -73,6 +77,11 @@ body {
   body { background: white !important; color: black !important; }
   .glass-morphism, header, .fixed, main { display: none !important; }
   .print-visible { display: block !important; }
+}
+
+/* List view row hover */
+.list-row-hover:hover {
+  background: rgba(16, 185, 129, 0.06);
 }
 
 /* Disable hover transforms on touch devices */

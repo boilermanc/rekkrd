@@ -8,9 +8,11 @@ import CameraModal from './components/CameraModal';
 import SpinningRecord from './components/SpinningRecord';
 import AlbumDetailModal from './components/AlbumDetailModal';
 import PlaylistStudio from './components/PlaylistStudio';
+import CollectionList from './components/CollectionList';
 import { proxyImageUrl } from './services/imageProxy';
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
+type ViewMode = 'landing' | 'grid' | 'list';
 
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=2000&auto=format&fit=crop';
 
@@ -25,10 +27,11 @@ const App: React.FC = () => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [heroBg, setHeroBg] = useState(DEFAULT_BG);
-  
+
   const [yearRange, setYearRange] = useState({ min: '', max: '' });
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [currentView, setCurrentView] = useState<ViewMode>('landing');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isSupabaseReady = !!supabase;
@@ -67,7 +70,8 @@ const App: React.FC = () => {
     setIsFilterPanelOpen(false);
     setShowStats(false);
     setSelectedAlbum(null);
-    
+    setCurrentView('landing');
+
     // Pick a fresh random background
     if (albums.length > 0) {
       const randomIndex = Math.floor(Math.random() * albums.length);
@@ -250,7 +254,7 @@ const App: React.FC = () => {
   }, [albums, searchQuery, yearRange, favoritesOnly, sortBy]);
 
   return (
-    <div className="min-h-screen pb-24 selection:bg-pink-500/30 relative overflow-x-hidden">
+    <div className={`min-h-screen ${currentView !== 'landing' ? 'pb-24' : ''} selection:bg-pink-500/30 relative overflow-x-hidden`}>
       {!isSupabaseReady && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-red-600 text-white text-[10px] py-1 text-center font-bold tracking-widest uppercase">
           Missing Supabase Configuration - Data will not persist
@@ -283,7 +287,7 @@ const App: React.FC = () => {
             </h1>
           </div>
 
-          <div className="flex-1 max-w-xl flex items-center gap-2">
+          {currentView !== 'landing' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button 
               onClick={() => setShowStats(!showStats)}
               className={`p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-white/60 hover:text-white'}`}
@@ -304,7 +308,22 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <button 
+            <button
+              onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
+              className={`p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'list' ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-white/60 hover:text-white'}`}
+              title={currentView === 'list' ? 'Switch to grid view' : 'Switch to list view'}
+            >
+              {currentView === 'list' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+            <button
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
               className={`p-3 rounded-full border transition-all flex-shrink-0 ${isFilterPanelOpen ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-white/60 hover:text-white'}`}
             >
@@ -312,7 +331,7 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
             </button>
-          </div>
+          </div>}
         </div>
       </header>
 
@@ -385,76 +404,154 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-32">
-            <SpinningRecord size="w-40 h-40" />
-            <p className="font-syncopate text-[10px] tracking-widest mt-8 text-white/40 uppercase">SYNCING COLLECTION</p>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-32">
+          <SpinningRecord size="w-40 h-40" />
+          <p className="font-syncopate text-[10px] tracking-widest mt-8 text-white/40 uppercase">SYNCING COLLECTION</p>
+        </div>
+      ) : currentView === 'landing' ? (
+        <main className="max-w-5xl mx-auto px-4 md:px-6 min-h-[calc(100vh-80px)] flex flex-col items-center justify-center animate-in fade-in duration-500">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="font-syncopate text-3xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-3">
+              THE CROWE COLLECTION
+            </h2>
+            <p className="text-white/30 text-sm md:text-base tracking-wide">Your vinyl archive awaits</p>
           </div>
-        ) : albums.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center px-6">
-            <div className="w-20 h-20 mb-6 opacity-20 text-white">
-              <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Browse Collection */}
+            <button
+              onClick={() => setCurrentView('grid')}
+              className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5 group-hover:bg-emerald-500/20 transition-colors">
+                <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </div>
+              <h3 className="font-syncopate text-[10px] md:text-xs tracking-widest uppercase font-bold text-white mb-2">Browse Crate</h3>
+              <p className="text-white/30 text-xs leading-relaxed">Visual grid of your vinyl — search, filter, and explore covers.</p>
+            </button>
+
+            {/* Collection List */}
+            <button
+              onClick={() => setCurrentView('list')}
+              className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-amber-500/30 hover:bg-amber-500/5 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-5 group-hover:bg-amber-500/20 transition-colors">
+                <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              </div>
+              <h3 className="font-syncopate text-[10px] md:text-xs tracking-widest uppercase font-bold text-white mb-2">Collection List</h3>
+              <p className="text-white/30 text-xs leading-relaxed">Sortable table view — sort by title, artist, year, value, and more.</p>
+            </button>
+
+            {/* Spin a Playlist */}
+            <button
+              onClick={() => setIsStudioOpen(true)}
+              className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-pink-500/30 hover:bg-pink-500/5 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center mb-5 group-hover:bg-pink-500/20 transition-colors">
+                <svg className="w-6 h-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                </svg>
+              </div>
+              <h3 className="font-syncopate text-[10px] md:text-xs tracking-widest uppercase font-bold text-white mb-2">Spin a Playlist</h3>
+              <p className="text-white/30 text-xs leading-relaxed">Let AI curate a session from your collection based on mood.</p>
+            </button>
+
+            {/* Scan a Record */}
+            <button
+              onClick={() => setIsCameraOpen(true)}
+              className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-indigo-400/30 hover:bg-indigo-400/5 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-indigo-400/10 flex items-center justify-center mb-5 group-hover:bg-indigo-400/20 transition-colors">
+                <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 className="font-syncopate text-[10px] md:text-xs tracking-widest uppercase font-bold text-white mb-2">Scan a Record</h3>
+              <p className="text-white/30 text-xs leading-relaxed">Snap a cover photo to identify and catalog a new album.</p>
+            </button>
+          </div>
+
+          {albums.length > 0 && (
+            <p className="mt-10 text-white/20 text-xs font-syncopate tracking-widest uppercase">{albums.length} records in your crate</p>
+          )}
+        </main>
+      ) : currentView === 'list' ? (
+        <CollectionList albums={albums} onSelect={setSelectedAlbum} onDelete={handleDelete} />
+      ) : (
+        <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
+          {albums.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+              <div className="w-20 h-20 mb-6 opacity-20 text-white">
+                <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
+              </div>
+              <h2 className="text-white/60 font-syncopate tracking-widest text-lg uppercase mb-2">CRATE IS EMPTY</h2>
+              <p className="text-white/30 text-sm max-w-xs">Scan your first record cover to begin your digital archive.</p>
             </div>
-            <h2 className="text-white/60 font-syncopate tracking-widest text-lg uppercase mb-2">CRATE IS EMPTY</h2>
-            <p className="text-white/30 text-sm max-w-xs">Scan your first record cover to begin your digital archive.</p>
-          </div>
-        ) : filteredAlbums.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center px-6">
-            <svg className="w-16 h-16 text-white/10 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          ) : filteredAlbums.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+              <svg className="w-16 h-16 text-white/10 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h2 className="text-white/60 font-syncopate tracking-widest text-lg uppercase mb-2">No Matches</h2>
+              <p className="text-white/30 text-sm max-w-xs">No albums match your current filters. Try adjusting your search or clearing filters.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
+              {filteredAlbums.map(album => (
+                <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} />
+              ))}
+            </div>
+          )}
+        </main>
+      )}
+
+      {currentView !== 'landing' && (
+        <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
+          <button
+            onClick={() => setIsStudioOpen(true)}
+            className="bg-white/10 backdrop-blur-md hover:bg-pink-500/20 text-white font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-white/20 group flex-shrink-0"
+            title="Magic Mix Studio"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
             </svg>
-            <h2 className="text-white/60 font-syncopate tracking-widest text-lg uppercase mb-2">No Matches</h2>
-            <p className="text-white/30 text-sm max-w-xs">No albums match your current filters. Try adjusting your search or clearing filters.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
-            {filteredAlbums.map(album => (
-              <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} />
-            ))}
-          </div>
-        )}
-      </main>
+          </button>
 
-      <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
-        <button 
-          onClick={() => setIsStudioOpen(true)}
-          className="bg-white/10 backdrop-blur-md hover:bg-pink-500/20 text-white font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-white/20 group flex-shrink-0"
-          title="Magic Mix Studio"
-        >
-          <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-          </svg>
-        </button>
+          <button
+            onClick={() => setIsCameraOpen(true)}
+            className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-white/20"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="font-syncopate tracking-[0.2em] text-[9px] md:text-xs whitespace-nowrap">SCAN COVER</span>
+          </button>
 
-        <button
-          onClick={() => setIsCameraOpen(true)}
-          className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-white/20"
-        >
-          <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className="font-syncopate tracking-[0.2em] text-[9px] md:text-xs whitespace-nowrap">SCAN COVER</span>
-        </button>
-
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="bg-white/10 backdrop-blur-md hover:bg-indigo-500/20 text-white font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-white/20 group flex-shrink-0"
-          title="Upload Album Cover"
-        >
-          <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:-translate-y-0.5 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-          </svg>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileUpload}
-          className="hidden"
-        />
-      </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="bg-white/10 backdrop-blur-md hover:bg-indigo-500/20 text-white font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-white/20 group flex-shrink-0"
+            title="Upload Album Cover"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:-translate-y-0.5 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+          </button>
+        </div>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
 
       {isCameraOpen && <CameraModal onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}
       {isStudioOpen && <PlaylistStudio albums={albums} onClose={() => setIsStudioOpen(false)} />}
