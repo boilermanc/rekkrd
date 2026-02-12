@@ -282,9 +282,11 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h1 className="font-syncopate text-lg md:text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 truncate">
-              THE CROWE COLLECTION
-            </h1>
+            {currentView !== 'landing' && (
+              <h1 className="font-syncopate text-lg md:text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 truncate">
+                THE CROWE COLLECTION
+              </h1>
+            )}
           </div>
 
           {currentView !== 'landing' && <div className="flex-1 max-w-xl flex items-center gap-2">
@@ -410,7 +412,7 @@ const App: React.FC = () => {
           <p className="font-syncopate text-[10px] tracking-widest mt-8 text-white/40 uppercase">SYNCING COLLECTION</p>
         </div>
       ) : currentView === 'landing' ? (
-        <main className="max-w-5xl mx-auto px-4 md:px-6 min-h-[calc(100vh-80px)] flex flex-col items-center justify-center animate-in fade-in duration-500">
+        <main className="max-w-5xl mx-auto px-4 md:px-6 pb-32 md:pb-0 min-h-[calc(100vh-80px)] flex flex-col items-center justify-center animate-in fade-in duration-500">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="font-syncopate text-3xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-3">
               THE CROWE COLLECTION
