@@ -7,6 +7,32 @@ export const config = {
   maxDuration: 60,
 };
 
+async function findCoverUrl(artist: string, title: string, geminiUrl?: string): Promise<string> {
+  // Try the URL Gemini returned
+  if (geminiUrl) {
+    try {
+      const check = await fetch(geminiUrl, { method: 'HEAD', headers: { 'User-Agent': 'CroweCollection/1.0' } });
+      if (check.ok) return geminiUrl;
+    } catch { /* fall through */ }
+  }
+
+  // Fallback: iTunes Search API (free, no auth, reliable artwork)
+  try {
+    const query = encodeURIComponent(`${artist} ${title}`);
+    const resp = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+    if (resp.ok) {
+      const json = await resp.json();
+      const artwork = json.results?.[0]?.artworkUrl100;
+      if (artwork) {
+        // Upscale from 100x100 to 600x600
+        return artwork.replace('100x100bb', '600x600bb');
+      }
+    }
+  } catch { /* fall through */ }
+
+  return '';
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -68,6 +94,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Ensure tracklist and tags are arrays
     if (!Array.isArray(data.tracklist)) data.tracklist = [];
     if (!Array.isArray(data.tags)) data.tags = [];
+
+    // Validate cover_url — Gemini often returns stale/invalid Discogs URLs
+    data.cover_url = await findCoverUrl(artist, title, data.cover_url);
 
     if (!data.year || !data.genre || !data.price_median) {
       const fallbackPrompt = `Find missing info for "${title}" by "${artist}": year, genre, and median Discogs price (USD).`;
