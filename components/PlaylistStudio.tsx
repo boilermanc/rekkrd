@@ -92,7 +92,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
                   value={mood}
                   onChange={(e) => setMood(e.target.value)}
                   placeholder="e.g. Late Night Jazz, 80s Disco..."
-                  className="w-full bg-white/5 border-b-2 border-white/10 text-2xl md:text-5xl font-bold text-white focus:border-pink-500 transition-all outline-none py-4 placeholder:text-white/5"
+                  className="w-full bg-white/5 border-b-2 border-white/10 text-2xl md:text-5xl font-bold text-white focus:border-pink-500 transition-all outline-none py-4 placeholder:text-white/30"
                 />
               </section>
 
