@@ -38,10 +38,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const prompt = `You are building a "${mood}" listening session from a vinyl record collection.
 
-Selection type: ${type}
-${typeInstructions[type]}
-
-Select up to ${maxItems} items.
+RULES:
+- playlistName must be a short, creative name (2-5 words max). No explanations or notes.
+- Always return at least 1 item. Work with what the collection has — find the closest match to the mood even if no genre is an exact fit.
+- Selection type: ${type}
+- ${typeInstructions[type]}
+- Select up to ${maxItems} items.
 
 Collection:
 ${JSON.stringify(simplifiedCollection)}`;
@@ -73,8 +75,10 @@ ${JSON.stringify(simplifiedCollection)}`;
     });
 
     const result = JSON.parse(response.text || '{}');
+    let name = typeof result.playlistName === 'string' ? result.playlistName.trim() : 'Crate Mix';
+    if (name.length > 60) name = name.slice(0, 57) + '...';
     return res.status(200).json({
-      playlistName: typeof result.playlistName === 'string' ? result.playlistName : 'Crate Mix',
+      playlistName: name || 'Crate Mix',
       items: Array.isArray(result.items) ? result.items : []
     });
   } catch (error) {

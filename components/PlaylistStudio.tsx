@@ -22,6 +22,11 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
     setStep('loading');
     try {
       const result = await geminiService.generatePlaylist(albums, mood, focus);
+      if (result.items.length === 0) {
+        alert("No tracks matched that vibe. Try a different mood!");
+        setStep('config');
+        return;
+      }
       setPlaylist(result);
       setStep('player');
     } catch (error) {
