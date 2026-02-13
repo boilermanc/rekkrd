@@ -253,9 +253,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (album.id && confirm('Delete this masterpiece?')) {
-                        onDelete(album.id);
-                      }
+                      if (album.id) onDelete(album.id);
                     }}
                     className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500 transition-all p-1 rounded-md"
                     title="Delete album"

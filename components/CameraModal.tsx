@@ -1,5 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
+import { useToast } from '../contexts/ToastContext';
 
 interface CameraModalProps {
   onCapture: (base64: string) => void;
@@ -7,6 +8,7 @@ interface CameraModalProps {
 }
 
 const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
+  const { showToast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -28,7 +30,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
         }
       } catch (err) {
         console.error('Camera access error:', err);
-        alert('Could not access camera. Please check permissions.');
+        showToast('Could not access camera. Please check permissions.', 'error');
       }
     }
     startCamera();

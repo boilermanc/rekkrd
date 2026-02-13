@@ -4,6 +4,7 @@ import { Album, Playlist, PlaylistItem } from '../types';
 import { geminiService } from '../services/geminiService';
 import SpinningRecord from './SpinningRecord';
 import { proxyImageUrl } from '../services/imageProxy';
+import { useToast } from '../contexts/ToastContext';
 
 interface PlaylistStudioProps {
   albums: Album[];
@@ -11,6 +12,7 @@ interface PlaylistStudioProps {
 }
 
 const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
+  const { showToast } = useToast();
   const [step, setStep] = useState<'config' | 'loading' | 'player' | 'manifest'>('config');
   const [mood, setMood] = useState('');
   const [focus, setFocus] = useState<'album' | 'side' | 'song'>('song');
@@ -23,14 +25,14 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
     try {
       const result = await geminiService.generatePlaylist(albums, mood, focus);
       if (result.items.length === 0) {
-        alert("No tracks matched that vibe. Try a different mood!");
+        showToast("No records in your crate match that vibe. Try a different mood!", "info");
         setStep('config');
         return;
       }
       setPlaylist(result);
       setStep('player');
     } catch (error) {
-      alert("The Vibe Engine hit a snag. Try again!");
+      showToast("The Vibe Engine hit a snag. Try again!", "error");
       setStep('config');
     }
   };

@@ -10,6 +10,7 @@ import AlbumDetailModal from './components/AlbumDetailModal';
 import PlaylistStudio from './components/PlaylistStudio';
 import CollectionList from './components/CollectionList';
 import { proxyImageUrl } from './services/imageProxy';
+import { useToast } from './contexts/ToastContext';
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
 type ViewMode = 'landing' | 'grid' | 'list';
@@ -17,6 +18,7 @@ type ViewMode = 'landing' | 'grid' | 'list';
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=2000&auto=format&fit=crop';
 
 const App: React.FC = () => {
+  const { showToast } = useToast();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -84,7 +86,7 @@ const App: React.FC = () => {
 
   const processImage = async (base64: string) => {
     if (!isSupabaseReady) {
-      alert("Database not configured. Please check your Supabase environment variables.");
+      showToast("Database not configured. Check your Supabase environment variables.", "error");
       return;
     }
     
@@ -92,7 +94,7 @@ const App: React.FC = () => {
     try {
       const identity = await geminiService.identifyAlbum(base64);
       if (!identity) {
-        alert("Couldn't identify that album. Try a clearer shot!");
+        showToast("Couldn't identify that album. Try a clearer shot!", "error");
         setProcessingStatus(null);
         return;
       }
@@ -135,7 +137,7 @@ const App: React.FC = () => {
       if (saved.cover_url) setHeroBg(saved.cover_url);
     } catch (err) {
       console.error(err);
-      alert("Something went wrong during processing.");
+      showToast("Something went wrong during processing.", "error");
     } finally {
       setProcessingStatus(prev => (prev === "✨ Already Cataloged!" ? prev : null));
     }
@@ -188,17 +190,22 @@ const App: React.FC = () => {
     e.target.value = '';
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Delete this masterpiece?")) {
-      try {
-        await supabaseService.deleteAlbum(id);
-        setAlbums(prev => prev.filter(a => a.id !== id));
-        if (selectedAlbum?.id === id) setSelectedAlbum(null);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete album. Please try again.");
+  const handleDelete = (id: string) => {
+    showToast("Delete this masterpiece?", "warning", {
+      action: "Delete",
+      duration: 5000,
+      onAction: async () => {
+        try {
+          await supabaseService.deleteAlbum(id);
+          setAlbums(prev => prev.filter(a => a.id !== id));
+          if (selectedAlbum?.id === id) setSelectedAlbum(null);
+          showToast("Album removed from crate.", "success");
+        } catch (err) {
+          console.error(err);
+          showToast("Failed to delete album. Please try again.", "error");
+        }
       }
-    }
+    });
   };
 
   const stats = useMemo(() => {

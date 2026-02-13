@@ -5,6 +5,7 @@ import { proxyImageUrl } from '../services/imageProxy';
 import { geminiService } from '../services/geminiService';
 import SpinningRecord from './SpinningRecord';
 import CoverPicker from './CoverPicker';
+import { useToast } from '../contexts/ToastContext';
 
 interface AlbumDetailModalProps {
   album: Album;
@@ -35,7 +36,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   onSelectAlbum,
   onUpdateAlbum
 }) => {
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { showToast } = useToast();
   const [notes, setNotes] = useState(album.personal_notes || '');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [expandedTrack, setExpandedTrack] = useState<number | null>(null);
@@ -61,12 +62,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
     setLoadingTrack(null);
   }, [expandedTrack, lyricsCache, album.artist, album.title]);
 
-  useEffect(() => {
-    if (toastMessage) {
-      const timer = setTimeout(() => setToastMessage(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toastMessage]);
+
 
   const collectionStats = useMemo(() => {
     const genreCount = allAlbums.filter(a => a.genre === album.genre).length;
@@ -90,7 +86,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
     const currentPlays = album.play_count || 0;
     if (album.id) onUpdateAlbum?.(album.id, { play_count: currentPlays + 1 });
     if (album.sample_url) window.open(album.sample_url, '_blank');
-    else setToastMessage('Sample playback not available.');
+    else showToast('Sample playback not available.', 'info');
   };
 
   const formatDate = (dateStr?: string) => {
@@ -113,12 +109,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
         if (onUpdateAlbum) {
           onUpdateAlbum(album.id, { cover_url: publicUrl });
         }
-        setToastMessage('Cover art saved');
+        showToast('Cover art saved', 'success');
       } else {
-        setToastMessage('Failed to save cover');
+        showToast('Failed to save cover', 'error');
       }
     } catch {
-      setToastMessage('Failed to save cover');
+      showToast('Failed to save cover', 'error');
     } finally {
       setUploadingCover(false);
     }
@@ -126,14 +122,6 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-2 md:p-8 backdrop-blur-xl animate-in fade-in duration-300">
-      {toastMessage && (
-        <div className="absolute top-6 md:top-10 left-1/2 -translate-x-1/2 z-[60] animate-in slide-in-from-top duration-300">
-          <div className="glass-morphism px-6 py-3 rounded-full border border-emerald-500/30 shadow-lg flex items-center gap-3">
-            <p className="text-white text-[10px] font-syncopate tracking-wider">{toastMessage}</p>
-          </div>
-        </div>
-      )}
-
       <div className="relative w-full max-w-6xl max-h-[98vh] md:max-h-[95vh] glass-morphism rounded-3xl overflow-hidden border border-white/10 flex flex-col md:flex-row animate-in zoom-in-95 duration-500">
         
         <button onClick={onClose} className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all">
