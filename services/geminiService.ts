@@ -102,7 +102,7 @@ export const geminiService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        albums: albums.map(a => ({ id: a.id, artist: a.artist, title: a.title, genre: a.genre, tracklist: a.tracklist })),
+        albums: albums.map(a => ({ id: a.id, artist: a.artist, title: a.title, genre: a.genre, tags: a.tags, tracklist: a.tracklist })),
         mood,
         type
       })
@@ -122,15 +122,17 @@ export const geminiService = {
       )
       .map((item: any) => {
         const album = albums.find(a => a.id === item.albumId);
+        if (!album) return null;
         return {
           albumId: item.albumId,
           artist: item.artist,
           albumTitle: item.albumTitle,
           itemTitle: item.itemTitle,
-          cover_url: album?.cover_url || '',
+          cover_url: album.cover_url || '',
           type,
         };
-      });
+      })
+      .filter((item): item is PlaylistItem => item !== null);
 
     return { id: crypto.randomUUID(), name: typeof result.playlistName === 'string' ? result.playlistName : 'Crate Mix', mood, items: itemsWithArt };
   }

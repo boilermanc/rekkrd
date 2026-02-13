@@ -27,6 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       artist: a.artist,
       title: a.title,
       genre: a.genre,
+      tags: a.tags,
       tracklist: a.tracklist
     }));
 
@@ -36,14 +37,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       song: 'Pick individual songs/tracks. itemTitle should be the actual song name. Use each album\'s tracklist data (if available) to pick real track names.'
     };
 
-    const prompt = `You are building a "${mood}" listening session from a vinyl record collection.
+    const validIds = new Set(simplifiedCollection.map((a: any) => a.id));
 
-RULES:
-- playlistName must be a short, creative name (2-5 words max). No explanations or notes.
-- Always return at least 1 item. Work with what the collection has — find the closest match to the mood even if no genre is an exact fit.
-- Selection type: ${type}
-- ${typeInstructions[type]}
-- Select up to ${maxItems} items.
+    const prompt = `You are a strict playlist curator for a vinyl record collection. The user wants a "${mood}" listening session.
+
+CRITICAL RULES — FOLLOW EXACTLY:
+1. Look at each album's genre and tags below. ONLY select albums whose genre or tags genuinely relate to the mood "${mood}".
+2. If NONE of the albums match the mood, you MUST return an empty items array [] and set playlistName to "No Matches Found". Do NOT force unrelated albums into the playlist just to return something.
+3. You MUST ONLY use albums from the list below. Do NOT invent albums, artists, or songs.
+4. Each albumId MUST exactly match an "id" value from the collection.
+5. playlistName: short creative name, 2-5 words max. No explanations.
+6. Selection type: ${type}. ${typeInstructions[type]}
+7. Select up to ${maxItems} items.
+
+Example: If the user asks for "jazz" but the collection only has Country and Pop albums, return {"playlistName": "No Matches Found", "items": []}.
 
 Collection:
 ${JSON.stringify(simplifiedCollection)}`;
@@ -77,9 +84,11 @@ ${JSON.stringify(simplifiedCollection)}`;
     const result = JSON.parse(response.text || '{}');
     let name = typeof result.playlistName === 'string' ? result.playlistName.trim() : 'Crate Mix';
     if (name.length > 60) name = name.slice(0, 57) + '...';
+    const rawItems = Array.isArray(result.items) ? result.items : [];
+    const verifiedItems = rawItems.filter((item: any) => item && validIds.has(item.albumId));
     return res.status(200).json({
       playlistName: name || 'Crate Mix',
-      items: Array.isArray(result.items) ? result.items : []
+      items: verifiedItems
     });
   } catch (error) {
     console.error('Gemini Playlist Error:', error);
