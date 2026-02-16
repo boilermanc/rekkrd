@@ -9,8 +9,11 @@ import SpinningRecord from './components/SpinningRecord';
 import AlbumDetailModal from './components/AlbumDetailModal';
 import PlaylistStudio from './components/PlaylistStudio';
 import CollectionList from './components/CollectionList';
+import Pagination from './components/Pagination';
 import { proxyImageUrl } from './services/imageProxy';
 import { useToast } from './contexts/ToastContext';
+
+const PAGE_SIZE = 40;
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
 type ViewMode = 'landing' | 'grid' | 'list';
@@ -35,6 +38,7 @@ const App: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [currentView, setCurrentView] = useState<ViewMode>('landing');
 
+  const [gridPage, setGridPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isSupabaseReady = !!supabase;
 
@@ -263,6 +267,14 @@ const App: React.FC = () => {
 
     return result;
   }, [albums, searchQuery, yearRange, favoritesOnly, sortBy]);
+
+  // Reset grid page when filters change
+  useEffect(() => {
+    setGridPage(1);
+  }, [searchQuery, yearRange, favoritesOnly, sortBy]);
+
+  const gridTotalPages = Math.ceil(filteredAlbums.length / PAGE_SIZE);
+  const paginatedAlbums = filteredAlbums.slice((gridPage - 1) * PAGE_SIZE, gridPage * PAGE_SIZE);
 
   return (
     <div className={`min-h-screen ${currentView !== 'landing' ? 'pb-24' : ''} selection:bg-pink-500/30 relative overflow-x-hidden`}>
@@ -596,11 +608,20 @@ const App: React.FC = () => {
               <p className="text-white/30 text-sm max-w-xs">No albums match your current filters. Try adjusting your search or clearing filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
-              {filteredAlbums.map(album => (
-                <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
+                {paginatedAlbums.map(album => (
+                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} />
+                ))}
+              </div>
+              <Pagination
+                currentPage={gridPage}
+                totalPages={gridTotalPages}
+                totalItems={filteredAlbums.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setGridPage}
+              />
+            </>
           )}
         </main>
       )}

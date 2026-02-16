@@ -1,8 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Album } from '../types';
 import { proxyImageUrl } from '../services/imageProxy';
 import { CONDITION_ORDER } from '../constants/conditionGrades';
+import Pagination from './Pagination';
+
+const PAGE_SIZE = 40;
 
 interface CollectionListProps {
   albums: Album[];
@@ -38,6 +41,7 @@ const SortArrow: React.FC<SortArrowProps> = ({ field, currentSortField, sortDir 
 const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, favoritesOnly, onToggleFavoritesFilter, searchQuery }) => {
   const [sortField, setSortField] = useState<SortField>('title');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -97,6 +101,14 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
 
     return result;
   }, [albums, searchQuery, sortField, sortDir, favoritesOnly]);
+
+  // Reset page when filters or sort change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortField, sortDir, favoritesOnly]);
+
+  const totalPages = Math.ceil(sortedAlbums.length / PAGE_SIZE);
+  const paginatedAlbums = sortedAlbums.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const colHeaderClass = (field: SortField) =>
     `cursor-pointer select-none transition-colors whitespace-nowrap ${
@@ -178,7 +190,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
               <p className="text-white/30 text-sm">No albums match your search.</p>
             </div>
           ) : (
-            sortedAlbums.map((album, idx) => (
+            paginatedAlbums.map((album, idx) => (
               <div
                 key={album.id}
                 onClick={() => onSelect(album)}
@@ -281,6 +293,14 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
           )}
         </div>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={sortedAlbums.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
