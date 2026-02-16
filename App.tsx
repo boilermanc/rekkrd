@@ -10,13 +10,14 @@ import AlbumDetailModal from './components/AlbumDetailModal';
 import PlaylistStudio from './components/PlaylistStudio';
 import CollectionList from './components/CollectionList';
 import Pagination from './components/Pagination';
+import Landing from './pages/Landing';
 import { proxyImageUrl } from './services/imageProxy';
 import { useToast } from './contexts/ToastContext';
 
 const PAGE_SIZE = 40;
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
-type ViewMode = 'landing' | 'grid' | 'list';
+type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list';
 
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=2000&auto=format&fit=crop';
 
@@ -36,7 +37,13 @@ const App: React.FC = () => {
   const [yearRange, setYearRange] = useState({ min: '', max: '' });
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
-  const [currentView, setCurrentView] = useState<ViewMode>('landing');
+  const [currentView, setCurrentView] = useState<ViewMode>(
+    () => (sessionStorage.getItem('rekkrd-view') as ViewMode) || 'public-landing'
+  );
+
+  useEffect(() => {
+    sessionStorage.setItem('rekkrd-view', currentView);
+  }, [currentView]);
 
   const [gridPage, setGridPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -276,6 +283,10 @@ const App: React.FC = () => {
   const gridTotalPages = Math.ceil(filteredAlbums.length / PAGE_SIZE);
   const paginatedAlbums = filteredAlbums.slice((gridPage - 1) * PAGE_SIZE, gridPage * PAGE_SIZE);
 
+  if (currentView === 'public-landing') {
+    return <Landing onEnterApp={() => setCurrentView('landing')} />;
+  }
+
   return (
     <div className={`min-h-screen ${currentView !== 'landing' ? 'pb-24' : ''} selection:bg-pink-500/30 relative overflow-x-hidden`}>
       {!isSupabaseReady && (
@@ -298,7 +309,7 @@ const App: React.FC = () => {
           <div className="flex items-center justify-between md:justify-start gap-3">
             <button
               onClick={resetView}
-              aria-label="The Crowe Collection home"
+              aria-label="Rekkrd home"
               title="Home / Reset Filters"
               className="w-10 h-10 bg-gradient-to-tr from-emerald-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg neon-border cursor-pointer active:scale-90 transition-transform flex-shrink-0 border-none p-0"
             >
@@ -308,7 +319,7 @@ const App: React.FC = () => {
             </button>
             {currentView !== 'landing' && (
               <h1 className="font-syncopate text-lg md:text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 truncate">
-                THE CROWE COLLECTION
+                REKKRD
               </h1>
             )}
           </div>
@@ -475,7 +486,7 @@ const App: React.FC = () => {
 
           <div className="text-center mb-12 md:mb-16 relative z-10">
             <h2 className="font-syncopate text-3xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-3">
-              THE CROWE COLLECTION
+              REKKRD
             </h2>
             <p className="text-white/30 text-sm md:text-base tracking-wide">
               {albums.length > 0 ? 'Your vinyl archive awaits' : 'Scan your first record to start your archive'}

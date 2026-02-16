@@ -1,5 +1,5 @@
 {
-  "name": "The Crowe Collection",
+  "name": "Rekkrd",
   "description": "A hip, vinyl record cataloging app that uses AI to identify records from photos and fetch high-quality metadata from the web.",
   "requestFramePermissions": [
     "camera"

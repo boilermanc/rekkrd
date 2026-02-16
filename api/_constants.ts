@@ -1,1 +1,1 @@
-export const USER_AGENT = 'TheCroweCollection/1.0';
+export const USER_AGENT = 'Rekkrd/1.0';

@@ -1,4 +1,4 @@
-# The Crowe Collection — Code Review Tasks
+# Rekkrd — Code Review Tasks
 
 Deployment target: **Vercel**
 Review date: **2025-02-15**
