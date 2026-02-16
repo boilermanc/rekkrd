@@ -11,7 +11,7 @@ import PlaylistStudio from './components/PlaylistStudio';
 import CollectionList from './components/CollectionList';
 import Pagination from './components/Pagination';
 import Landing from './pages/Landing';
-import AuthPage from './components/AuthPage';
+// AuthPage kept as standalone fallback; Landing page handles auth via dropdown
 import { proxyImageUrl } from './services/imageProxy';
 import { useToast } from './contexts/ToastContext';
 import { useAuthContext } from './contexts/AuthContext';
@@ -315,11 +315,12 @@ const App: React.FC = () => {
     );
   }
 
-  // Not signed in — show auth page
+  // Not signed in — show landing page with auth dropdown
   if (!user) {
-    return <AuthPage />;
+    return <Landing />;
   }
 
+  // Authenticated user with stale public-landing view — show in-app landing
   if (currentView === 'public-landing') {
     return <Landing onEnterApp={() => setCurrentView('landing')} />;
   }

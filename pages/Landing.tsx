@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import './Landing.css';
+import { useAuthContext } from '../contexts/AuthContext';
+import { supabase } from '../services/supabaseService';
 
 interface LandingProps {
-  onEnterApp: () => void;
+  onEnterApp?: () => void;
 }
 
 const Check: React.FC = () => (
@@ -69,8 +71,91 @@ const faqs = [
 ];
 
 const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
+  const { user, signOut } = useAuthContext();
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Auth overlay state
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const authRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!showAuth) return;
+    const handle = (e: MouseEvent) => {
+      if (authRef.current && !authRef.current.contains(e.target as Node)) {
+        setShowAuth(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [showAuth]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!showAuth) return;
+    const handle = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowAuth(false);
+    };
+    document.addEventListener('keydown', handle);
+    return () => document.removeEventListener('keydown', handle);
+  }, [showAuth]);
+
+  const openAuthPanel = (mode: 'signin' | 'signup') => {
+    setAuthMode(mode);
+    setAuthError(null);
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setShowAuth(true);
+  };
+
+  const handleAuthSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    if (!supabase) {
+      setAuthError('Database connection is not available.');
+      return;
+    }
+    if (!email.trim() || !password.trim()) {
+      setAuthError('Email and password are required.');
+      return;
+    }
+    if (authMode === 'signup' && password !== confirmPassword) {
+      setAuthError('Passwords don\u2019t match.');
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      if (authMode === 'signin') {
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (error) throw error;
+      } else {
+        const { error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
+        if (signUpError) throw signUpError;
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (signInError) throw signInError;
+      }
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleCTA = () => {
+    if (user && onEnterApp) {
+      onEnterApp();
+    } else if (!user) {
+      openAuthPanel('signup');
+    }
+  };
 
   const checkItem = (text: string) => (
     <li key={text}>
@@ -90,8 +175,21 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
             <a href="#playlist">Playlists</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
-            <button className="nav-cta" onClick={onEnterApp}>Get Started</button>
+            {user ? (
+              <>
+                <button className="nav-sign-in" onClick={signOut}>Sign Out</button>
+                <button className="nav-cta" onClick={handleCTA}>My Collection</button>
+              </>
+            ) : (
+              <>
+                <button className="nav-sign-in" onClick={() => openAuthPanel('signin')}>Sign In</button>
+                <button className="nav-cta" onClick={() => openAuthPanel('signup')}>Get Started</button>
+              </>
+            )}
           </div>
+          {!user && (
+            <button className="nav-mobile-auth" onClick={() => openAuthPanel('signin')}>Sign In</button>
+          )}
         </div>
       </nav>
 
@@ -122,7 +220,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
             <h1>Your Vinyl<br />Collection, <em>Reimagined.</em></h1>
             <p>Scan, catalog, and rediscover your record collection with AI. Get instant identification, valuations, tracklists, and curated playlists from what you already own.</p>
             <div className="hero-actions">
-              <button className="btn-primary" onClick={onEnterApp}>Start Free <Arrow /></button>
+              <button className="btn-primary" onClick={handleCTA}>Start Free <Arrow /></button>
               <a href="#features" className="btn-secondary">See Features</a>
             </div>
           </div>
@@ -345,7 +443,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
                 <li className="disabled"><X />AI playlists</li>
                 <li className="disabled"><X />Lyrics lookup</li>
               </ul>
-              <button className="price-btn outline" onClick={onEnterApp}>Get Started</button>
+              <button className="price-btn outline" onClick={handleCTA}>Get Started</button>
             </div>
 
             <div className="price-card featured">
@@ -367,7 +465,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
                 <li><Check />Pricing &amp; condition grading</li>
                 <li><Check />Export collection data</li>
               </ul>
-              <button className="price-btn primary" onClick={onEnterApp}>Start Free Trial</button>
+              <button className="price-btn primary" onClick={handleCTA}>Start Free Trial</button>
             </div>
 
             <div className="price-card">
@@ -421,7 +519,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
           <h2>Ready to <em>Rekkrd</em><br />Your Collection?</h2>
           <p>Join thousands of collectors who've digitized, valued, and rediscovered their vinyl with AI.</p>
           <div className="final-cta-actions">
-            <button className="btn-light" onClick={onEnterApp}>Start Free &mdash; No Card Required <Arrow /></button>
+            <button className="btn-light" onClick={handleCTA}>Start Free &mdash; No Card Required <Arrow /></button>
             <a href="#pricing" className="btn-ghost">View Pricing</a>
           </div>
         </div>
@@ -468,6 +566,94 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
           </div>
         </div>
       </footer>
+
+      {/* Auth overlay */}
+      {showAuth && !user && (
+        <div className="auth-overlay" role="dialog" aria-modal="true" aria-label={authMode === 'signin' ? 'Sign in' : 'Create account'}>
+          <div className="auth-card" ref={authRef}>
+            <button className="auth-close" onClick={() => setShowAuth(false)} aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div className="auth-tabs">
+              <button
+                className={`auth-tab${authMode === 'signin' ? ' active' : ''}`}
+                onClick={() => { setAuthMode('signin'); setAuthError(null); setConfirmPassword(''); }}
+              >
+                Sign In
+              </button>
+              <button
+                className={`auth-tab${authMode === 'signup' ? ' active' : ''}`}
+                onClick={() => { setAuthMode('signup'); setAuthError(null); }}
+              >
+                Sign Up
+              </button>
+            </div>
+
+            <div aria-live="polite" style={{ minHeight: 24 }}>
+              {authError && <p className="auth-error" role="alert">{authError}</p>}
+            </div>
+
+            <form onSubmit={handleAuthSubmit} role="form" aria-label={authMode === 'signin' ? 'Sign in' : 'Create account'}>
+              <div className="auth-field">
+                <label htmlFor="landing-email">Email</label>
+                <input
+                  id="landing-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="landing-password">Password</label>
+                <input
+                  id="landing-password"
+                  type="password"
+                  autoComplete={authMode === 'signin' ? 'current-password' : 'new-password'}
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder={'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}
+                />
+              </div>
+              {authMode === 'signup' && (
+                <div className="auth-field">
+                  <label htmlFor="landing-confirm-password">Confirm Password</label>
+                  <input
+                    id="landing-confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder={'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}
+                  />
+                </div>
+              )}
+              <button type="submit" className="auth-submit" disabled={authLoading}>
+                {authLoading ? 'Loading\u2026' : authMode === 'signin' ? 'Sign In' : 'Create Account'}
+              </button>
+            </form>
+
+            <p className="auth-switch">
+              {authMode === 'signin' ? "Don\u2019t have an account? " : 'Already have an account? '}
+              <button
+                type="button"
+                className="auth-switch-link"
+                onClick={() => { setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); setAuthError(null); }}
+              >
+                {authMode === 'signin' ? 'Sign up' : 'Sign in'}
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
