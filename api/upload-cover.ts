@@ -85,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Resolve hostname and block private/internal IPs
-    let addresses: dns.LookupAddress[];
+    let addresses: { address: string; family: number }[];
     try {
       addresses = await dns.lookup(parsed.hostname, { all: true });
     } catch {
