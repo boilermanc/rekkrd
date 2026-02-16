@@ -11,8 +11,11 @@ import PlaylistStudio from './components/PlaylistStudio';
 import CollectionList from './components/CollectionList';
 import Pagination from './components/Pagination';
 import Landing from './pages/Landing';
+import AuthPage from './components/AuthPage';
 import { proxyImageUrl } from './services/imageProxy';
 import { useToast } from './contexts/ToastContext';
+import { useAuthContext } from './contexts/AuthContext';
+import { getProfile, createProfile } from './services/profileService';
 
 const PAGE_SIZE = 40;
 
@@ -23,6 +26,7 @@ const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617
 
 const App: React.FC = () => {
   const { showToast } = useToast();
+  const { user, loading: authLoading, signOut } = useAuthContext();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -62,6 +66,24 @@ const App: React.FC = () => {
       setLoading(false);
     }
   }, [isSupabaseReady]);
+
+  // Auto-create profile row on first signup
+  const profileCheckedRef = useRef(false);
+  useEffect(() => {
+    if (!user || profileCheckedRef.current) return;
+    profileCheckedRef.current = true;
+
+    (async () => {
+      try {
+        const existing = await getProfile(user.id);
+        if (!existing) {
+          await createProfile({ id: user.id });
+        }
+      } catch (err) {
+        console.error('Failed to ensure profile exists:', err);
+      }
+    })();
+  }, [user]);
 
   const isAlbumDeselected = selectedAlbum === null;
   useEffect(() => {
@@ -283,6 +305,21 @@ const App: React.FC = () => {
   const gridTotalPages = Math.ceil(filteredAlbums.length / PAGE_SIZE);
   const paginatedAlbums = filteredAlbums.slice((gridPage - 1) * PAGE_SIZE, gridPage * PAGE_SIZE);
 
+  // Auth loading screen
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center">
+        <SpinningRecord size="w-32 h-32" />
+        <p className="font-syncopate text-[10px] tracking-widest mt-6 text-white/40 uppercase">Loading</p>
+      </div>
+    );
+  }
+
+  // Not signed in — show auth page
+  if (!user) {
+    return <AuthPage />;
+  }
+
   if (currentView === 'public-landing') {
     return <Landing onEnterApp={() => setCurrentView('landing')} />;
   }
@@ -369,6 +406,17 @@ const App: React.FC = () => {
               </svg>
             </button>
           </div>}
+
+          <button
+            onClick={signOut}
+            className="p-2 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all flex-shrink-0"
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+          </button>
         </div>
       </header>
 

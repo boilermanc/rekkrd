@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
+import { AuthProvider } from './contexts/AuthContext';
 import Toast from './components/Toast';
 
 const rootElement = document.getElementById('root');
@@ -17,7 +18,9 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <ToastProvider>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
         <Toast />
       </ToastProvider>
     </ErrorBoundary>
