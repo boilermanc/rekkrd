@@ -1,13 +1,17 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Toast from './components/Toast';
+import AdminAuthGuard from './components/AdminAuthGuard';
+import AdminRoutes from './admin/AdminRoutes';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -18,14 +22,25 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-          <Toast />
-        </ToastProvider>
-      </ThemeProvider>
+      <BrowserRouter>
+        <ThemeProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <SubscriptionProvider>
+                <Routes>
+                  <Route path="/admin/*" element={
+                    <AdminAuthGuard>
+                      <AdminRoutes />
+                    </AdminAuthGuard>
+                  } />
+                  <Route path="*" element={<App />} />
+                </Routes>
+              </SubscriptionProvider>
+            </AuthProvider>
+            <Toast />
+          </ToastProvider>
+        </ThemeProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>
 );

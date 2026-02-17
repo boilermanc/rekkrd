@@ -1,5 +1,7 @@
 import { supabase } from './supabaseService';
 
+export type UserRole = 'user' | 'admin';
+
 export interface Profile {
   id: string;
   display_name: string | null;
@@ -7,6 +9,7 @@ export interface Profile {
   listening_setup: string | null;
   collecting_goal: string | null;
   onboarding_completed: boolean;
+  role: UserRole;
   created_at: string;
   updated_at: string;
 }
@@ -95,6 +98,16 @@ export async function hasCompletedOnboarding(userId: string): Promise<boolean> {
     return profile?.onboarding_completed ?? false;
   } catch (e) {
     console.error('Error checking onboarding status:', e);
+    return false;
+  }
+}
+
+export async function isAdmin(userId: string): Promise<boolean> {
+  try {
+    const profile = await getProfile(userId);
+    return profile?.role === 'admin';
+  } catch (e) {
+    console.error('Error checking admin status:', e);
     return false;
   }
 }
