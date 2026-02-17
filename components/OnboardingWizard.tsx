@@ -115,7 +115,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ userId, onComplete 
         </svg>
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 520 }}>
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 520, boxSizing: 'border-box' }}>
         {/* Progress */}
         <div
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 32 }}
@@ -142,8 +142,9 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ userId, onComplete 
         {/* Card */}
         <div style={{
           background: t.white, borderRadius: t.radius, border: `2px solid ${t.beige}`,
-          padding: '40px 36px', minHeight: 400, display: 'flex', flexDirection: 'column',
+          padding: 'clamp(24px, 4vw, 40px) clamp(16px, 3vw, 36px)', minHeight: 400, display: 'flex', flexDirection: 'column',
           boxShadow: '0 12px 36px rgba(79,109,122,.12)', animation: 'auth-slide-up .3s ease-out',
+          overflow: 'hidden',
         }}>
           <div
             key={animKey}
@@ -292,7 +293,7 @@ const StepHabits: React.FC<StepHabitsProps> = ({
     {/* Setup */}
     <div>
       <p style={labelStyle}>Listening Setup</p>
-      <div role="radiogroup" aria-label="Select your listening setup" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+      <div role="radiogroup" aria-label="Select your listening setup" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
         {SETUP_OPTIONS.map(opt => {
           const sel = selectedSetup === opt.id;
           return (
@@ -318,7 +319,7 @@ const StepHabits: React.FC<StepHabitsProps> = ({
     {/* Goals */}
     <div>
       <p style={labelStyle}>Collecting Goal</p>
-      <div role="radiogroup" aria-label="Select your collecting goal" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
+      <div role="radiogroup" aria-label="Select your collecting goal" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8 }}>
         {GOAL_OPTIONS.map(opt => {
           const sel = selectedGoal === opt.id;
           return (
