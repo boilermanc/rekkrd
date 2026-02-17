@@ -57,7 +57,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, totalI
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 mb-2 px-1">
-      <span className="text-[#7d9199]/70 text-xs font-label tracking-widest uppercase">
+      <span className="text-th-text3/70 text-xs font-label tracking-widest uppercase">
         {rangeStart}–{rangeEnd} of {totalItems}
       </span>
 
@@ -66,7 +66,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, totalI
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-1.5 rounded-lg text-xs transition-all border border-[#e8dab2]/[0.10] disabled:opacity-20 disabled:cursor-not-allowed bg-[#e8dab2]/[0.04] text-[#c0d6df] hover:text-[#e8e2d6] hover:bg-[#e8dab2]/[0.08]"
+          className="px-3 py-1.5 rounded-lg text-xs transition-all border border-th-surface/[0.10] disabled:opacity-20 disabled:cursor-not-allowed bg-th-surface/[0.04] text-th-text2 hover:text-th-text hover:bg-th-surface/[0.08]"
           aria-label="Previous page"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,15 +77,15 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, totalI
         {/* Page numbers */}
         {pageNumbers.map((page, idx) =>
           page === '...' ? (
-            <span key={`ellipsis-${idx}`} className="px-2 text-[#7d9199]/50 text-xs select-none">...</span>
+            <span key={`ellipsis-${idx}`} className="px-2 text-th-text3/50 text-xs select-none">...</span>
           ) : (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
               className={`min-w-[32px] h-8 rounded-lg text-xs font-medium transition-all border ${
                 currentPage === page
-                  ? 'bg-[#dd6e42] border-[#dd6e42] text-[#e8e2d6] shadow-lg shadow-[#dd6e42]/20'
-                  : 'border-[#e8dab2]/[0.10] bg-[#e8dab2]/[0.04] text-[#7d9199] hover:text-[#e8e2d6] hover:bg-[#e8dab2]/[0.08]'
+                  ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg shadow-[#dd6e42]/20'
+                  : 'border-th-surface/[0.10] bg-th-surface/[0.04] text-th-text3 hover:text-th-text hover:bg-th-surface/[0.08]'
               }`}
               aria-label={`Page ${page}`}
               aria-current={currentPage === page ? 'page' : undefined}
@@ -99,7 +99,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, totalI
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 py-1.5 rounded-lg text-xs transition-all border border-[#e8dab2]/[0.10] disabled:opacity-20 disabled:cursor-not-allowed bg-[#e8dab2]/[0.04] text-[#c0d6df] hover:text-[#e8e2d6] hover:bg-[#e8dab2]/[0.08]"
+          className="px-3 py-1.5 rounded-lg text-xs transition-all border border-th-surface/[0.10] disabled:opacity-20 disabled:cursor-not-allowed bg-th-surface/[0.04] text-th-text2 hover:text-th-text hover:bg-th-surface/[0.08]"
           aria-label="Next page"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

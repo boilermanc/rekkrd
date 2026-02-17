@@ -112,7 +112,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
 
   const colHeaderClass = (field: SortField) =>
     `cursor-pointer select-none transition-colors whitespace-nowrap ${
-      sortField === field ? 'text-[#f0a882]' : 'text-[#7d9199] hover:text-[#c0d6df]'
+      sortField === field ? 'text-[#f0a882]' : 'text-th-text3 hover:text-th-text2'
     }`;
 
   const getAriaSort = (field: SortField): 'ascending' | 'descending' | 'none' =>
@@ -132,7 +132,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
         {onToggleFavoritesFilter && (
           <button
             onClick={onToggleFavoritesFilter}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase tracking-widest transition-all border ${favoritesOnly ? 'bg-[#dd6e42]/20 border-[#dd6e42]/40 text-[#dd6e42]' : 'bg-[#e8dab2]/[0.04] border-[#e8dab2]/[0.10] text-[#7d9199] hover:text-[#c0d6df]'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase tracking-widest transition-all border ${favoritesOnly ? 'bg-[#dd6e42]/20 border-[#dd6e42]/40 text-[#dd6e42]' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text3 hover:text-th-text2'}`}
             title={favoritesOnly ? 'Show all records' : 'Show favorites only'}
           >
             <svg className={`w-3.5 h-3.5 ${favoritesOnly ? 'fill-current' : ''}`} viewBox="0 0 24 24" fill={favoritesOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
@@ -141,15 +141,15 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
             Favorites
           </button>
         )}
-        <span className="text-[#7d9199]/70 text-xs font-label tracking-widest uppercase">
+        <span className="text-th-text3/70 text-xs font-label tracking-widest uppercase">
           {sortedAlbums.length} {sortedAlbums.length === 1 ? 'record' : 'records'}
         </span>
       </div>
 
       {/* Table */}
-      <div className="glass-morphism rounded-2xl border border-[#e8dab2]/[0.10] overflow-hidden" role="table" aria-label="Album collection">
+      <div className="glass-morphism rounded-2xl border border-th-surface/[0.10] overflow-hidden" role="table" aria-label="Album collection">
         {/* Header row */}
-        <div className="grid grid-cols-[48px_28px_1fr_1fr_72px_100px_80px] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_90px_100px_72px] gap-x-3 px-4 py-3 border-b border-[#e8dab2]/[0.10] text-[9px] font-label tracking-widest uppercase" role="row">
+        <div className="grid grid-cols-[48px_28px_1fr_1fr_72px_100px_80px] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_90px_100px_72px] gap-x-3 px-4 py-3 border-b border-th-surface/[0.10] text-[9px] font-label tracking-widest uppercase" role="row">
           <div role="columnheader"></div>
           <div className={colHeaderClass('favorite')} onClick={() => handleSort('favorite')} onKeyDown={(e) => handleHeaderKeyDown(e, 'favorite')} tabIndex={0} role="columnheader" aria-sort={getAriaSort('favorite')} title="Sort by favorites">
             <svg className={`w-3.5 h-3.5 ${sortField === 'favorite' ? 'text-[#dd6e42]' : ''}`} viewBox="0 0 24 24" fill={sortField === 'favorite' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
@@ -181,13 +181,13 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
         </div>
 
         {/* Album rows */}
-        <div className="divide-y divide-[#e8dab2]/[0.06]" role="rowgroup">
+        <div className="divide-y divide-th-surface/[0.06]" role="rowgroup">
           {sortedAlbums.length === 0 ? (
             <div className="py-16 text-center">
-              <svg className="w-12 h-12 text-[#7d9199]/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 text-th-text3/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <p className="text-[#7d9199]/70 text-sm">No albums match your search.</p>
+              <p className="text-th-text3/70 text-sm">No albums match your search.</p>
             </div>
           ) : (
             paginatedAlbums.map((album, idx) => (
@@ -205,7 +205,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                 }}
               >
                 {/* Thumbnail */}
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-[#1a2528]/40 flex-shrink-0" role="cell">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-th-bg/40 flex-shrink-0" role="cell">
                   <img
                     src={proxyImageUrl(album.cover_url) || `https://picsum.photos/seed/${album.id}/96/96`}
                     alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'}
@@ -227,7 +227,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                     className={`flex items-center justify-center transition-all ${onToggleFavorite ? 'hover:scale-125' : ''}`}
                     title={album.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                   >
-                    <svg className={`w-4 h-4 transition-colors ${album.isFavorite ? 'text-rose-500 fill-current' : 'text-[#7d9199]/50 hover:text-[#dd6e42]'}`} viewBox="0 0 24 24" fill={album.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
+                    <svg className={`w-4 h-4 transition-colors ${album.isFavorite ? 'text-rose-500 fill-current' : 'text-th-text3/50 hover:text-[#dd6e42]'}`} viewBox="0 0 24 24" fill={album.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                   </button>
@@ -235,29 +235,29 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
 
                 {/* Title */}
                 <div className="min-w-0" role="cell">
-                  <p className="text-[#e8e2d6] text-sm font-medium truncate">{album.title}</p>
+                  <p className="text-th-text text-sm font-medium truncate">{album.title}</p>
                 </div>
 
                 {/* Artist */}
                 <p className="text-[#dd6e42] text-sm truncate" role="cell">{album.artist}</p>
 
                 {/* Year */}
-                <p className="text-[#7d9199] text-xs" role="cell">{album.year || '—'}</p>
+                <p className="text-th-text3 text-xs" role="cell">{album.year || '—'}</p>
 
                 {/* Genre (hidden on mobile) */}
-                <p className="text-[#7d9199] text-xs truncate hidden md:block" role="cell">{album.genre || '—'}</p>
+                <p className="text-th-text3 text-xs truncate hidden md:block" role="cell">{album.genre || '—'}</p>
 
                 {/* Condition (hidden on mobile) */}
-                <p className="text-[#7d9199] text-xs truncate hidden md:block" role="cell">{album.condition || '—'}</p>
+                <p className="text-th-text3 text-xs truncate hidden md:block" role="cell">{album.condition || '—'}</p>
 
                 {/* Value */}
-                <p className={`text-xs font-medium ${album.price_median ? 'text-[#f0a882]' : 'text-[#7d9199]/50'}`} role="cell">
+                <p className={`text-xs font-medium ${album.price_median ? 'text-[#f0a882]' : 'text-th-text3/50'}`} role="cell">
                   {album.price_median ? `$${Math.round(album.price_median)}` : '—'}
                 </p>
 
                 {/* Plays + delete (desktop only) */}
                 <div className="hidden md:flex items-center justify-end gap-2" role="cell">
-                  <span className="text-[#7d9199] text-xs">{album.play_count || 0}</span>
+                  <span className="text-th-text3 text-xs">{album.play_count || 0}</span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -279,7 +279,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                       e.stopPropagation();
                       onDelete(album.id);
                     }}
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#7d9199]/50 active:text-red-400 transition-colors rounded-md"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-th-text3/50 active:text-red-400 transition-colors rounded-md"
                     title="Delete album"
                     aria-label={`Delete ${album.title}`}
                   >

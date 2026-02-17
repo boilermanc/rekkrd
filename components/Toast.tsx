@@ -53,11 +53,11 @@ const Toast: React.FC = () => {
     >
       <div className={`glass-morphism rounded-full border ${config.border} px-6 py-3 shadow-lg flex items-center gap-3`}>
         {config.icon}
-        <p className="text-[#e8e2d6] text-[10px] font-label tracking-wider uppercase">{toast.message}</p>
+        <p className="text-th-text text-[10px] font-label tracking-wider uppercase">{toast.message}</p>
         {action && onAction && (
           <button
             onClick={() => { onAction(); dismiss(); }}
-            className="ml-2 text-[10px] font-label tracking-wider uppercase font-bold text-[#e8e2d6] bg-[#e8dab2]/[0.08] hover:bg-[#e8dab2]/[0.12] rounded-full px-4 py-1.5 transition-colors border border-[#e8dab2]/[0.10]"
+            className="ml-2 text-[10px] font-label tracking-wider uppercase font-bold text-th-text bg-th-surface/[0.08] hover:bg-th-surface/[0.12] rounded-full px-4 py-1.5 transition-colors border border-th-surface/[0.10]"
           >
             {action}
           </button>

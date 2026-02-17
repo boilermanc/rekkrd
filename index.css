@@ -2,9 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* —— Rekkrd Dark Theme (Landing-page design system, dark variant) —— */
+/* —— Rekkrd Theme System —— */
+
+/* Accent colors (shared across light & dark) */
 :root {
-  /* Accents */
   --peach: #dd6e42;
   --peach-light: #f0a882;
   --peach-dark: #c45a30;
@@ -15,21 +16,31 @@
   --beige: #e8dab2;
   --alabaster: #eaeaea;
 
-  /* Backgrounds */
-  --bg: #1a2528;
-  --bg2: #213136;
-  --bg3: #2a3f45;
+  /* Theme tokens — dark default (space-separated RGB for Tailwind alpha support) */
+  --color-bg: 26 37 40;
+  --color-bg2: 33 49 54;
+  --color-bg3: 42 63 69;
+  --color-text: 232 226 214;
+  --color-text2: 192 214 223;
+  --color-text3: 125 145 153;
+  --color-surface: 232 218 178;
+}
 
-  /* Text */
-  --text: #e8e2d6;
-  --text2: #c0d6df;
-  --text3: #7d9199;
+/* Light theme override */
+[data-theme="light"] {
+  --color-bg: 247 244 239;
+  --color-bg2: 239 233 221;
+  --color-bg3: 232 218 178;
+  --color-text: 45 58 62;
+  --color-text2: 79 109 122;
+  --color-text3: 125 145 153;
+  --color-surface: 79 109 122;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-text));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -39,15 +50,15 @@ body {
 }
 
 .glass-morphism {
-  background: rgba(232, 218, 178, 0.04);
+  background: rgb(var(--color-surface) / 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(232, 218, 178, 0.06);
+  border: 1px solid rgb(var(--color-surface) / 0.06);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
 ::-webkit-scrollbar-thumb { background: var(--slate-dark); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--peach); }
 

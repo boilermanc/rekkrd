@@ -15,6 +15,7 @@ import Landing from './pages/Landing';
 import { proxyImageUrl } from './services/imageProxy';
 import { useToast } from './contexts/ToastContext';
 import { useAuthContext } from './contexts/AuthContext';
+import { useTheme } from './contexts/ThemeContext';
 import { getProfile, createProfile, hasCompletedOnboarding } from './services/profileService';
 import OnboardingWizard from './components/OnboardingWizard';
 
@@ -28,6 +29,7 @@ const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617
 const App: React.FC = () => {
   const { showToast } = useToast();
   const { user, loading: authLoading, signOut } = useAuthContext();
+  const { theme, toggleTheme } = useTheme();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -148,7 +150,7 @@ const App: React.FC = () => {
       );
 
       if (existingAlbum) {
-        setProcessingStatus("✨ Already Cataloged!");
+        setProcessingStatus("Already Cataloged!");
         setTimeout(() => {
           setProcessingStatus(null);
           setSelectedAlbum(existingAlbum);
@@ -179,7 +181,7 @@ const App: React.FC = () => {
       console.error(err);
       showToast("Something went wrong during processing.", "error");
     } finally {
-      setProcessingStatus(prev => (prev === "✨ Already Cataloged!" ? prev : null));
+      setProcessingStatus(prev => (prev === "Already Cataloged!" ? prev : null));
     }
   };
 
@@ -316,9 +318,9 @@ const App: React.FC = () => {
   // Auth loading screen
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#1a2528] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-th-bg flex flex-col items-center justify-center">
         <SpinningRecord size="w-32 h-32" />
-        <p className="font-label text-[10px] tracking-widest mt-6 text-[#7d9199] uppercase">Loading</p>
+        <p className="font-label text-[10px] tracking-widest mt-6 text-th-text3 uppercase">Loading</p>
       </div>
     );
   }
@@ -365,10 +367,10 @@ const App: React.FC = () => {
           className="absolute inset-0 bg-cover bg-center transition-all duration-[3000ms] ease-in-out opacity-20 scale-110 blur-[80px] animate-[ken-burns_60s_linear_infinite]"
           style={{ backgroundImage: `url(${proxyImageUrl(heroBg) || heroBg})` }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a2528] via-transparent to-[#1a2528]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-th-bg via-transparent to-th-bg"></div>
       </div>
 
-      <header className="sticky top-0 z-40 glass-morphism border-b border-[#e8dab2]/[0.10] px-4 md:px-6 py-4">
+      <header className="sticky top-0 z-40 glass-morphism border-b border-th-surface/[0.10] px-4 md:px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center justify-between md:justify-start gap-3">
             <button
@@ -382,7 +384,7 @@ const App: React.FC = () => {
               </svg>
             </button>
             {currentView !== 'landing' && (
-              <h1 className="font-label text-lg md:text-2xl font-bold tracking-tighter text-[#e8e2d6] truncate">
+              <h1 className="font-label text-lg md:text-2xl font-bold tracking-tighter text-th-text truncate">
                 REKK<span className="text-[#c45a30]">R</span>D
               </h1>
             )}
@@ -391,7 +393,7 @@ const App: React.FC = () => {
           {currentView !== 'landing' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button
               onClick={() => setShowStats(!showStats)}
-              className={`p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-[#e8e2d6] shadow-lg' : 'bg-[#e8dab2]/[0.04] border-[#e8dab2]/[0.10] text-[#c0d6df] hover:text-[#e8e2d6]'}`}
+              className={`p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -403,15 +405,15 @@ const App: React.FC = () => {
                 placeholder="Search crate..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#e8dab2]/[0.04] border border-[#e8dab2]/[0.10] rounded-full pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all placeholder:text-[#7d9199]/50"
+                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-full pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all placeholder:text-th-text3/50"
               />
-              <svg className="absolute left-3.5 top-3 w-4 h-4 text-[#7d9199]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3.5 top-3 w-4 h-4 text-th-text3/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             <button
               onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
-              className={`p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'list' ? 'bg-[#dd6e42] border-[#dd6e42] text-[#e8e2d6] shadow-lg' : 'bg-[#e8dab2]/[0.04] border-[#e8dab2]/[0.10] text-[#c0d6df] hover:text-[#e8e2d6]'}`}
+              className={`p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'list' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
               title={currentView === 'list' ? 'Switch to grid view' : 'Switch to list view'}
             >
               {currentView === 'list' ? (
@@ -426,7 +428,7 @@ const App: React.FC = () => {
             </button>
             <button
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-              className={`p-3 rounded-full border transition-all flex-shrink-0 ${isFilterPanelOpen ? 'bg-[#dd6e42] border-[#dd6e42] text-[#e8e2d6] shadow-lg' : 'bg-[#e8dab2]/[0.04] border-[#e8dab2]/[0.10] text-[#c0d6df] hover:text-[#e8e2d6]'}`}
+              className={`p-3 rounded-full border transition-all flex-shrink-0 ${isFilterPanelOpen ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -434,37 +436,57 @@ const App: React.FC = () => {
             </button>
           </div>}
 
-          <button
-            onClick={signOut}
-            className="p-2 rounded-full text-[#7d9199]/70 hover:text-[#c0d6df] hover:bg-[#e8dab2]/[0.04] transition-all flex-shrink-0"
-            title="Sign out"
-            aria-label="Sign out"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full text-th-text3/70 hover:text-th-text2 hover:bg-th-surface/[0.04] transition-all"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              onClick={signOut}
+              className="p-2 rounded-full text-th-text3/70 hover:text-th-text2 hover:bg-th-surface/[0.04] transition-all"
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
       {showStats && !loading && albums.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 md:px-6 mt-6 animate-in slide-in-from-top duration-500">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <div className="glass-morphism p-4 md:p-6 rounded-3xl border border-[#e8dab2]/[0.10]">
-              <p className="text-[9px] font-label text-[#7d9199] tracking-widest uppercase mb-1">Crate Count</p>
-              <h3 className="text-3xl md:text-4xl font-bold text-[#e8e2d6]">{stats.total}</h3>
+            <div className="glass-morphism p-4 md:p-6 rounded-3xl border border-th-surface/[0.10]">
+              <p className="text-[9px] font-label text-th-text3 tracking-widest uppercase mb-1">Crate Count</p>
+              <h3 className="text-3xl md:text-4xl font-bold text-th-text">{stats.total}</h3>
             </div>
-            <div className="glass-morphism p-4 md:p-6 rounded-3xl border border-[#e8dab2]/[0.10]">
+            <div className="glass-morphism p-4 md:p-6 rounded-3xl border border-th-surface/[0.10]">
               <p className="text-[9px] font-label text-[#f0a882]/60 tracking-widest uppercase mb-1">Portfolio Value</p>
               <h3 className="text-3xl md:text-4xl font-bold text-[#f0a882]">${stats.portfolioValue.toLocaleString()}</h3>
             </div>
-            <div className="glass-morphism p-4 md:p-6 rounded-3xl border border-[#e8dab2]/[0.10]">
-              <p className="text-[9px] font-label text-[#7d9199] tracking-widest uppercase mb-1">Top Vibe</p>
-              <h3 className="text-lg md:text-xl font-bold text-[#e8e2d6] truncate">{stats.topGenre?.[0] || 'Mixed'}</h3>
+            <div className="glass-morphism p-4 md:p-6 rounded-3xl border border-th-surface/[0.10]">
+              <p className="text-[9px] font-label text-th-text3 tracking-widest uppercase mb-1">Top Vibe</p>
+              <h3 className="text-lg md:text-xl font-bold text-th-text truncate">{stats.topGenre?.[0] || 'Mixed'}</h3>
             </div>
-            <div className="hidden lg:block glass-morphism p-6 rounded-3xl border border-[#e8dab2]/[0.10]">
-              <p className="text-[9px] font-label text-[#7d9199] tracking-widest uppercase mb-1">Era Spotlight</p>
-              <h3 className="text-xl font-bold text-[#e8e2d6]">{stats.topDecade?.[0] || 'N/A'}</h3>
+            <div className="hidden lg:block glass-morphism p-6 rounded-3xl border border-th-surface/[0.10]">
+              <p className="text-[9px] font-label text-th-text3 tracking-widest uppercase mb-1">Era Spotlight</p>
+              <h3 className="text-xl font-bold text-th-text">{stats.topDecade?.[0] || 'N/A'}</h3>
             </div>
           </div>
         </div>
@@ -472,32 +494,32 @@ const App: React.FC = () => {
 
       {isFilterPanelOpen && (
         <div className="max-w-7xl mx-auto px-4 md:px-6 mt-4">
-          <div className="glass-morphism rounded-3xl p-6 border border-[#e8dab2]/[0.10] animate-in slide-in-from-top duration-300">
+          <div className="glass-morphism rounded-3xl p-6 border border-th-surface/[0.10] animate-in slide-in-from-top duration-300">
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
-                <h4 className="text-[#7d9199] font-label text-[9px] tracking-widest uppercase mb-3">Sort Collection</h4>
+                <h4 className="text-th-text3 font-label text-[9px] tracking-widest uppercase mb-3">Sort Collection</h4>
                 <div className="flex flex-wrap gap-2">
                   {(['recent', 'year', 'artist', 'value'] as const).map(opt => (
-                    <button key={opt} onClick={() => setSortBy(opt)} className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all ${sortBy === opt ? 'bg-[#dd6e42] text-[#e8e2d6]' : 'bg-[#e8dab2]/[0.04] text-[#7d9199]'}`}>
+                    <button key={opt} onClick={() => setSortBy(opt)} className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all ${sortBy === opt ? 'bg-[#dd6e42] text-th-text' : 'bg-th-surface/[0.04] text-th-text3'}`}>
                       {opt}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <h4 className="text-[#7d9199] font-label text-[9px] tracking-widest uppercase mb-3">Release Era</h4>
+                <h4 className="text-th-text3 font-label text-[9px] tracking-widest uppercase mb-3">Release Era</h4>
                 <div className="flex items-center gap-2">
-                  <input type="number" placeholder="From" value={yearRange.min} onChange={(e) => setYearRange(prev => ({ ...prev, min: e.target.value }))} className="w-full bg-[#e8dab2]/[0.04] border border-[#e8dab2]/[0.10] rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-[#dd6e42]" />
-                  <span className="text-[#7d9199]/50">—</span>
-                  <input type="number" placeholder="To" value={yearRange.max} onChange={(e) => setYearRange(prev => ({ ...prev, max: e.target.value }))} className="w-full bg-[#e8dab2]/[0.04] border border-[#e8dab2]/[0.10] rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-[#dd6e42]" />
+                  <input type="number" placeholder="From" value={yearRange.min} onChange={(e) => setYearRange(prev => ({ ...prev, min: e.target.value }))} className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-[#dd6e42]" />
+                  <span className="text-th-text3/50">—</span>
+                  <input type="number" placeholder="To" value={yearRange.max} onChange={(e) => setYearRange(prev => ({ ...prev, max: e.target.value }))} className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-[#dd6e42]" />
                 </div>
               </div>
               <div className="flex items-end">
                 <button role="switch" aria-checked={favoritesOnly} aria-label="Show favorites only" onClick={() => setFavoritesOnly(!favoritesOnly)} className="flex items-center gap-3 cursor-pointer group bg-transparent border-none p-0 outline-none focus-visible:ring-2 focus-visible:ring-[#dd6e42] rounded-full">
-                  <div className={`w-10 h-5 rounded-full transition-all relative border border-[#e8dab2]/[0.10] ${favoritesOnly ? 'bg-[#c45a30]' : 'bg-[#e8dab2]/[0.04]'}`}>
-                    <div className={`absolute top-0.5 w-3.5 h-3.5 bg-[#e8e2d6] rounded-full transition-all ${favoritesOnly ? 'left-5.5' : 'left-1'}`}></div>
+                  <div className={`w-10 h-5 rounded-full transition-all relative border border-th-surface/[0.10] ${favoritesOnly ? 'bg-[#c45a30]' : 'bg-th-surface/[0.04]'}`}>
+                    <div className={`absolute top-0.5 w-3.5 h-3.5 bg-th-text rounded-full transition-all ${favoritesOnly ? 'left-5.5' : 'left-1'}`}></div>
                   </div>
-                  <span className="text-xs text-[#c0d6df] group-hover:text-[#e8e2d6]">Favorites Only</span>
+                  <span className="text-xs text-th-text2 group-hover:text-th-text">Favorites Only</span>
                 </button>
               </div>
             </div>
@@ -506,10 +528,10 @@ const App: React.FC = () => {
       )}
 
       {processingStatus && (
-        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-[#1a2528]/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-th-bg/80 backdrop-blur-md">
           <SpinningRecord size="w-64 h-64 md:w-96 md:h-96" />
           <div className="mt-8 md:mt-12 text-center px-6">
-            <p className={`font-label ${processingStatus === '✨ Already Cataloged!' ? 'text-[#6a8c9a]' : 'text-[#dd6e42]'} text-xl md:text-2xl font-bold animate-pulse tracking-[0.3em] uppercase transition-colors duration-500`}>
+            <p className={`font-label ${processingStatus === 'Already Cataloged!' ? 'text-[#6a8c9a]' : 'text-[#dd6e42]'} text-xl md:text-2xl font-bold animate-pulse tracking-[0.3em] uppercase transition-colors duration-500`}>
               {processingStatus}
             </p>
           </div>
@@ -519,7 +541,7 @@ const App: React.FC = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-32">
           <SpinningRecord size="w-40 h-40" />
-          <p className="font-label text-[10px] tracking-widest mt-8 text-[#7d9199] uppercase">SYNCING COLLECTION</p>
+          <p className="font-label text-[10px] tracking-widest mt-8 text-th-text3 uppercase">SYNCING COLLECTION</p>
         </div>
       ) : currentView === 'landing' ? (
         <main className="relative max-w-5xl mx-auto px-4 md:px-6 pb-32 md:pb-0 min-h-[calc(100vh-80px)] flex flex-col items-center justify-center animate-in fade-in duration-500 overflow-hidden">
@@ -537,7 +559,7 @@ const App: React.FC = () => {
 
               {/* Grooves */}
               {[175, 165, 155, 145, 135, 125, 115, 105, 95, 85, 78, 71].map((r) => (
-                <circle key={r} cx="200" cy="200" r={r} stroke="#1a2528" strokeWidth="0.8" opacity="0.3" />
+                <circle key={r} cx="200" cy="200" r={r} stroke="currentColor" strokeWidth="0.8" opacity="0.3" className="text-th-bg" />
               ))}
 
               {/* Groove highlight arcs — gives depth */}
@@ -547,23 +569,23 @@ const App: React.FC = () => {
 
               {/* Center label */}
               <circle cx="200" cy="200" r="58" fill="#dd6e42" opacity="0.6" />
-              <circle cx="200" cy="200" r="56" stroke="#1a2528" strokeWidth="0.5" opacity="0.2" />
+              <circle cx="200" cy="200" r="56" stroke="currentColor" strokeWidth="0.5" opacity="0.2" className="text-th-bg" />
 
               {/* Label details */}
-              <circle cx="200" cy="200" r="45" stroke="#1a2528" strokeWidth="0.3" opacity="0.15" />
-              <circle cx="200" cy="200" r="35" stroke="#1a2528" strokeWidth="0.3" opacity="0.1" />
+              <circle cx="200" cy="200" r="45" stroke="currentColor" strokeWidth="0.3" opacity="0.15" className="text-th-bg" />
+              <circle cx="200" cy="200" r="35" stroke="currentColor" strokeWidth="0.3" opacity="0.1" className="text-th-bg" />
 
               {/* Spindle hole */}
-              <circle cx="200" cy="200" r="6" fill="#1a2528" />
-              <circle cx="200" cy="200" r="8" stroke="#1a2528" strokeWidth="0.5" opacity="0.3" />
+              <circle cx="200" cy="200" r="6" fill="currentColor" className="text-th-bg" />
+              <circle cx="200" cy="200" r="8" stroke="currentColor" strokeWidth="0.5" opacity="0.3" className="text-th-bg" />
             </svg>
           </div>
 
           <div className="text-center mb-12 md:mb-16 relative z-10">
-            <h2 className="font-label text-3xl md:text-5xl font-bold tracking-tight text-[#e8e2d6] mb-3">
+            <h2 className="font-label text-3xl md:text-5xl font-bold tracking-tight text-th-text mb-3">
               REKK<span className="text-[#c45a30]">R</span>D
             </h2>
-            <p className="text-[#7d9199]/70 text-sm md:text-base tracking-wide">
+            <p className="text-th-text3/70 text-sm md:text-base tracking-wide">
               {albums.length > 0 ? 'Your vinyl archive awaits' : 'Scan your first record to start your archive'}
             </p>
           </div>
@@ -581,8 +603,8 @@ const App: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
                   </div>
-                  <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-[#e8e2d6] mb-2">Browse Crate</h3>
-                  <p className="text-[#7d9199]/70 text-xs leading-relaxed">Visual grid of your vinyl — search, filter, and explore covers.</p>
+                  <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Browse Crate</h3>
+                  <p className="text-th-text3/70 text-xs leading-relaxed">Visual grid of your vinyl — search, filter, and explore covers.</p>
                 </button>
 
                 {/* Collection List */}
@@ -595,8 +617,8 @@ const App: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
                   </div>
-                  <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-[#e8e2d6] mb-2">Collection List</h3>
-                  <p className="text-[#7d9199]/70 text-xs leading-relaxed">Sortable table view — sort by title, artist, year, value, and more.</p>
+                  <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Collection List</h3>
+                  <p className="text-th-text3/70 text-xs leading-relaxed">Sortable table view — sort by title, artist, year, value, and more.</p>
                 </button>
 
                 {/* Spin a Playlist */}
@@ -609,8 +631,8 @@ const App: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                     </svg>
                   </div>
-                  <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-[#e8e2d6] mb-2">Spin a Playlist</h3>
-                  <p className="text-[#7d9199]/70 text-xs leading-relaxed">Let AI curate a session from your collection based on mood.</p>
+                  <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Spin a Playlist</h3>
+                  <p className="text-th-text3/70 text-xs leading-relaxed">Let AI curate a session from your collection based on mood.</p>
                 </button>
               </>
             )}
@@ -626,8 +648,8 @@ const App: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-[#e8e2d6] mb-2">Scan a Record</h3>
-              <p className="text-[#7d9199]/70 text-xs leading-relaxed">Snap a cover photo to identify and catalog a new album.</p>
+              <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Scan a Record</h3>
+              <p className="text-th-text3/70 text-xs leading-relaxed">Snap a cover photo to identify and catalog a new album.</p>
             </button>
 
             {/* Upload a Cover — shown when crate is empty */}
@@ -641,15 +663,15 @@ const App: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                   </svg>
                 </div>
-                <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-[#e8e2d6] mb-2">Upload Cover</h3>
-                <p className="text-[#7d9199]/70 text-xs leading-relaxed">Pick an album cover photo from your device.</p>
+                <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Upload Cover</h3>
+                <p className="text-th-text3/70 text-xs leading-relaxed">Pick an album cover photo from your device.</p>
               </button>
             )}
           </div>
 
           {albums.length > 0 && (
             <div className="relative z-10 mt-10 flex items-center gap-4">
-              <p className="text-[#7d9199]/50 text-xs font-label tracking-widest uppercase">{albums.length} records in your crate</p>
+              <p className="text-th-text3/50 text-xs font-label tracking-widest uppercase">{albums.length} records in your crate</p>
               {albums.some(a => a.isFavorite) && (
                 <button
                   onClick={() => { setFavoritesOnly(true); setCurrentView('list'); }}
@@ -679,19 +701,19 @@ const App: React.FC = () => {
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
           {albums.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center px-6">
-              <div className="w-20 h-20 mb-6 opacity-20 text-[#e8e2d6]">
+              <div className="w-20 h-20 mb-6 opacity-20 text-th-text">
                 <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
               </div>
-              <h2 className="text-[#c0d6df] font-label tracking-widest text-lg uppercase mb-2">CRATE IS EMPTY</h2>
-              <p className="text-[#7d9199]/70 text-sm max-w-xs">Scan your first record cover to begin your digital archive.</p>
+              <h2 className="text-th-text2 font-label tracking-widest text-lg uppercase mb-2">CRATE IS EMPTY</h2>
+              <p className="text-th-text3/70 text-sm max-w-xs">Scan your first record cover to begin your digital archive.</p>
             </div>
           ) : filteredAlbums.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center px-6">
-              <svg className="w-16 h-16 text-[#7d9199]/30 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-16 h-16 text-th-text3/30 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <h2 className="text-[#c0d6df] font-label tracking-widest text-lg uppercase mb-2">No Matches</h2>
-              <p className="text-[#7d9199]/70 text-sm max-w-xs">No albums match your current filters. Try adjusting your search or clearing filters.</p>
+              <h2 className="text-th-text2 font-label tracking-widest text-lg uppercase mb-2">No Matches</h2>
+              <p className="text-th-text3/70 text-sm max-w-xs">No albums match your current filters. Try adjusting your search or clearing filters.</p>
             </div>
           ) : (
             <>
@@ -716,7 +738,7 @@ const App: React.FC = () => {
         <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
           <button
             onClick={() => setIsStudioOpen(true)}
-            className="bg-[#e8dab2]/[0.08] backdrop-blur-md hover:bg-[#dd6e42]/20 text-[#e8e2d6] font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-[#e8dab2]/[0.15] group flex-shrink-0"
+            className="bg-th-surface/[0.08] backdrop-blur-md hover:bg-[#dd6e42]/20 text-th-text font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-th-surface/[0.15] group flex-shrink-0"
             title="Magic Mix Studio"
           >
             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -726,7 +748,7 @@ const App: React.FC = () => {
 
           <button
             onClick={() => setIsCameraOpen(true)}
-            className="bg-gradient-to-r from-[#c45a30] to-[#4f6d7a] hover:from-[#dd6e42] hover:to-[#6a8c9a] text-[#e8e2d6] font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-[#e8dab2]/[0.15]"
+            className="bg-gradient-to-r from-[#c45a30] to-[#4f6d7a] hover:from-[#dd6e42] hover:to-[#6a8c9a] text-[#e8e2d6] font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-th-surface/[0.15]"
           >
             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -737,7 +759,7 @@ const App: React.FC = () => {
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-[#e8dab2]/[0.08] backdrop-blur-md hover:bg-[#4f6d7a]/20 text-[#e8e2d6] font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-[#e8dab2]/[0.15] group flex-shrink-0"
+            className="bg-th-surface/[0.08] backdrop-blur-md hover:bg-[#4f6d7a]/20 text-th-text font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-th-surface/[0.15] group flex-shrink-0"
             title="Upload Album Cover"
           >
             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:-translate-y-0.5 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
