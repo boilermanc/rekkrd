@@ -2,8 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { cors } from './_cors';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 // Simple in-memory cache (survives for the life of the serverless instance)
 let cachedPrices: unknown = null;
 let cacheExpiry = 0;
@@ -16,6 +14,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(200).json({ tiers: {} });
+  }
+
   // No auth required — pricing is public info
 
   const now = Date.now();
@@ -24,6 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     const prices = await stripe.prices.list({
       active: true,
       expand: ['data.product'],
