@@ -72,9 +72,23 @@ const AuthPage: React.FC = () => {
     <div className="min-h-screen bg-th-bg flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <h1 className="font-label text-th-text text-3xl md:text-4xl font-bold tracking-widest text-center mb-10">
-          REKK<span className="text-[#c45a30]">R</span>D
-        </h1>
+        <div className="flex flex-col items-center mb-10 gap-3">
+          <svg className="w-16 h-16" viewBox="0 0 512 512" fill="none">
+            <circle cx="256" cy="256" r="250" fill="#f0a882"/>
+            <circle cx="256" cy="256" r="250" fill="none" stroke="#dd6e42" strokeWidth="4" opacity="0.3"/>
+            <circle cx="256" cy="256" r="225" fill="none" stroke="#d48a6a" strokeWidth="2" opacity="0.35"/>
+            <circle cx="256" cy="256" r="200" fill="none" stroke="#d48a6a" strokeWidth="1.5" opacity="0.3"/>
+            <circle cx="256" cy="256" r="175" fill="none" stroke="#d48a6a" strokeWidth="1.5" opacity="0.3"/>
+            <circle cx="256" cy="256" r="150" fill="none" stroke="#d48a6a" strokeWidth="1.5" opacity="0.25"/>
+            <circle cx="256" cy="256" r="120" fill="#c45a30"/>
+            <circle cx="256" cy="256" r="105" fill="none" stroke="#a8481f" strokeWidth="1" opacity="0.3"/>
+            <text x="256" y="264" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,'Times New Roman',serif" fontWeight="bold" fontSize="140" fill="#f0a882">R</text>
+            <circle cx="256" cy="256" r="12" fill="#f0a882" opacity="0.4"/>
+          </svg>
+          <h1 className="font-label text-th-text text-3xl md:text-4xl font-bold tracking-widest">
+            REKK<span className="text-[#c45a30]">R</span>D
+          </h1>
+        </div>
 
         {/* Form card */}
         <div className="glass-morphism rounded-2xl p-6 md:p-8">
