@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Vinyl disc -->
+  <circle cx="256" cy="256" r="250" fill="#f0a882"/>
+  <!-- Outer rim -->
+  <circle cx="256" cy="256" r="250" fill="none" stroke="#dd6e42" stroke-width="4" opacity="0.3"/>
+  <!-- Grooves -->
+  <circle cx="256" cy="256" r="225" fill="none" stroke="#d48a6a" stroke-width="2" opacity="0.35"/>
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#d48a6a" stroke-width="1.5" opacity="0.3"/>
+  <circle cx="256" cy="256" r="175" fill="none" stroke="#d48a6a" stroke-width="1.5" opacity="0.3"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#d48a6a" stroke-width="1.5" opacity="0.25"/>
+  <!-- Center label -->
+  <circle cx="256" cy="256" r="120" fill="#c45a30"/>
+  <!-- Inner ring on label -->
+  <circle cx="256" cy="256" r="105" fill="none" stroke="#a8481f" stroke-width="1" opacity="0.3"/>
+  <!-- R letter -->
+  <text x="256" y="264" text-anchor="middle" dominant-baseline="central" font-family="Georgia,'Times New Roman',serif" font-weight="bold" font-size="140" fill="#f0a882">R</text>
+  <!-- Spindle hole -->
+  <circle cx="256" cy="256" r="12" fill="#f0a882" opacity="0.4"/>
+</svg>
