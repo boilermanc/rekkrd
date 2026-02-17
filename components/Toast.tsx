@@ -4,9 +4,9 @@ import { useToast } from '../contexts/ToastContext';
 
 const typeConfig = {
   success: {
-    border: 'border-emerald-500/30',
+    border: 'border-[#dd6e42]/30',
     icon: (
-      <svg className="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="w-4 h-4 text-[#dd6e42] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
       </svg>
     ),
@@ -20,9 +20,9 @@ const typeConfig = {
     ),
   },
   info: {
-    border: 'border-indigo-400/30',
+    border: 'border-[#6a8c9a]/30',
     icon: (
-      <svg className="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="w-4 h-4 text-[#6a8c9a] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
@@ -53,11 +53,11 @@ const Toast: React.FC = () => {
     >
       <div className={`glass-morphism rounded-full border ${config.border} px-6 py-3 shadow-lg flex items-center gap-3`}>
         {config.icon}
-        <p className="text-white text-[10px] font-syncopate tracking-wider uppercase">{toast.message}</p>
+        <p className="text-[#e8e2d6] text-[10px] font-label tracking-wider uppercase">{toast.message}</p>
         {action && onAction && (
           <button
             onClick={() => { onAction(); dismiss(); }}
-            className="ml-2 text-[10px] font-syncopate tracking-wider uppercase font-bold text-white bg-white/10 hover:bg-white/20 rounded-full px-4 py-1.5 transition-colors border border-white/10"
+            className="ml-2 text-[10px] font-label tracking-wider uppercase font-bold text-[#e8e2d6] bg-[#e8dab2]/[0.08] hover:bg-[#e8dab2]/[0.12] rounded-full px-4 py-1.5 transition-colors border border-[#e8dab2]/[0.10]"
           >
             {action}
           </button>

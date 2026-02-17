@@ -9,8 +9,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        label: ['"Space Mono"', 'monospace'],
-        display: ['"Playfair Display"', 'serif'],
+        syncopate: ['Syncopate', 'sans-serif'],
       },
     },
   },

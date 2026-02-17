@@ -2,54 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* —— Rekkrd Dark Theme (Landing-page design system, dark variant) —— */
-:root {
-  /* Accents */
-  --peach: #dd6e42;
-  --peach-light: #f0a882;
-  --peach-dark: #c45a30;
-  --sky: #c0d6df;
-  --slate: #4f6d7a;
-  --slate-dark: #3a525d;
-  --slate-light: #6a8c9a;
-  --beige: #e8dab2;
-  --alabaster: #eaeaea;
-
-  /* Backgrounds */
-  --bg: #1a2528;
-  --bg2: #213136;
-  --bg3: #2a3f45;
-
-  /* Text */
-  --text: #e8e2d6;
-  --text2: #c0d6df;
-  --text3: #7d9199;
-}
-
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  background-color: #050505;
+  color: #e5e7eb;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .neon-border {
-  box-shadow: 0 0 10px rgba(221, 110, 66, 0.4), 0 0 20px rgba(79, 109, 122, 0.2);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4), 0 0 20px rgba(99, 102, 241, 0.2);
 }
 
 .glass-morphism {
-  background: rgba(232, 218, 178, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(232, 218, 178, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--slate-dark); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--peach); }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
 /* Custom animations */
 @keyframes spin-slow {
@@ -109,7 +85,7 @@ body {
 
 /* List view row hover */
 .list-row-hover:hover {
-  background: rgba(221, 110, 66, 0.06);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 /* Disable hover transforms on touch devices */

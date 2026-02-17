@@ -19,12 +19,12 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
           onSelect(album);
         }
       }}
-      className="group relative glass-morphism rounded-xl overflow-hidden hover:neon-border transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-white/5"
+      className="group relative glass-morphism rounded-xl overflow-hidden hover:neon-border transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-[#e8dab2]/[0.06]"
       role="button"
       tabIndex={0}
       aria-label={`View details for ${album.title} by ${album.artist}`}
     >
-      <div className="aspect-square overflow-hidden bg-black/40 relative">
+      <div className="aspect-square overflow-hidden bg-[#1a2528]/40 relative">
         <img
           src={proxyImageUrl(album.cover_url) || `https://picsum.photos/seed/${album.id}/400/400`}
           alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'}
@@ -34,18 +34,18 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
             (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/vinyl/400/400';
           }}
         />
-        
+
         {/* Price Tag Badge */}
         {album.price_median && (
-          <div className="absolute bottom-2 left-2 bg-emerald-500/90 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-lg z-10 border border-emerald-400/50">
+          <div className="absolute bottom-2 left-2 bg-[#dd6e42]/90 backdrop-blur-sm text-[#e8e2d6] px-2 py-0.5 rounded text-[10px] font-bold shadow-lg z-10 border border-[#f0a882]/50">
             ${Math.round(album.price_median)}
           </div>
         )}
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-emerald-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-           <div className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-full transform scale-50 group-hover:scale-100 transition-transform duration-500">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute inset-0 bg-[#c45a30]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+           <div className="bg-[#e8dab2]/[0.08] backdrop-blur-md border border-[#e8dab2]/[0.15] p-2 rounded-full transform scale-50 group-hover:scale-100 transition-transform duration-500">
+              <svg className="w-6 h-6 text-[#e8e2d6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -53,18 +53,18 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
         </div>
 
         {album.isFavorite && (
-          <div className="absolute top-2 right-2 p-1.5 bg-rose-600 rounded-full shadow-lg border border-white/20 z-10">
-            <svg className="w-3 h-3 text-white fill-current" viewBox="0 0 24 24">
+          <div className="absolute top-2 right-2 p-1.5 bg-[#dd6e42] rounded-full shadow-lg border border-[#e8dab2]/[0.15] z-10">
+            <svg className="w-3 h-3 text-[#e8e2d6] fill-current" viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
           </div>
         )}
       </div>
-      
+
       <div className="p-4 relative">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-bold text-white truncate w-full" title={album.title}>{album.title}</h3>
-          <button 
+          <h3 className="font-bold text-[#e8e2d6] truncate w-full" title={album.title}>{album.title}</h3>
+          <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete(album.id);
@@ -76,8 +76,8 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
             </svg>
           </button>
         </div>
-        <p className="text-emerald-500 text-sm font-medium truncate">{album.artist}</p>
-        <div className="mt-2 flex items-center justify-between text-[10px] text-white/40 uppercase tracking-widest">
+        <p className="text-[#dd6e42] text-sm font-medium truncate">{album.artist}</p>
+        <div className="mt-2 flex items-center justify-between text-[10px] text-[#7d9199] uppercase tracking-widest">
           <span>{album.year || 'No Date'}</span>
           <span>{album.genre || 'Vinyl'}</span>
         </div>
