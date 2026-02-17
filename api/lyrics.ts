@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireAuth } from './_auth';
+import { requireAuthWithUser } from './_auth';
 import { cors } from './_cors';
 import { USER_AGENT } from './_constants';
+import { requirePlan } from './_subscription';
 import { validateStringLength } from './_validate';
 
 export const config = {
@@ -17,11 +18,16 @@ function cleanTrackName(track: string): string {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res, 'POST')) return;
-  if (!requireAuth(req, res)) return;
+  const auth = await requireAuthWithUser(req, res);
+  if (!auth) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Curator+ only
+  const sub = await requirePlan(auth.userId, 'curator', res);
+  if (!sub) return;
 
   try {
     const { artist, track, album } = req.body;

@@ -2,10 +2,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Type } from '@google/genai';
 import type { PlaylistAlbumInput } from './_types';
 import type { RawPlaylistItem } from '../types';
-import { requireAuth } from './_auth';
+import { requireAuthWithUser } from './_auth';
 import { cors } from './_cors';
 import { ai } from './_gemini';
 import { rateLimit } from './_rateLimit';
+import { requirePlan } from './_subscription';
 import { validateStringLength } from './_validate';
 import { sanitizePromptInput } from './_sanitize';
 
@@ -15,12 +16,17 @@ export const config = {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res, 'POST')) return;
-  if (!requireAuth(req, res)) return;
+  const auth = await requireAuthWithUser(req, res);
+  if (!auth) return;
   if (rateLimit(req, res)) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Curator+ only
+  const sub = await requirePlan(auth.userId, 'curator', res);
+  if (!sub) return;
 
   try {
     const { albums, mood: rawMood, type: rawType } = req.body;

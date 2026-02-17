@@ -15,9 +15,13 @@ import Landing from './pages/Landing';
 import { proxyImageUrl } from './services/imageProxy';
 import { useToast } from './contexts/ToastContext';
 import { useAuthContext } from './contexts/AuthContext';
+import { useSubscription } from './contexts/SubscriptionContext';
 import { useTheme } from './contexts/ThemeContext';
 import { getProfile, createProfile, hasCompletedOnboarding } from './services/profileService';
+import { ScanLimitError, UpgradeRequiredError } from './services/geminiService';
 import OnboardingWizard from './components/OnboardingWizard';
+import UpgradePrompt from './components/UpgradePrompt';
+import TrialBanner from './components/TrialBanner';
 
 const PAGE_SIZE = 40;
 
@@ -29,9 +33,12 @@ const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617
 const App: React.FC = () => {
   const { showToast } = useToast();
   const { user, loading: authLoading, signOut } = useAuthContext();
+  const { canUse, isTrialing, trialDaysLeft, scansRemaining, albumLimitReached, plan, refresh: refreshSubscription } = useSubscription();
   const { theme, toggleTheme } = useTheme();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
+  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
+  const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [processingStatus, setProcessingStatus] = useState<string | null>(null);
@@ -95,6 +102,24 @@ const App: React.FC = () => {
     })();
   }, [user]);
 
+  // After login, redirect from public landing to in-app landing
+  useEffect(() => {
+    if (user && currentView === 'public-landing') {
+      setCurrentView('landing');
+    }
+  }, [user, currentView]);
+
+  // Handle Stripe checkout return
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      window.history.replaceState({}, '', window.location.pathname);
+      refreshSubscription().then(() => {
+        showToast('Welcome! Your subscription is now active.', 'success');
+      });
+    }
+  }, []);
+
   const isAlbumDeselected = selectedAlbum === null;
   useEffect(() => {
     if (albums.length > 0) {
@@ -129,6 +154,18 @@ const App: React.FC = () => {
   const processImage = async (base64: string) => {
     if (!isSupabaseReady) {
       showToast("Database not configured. Check your Supabase environment variables.", "error");
+      return;
+    }
+
+    // Check album limit for free tier before processing
+    if (albumLimitReached(albums.length)) {
+      setUpgradeFeature('album_limit');
+      return;
+    }
+
+    // Check scan limit for free tier
+    if (!canUse('scan')) {
+      setUpgradeFeature('scan');
       return;
     }
 
@@ -178,8 +215,14 @@ const App: React.FC = () => {
       setSelectedAlbum(saved);
       if (saved.cover_url) setHeroBg(saved.cover_url);
     } catch (err) {
-      console.error(err);
-      showToast("Something went wrong during processing.", "error");
+      if (err instanceof ScanLimitError) {
+        setUpgradeFeature('scan');
+      } else if (err instanceof UpgradeRequiredError) {
+        setUpgradeFeature(err.requiredPlan === 'curator' ? 'scan' : 'scan');
+      } else {
+        console.error(err);
+        showToast("Something went wrong during processing.", "error");
+      }
     } finally {
       setProcessingStatus(prev => (prev === "Already Cataloged!" ? prev : null));
     }
@@ -348,10 +391,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Authenticated user with stale public-landing view — show in-app landing
-  if (currentView === 'public-landing') {
-    return <Landing onEnterApp={() => setCurrentView('landing')} />;
-  }
 
   return (
     <div className={`min-h-screen ${currentView !== 'landing' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
@@ -379,8 +418,17 @@ const App: React.FC = () => {
               title="Home / Reset Filters"
               className="w-10 h-10 bg-gradient-to-tr from-[#dd6e42] to-[#4f6d7a] rounded-lg flex items-center justify-center shadow-lg neon-border cursor-pointer active:scale-90 transition-transform flex-shrink-0 border-none p-0"
             >
-              <svg className="w-6 h-6 text-[#e8e2d6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                {/* Vinyl disc */}
+                <circle cx="12" cy="12" r="11" fill="#f0a882"/>
+                {/* Grooves */}
+                <circle cx="12" cy="12" r="9.5" fill="none" stroke="#d48a6a" strokeWidth="0.4" opacity="0.5"/>
+                <circle cx="12" cy="12" r="8" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.4"/>
+                <circle cx="12" cy="12" r="6.5" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.3"/>
+                {/* Center label */}
+                <circle cx="12" cy="12" r="5.2" fill="#c45a30"/>
+                {/* R letter */}
+                <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#f0a882">R</text>
               </svg>
             </button>
             {currentView !== 'landing' && (
@@ -468,6 +516,14 @@ const App: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {isTrialing && !trialBannerDismissed && trialDaysLeft > 0 && (
+        <TrialBanner
+          daysLeft={trialDaysLeft}
+          onUpgrade={() => setUpgradeFeature('playlist')}
+          onDismiss={() => setTrialBannerDismissed(true)}
+        />
+      )}
 
       {showStats && !loading && albums.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 md:px-6 mt-6 animate-in slide-in-from-top duration-500">
@@ -623,9 +679,18 @@ const App: React.FC = () => {
 
                 {/* Spin a Playlist */}
                 <button
-                  onClick={() => setIsStudioOpen(true)}
-                  className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-[#dd6e42]/30 hover:bg-[#dd6e42]/5 transition-all duration-300 cursor-pointer"
+                  onClick={() => {
+                    if (!canUse('playlist')) {
+                      setUpgradeFeature('playlist');
+                      return;
+                    }
+                    setIsStudioOpen(true);
+                  }}
+                  className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-[#dd6e42]/30 hover:bg-[#dd6e42]/5 transition-all duration-300 cursor-pointer relative"
                 >
+                  {!canUse('playlist') && (
+                    <span className="absolute top-4 right-4 text-[8px] font-label tracking-widest uppercase bg-th-accent/20 text-th-accent px-2 py-0.5 rounded-full">Curator</span>
+                  )}
                   <div className="w-12 h-12 rounded-2xl bg-[#dd6e42]/10 flex items-center justify-center mb-5 group-hover:bg-[#dd6e42]/20 transition-colors">
                     <svg className="w-6 h-6 text-[#dd6e42]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
@@ -737,8 +802,14 @@ const App: React.FC = () => {
       {currentView !== 'landing' && (
         <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
           <button
-            onClick={() => setIsStudioOpen(true)}
-            className="bg-th-surface/[0.08] backdrop-blur-md hover:bg-[#dd6e42]/20 text-th-text font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-th-surface/[0.15] group flex-shrink-0"
+            onClick={() => {
+              if (!canUse('playlist')) {
+                setUpgradeFeature('playlist');
+                return;
+              }
+              setIsStudioOpen(true);
+            }}
+            className="bg-th-surface/[0.08] backdrop-blur-md hover:bg-[#dd6e42]/20 text-th-text font-bold p-4 md:p-5 rounded-full shadow-2xl transition-all border border-th-surface/[0.15] group flex-shrink-0 relative"
             title="Magic Mix Studio"
           >
             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -747,14 +818,25 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setIsCameraOpen(true)}
-            className="bg-gradient-to-r from-[#c45a30] to-[#4f6d7a] hover:from-[#dd6e42] hover:to-[#6a8c9a] text-[#e8e2d6] font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-th-surface/[0.15]"
+            onClick={() => {
+              if (!canUse('scan')) {
+                setUpgradeFeature('scan');
+                return;
+              }
+              setIsCameraOpen(true);
+            }}
+            className="bg-gradient-to-r from-[#c45a30] to-[#4f6d7a] hover:from-[#dd6e42] hover:to-[#6a8c9a] text-[#e8e2d6] font-bold py-3.5 px-6 md:py-4 md:px-10 rounded-full shadow-2xl transition-all transform hover:scale-105 flex items-center gap-2 md:gap-3 group border border-th-surface/[0.15] relative"
           >
             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <span className="font-label tracking-[0.2em] text-[9px] md:text-xs whitespace-nowrap">SCAN COVER</span>
+            {scansRemaining !== null && (
+              <span className="absolute -top-2 -right-2 bg-th-accent text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {scansRemaining}
+              </span>
+            )}
           </button>
 
           <button
@@ -787,6 +869,20 @@ const App: React.FC = () => {
           onToggleFavorite={handleToggleFavorite}
           onSelectAlbum={setSelectedAlbum}
           onUpdateAlbum={handleUpdateAlbum}
+          canUseLyrics={canUse('lyrics')}
+          canUseCovers={canUse('covers')}
+          onUpgradeRequired={(feature: string) => setUpgradeFeature(feature)}
+        />
+      )}
+      {upgradeFeature && (
+        <UpgradePrompt
+          feature={upgradeFeature}
+          onClose={() => setUpgradeFeature(null)}
+          onUpgrade={() => {
+            setUpgradeFeature(null);
+            // Navigate to pricing — for now, switch to landing page
+            setCurrentView('public-landing');
+          }}
         />
       )}
     </div>

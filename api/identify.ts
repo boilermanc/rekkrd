@@ -1,9 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Type } from '@google/genai';
-import { requireAuth } from './_auth';
+import { requireAuthWithUser } from './_auth';
 import { cors } from './_cors';
 import { ai } from './_gemini';
 import { rateLimit } from './_rateLimit';
+import { getSubscription, incrementScanCount, PLAN_LIMITS } from './_subscription';
 import { validateBase64Size, validateStringLength } from './_validate';
 
 export const config = {
@@ -12,11 +13,29 @@ export const config = {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res, 'POST')) return;
-  if (!requireAuth(req, res)) return;
+  const auth = await requireAuthWithUser(req, res);
+  if (!auth) return;
   if (rateLimit(req, res)) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Subscription check: enforce scan limits for free tier
+  const sub = await getSubscription(auth.userId);
+  const isActive = ['active', 'trialing'].includes(sub.status);
+  if (!isActive) {
+    return res.status(403).json({ error: 'Subscription inactive', status: sub.status });
+  }
+  const scanLimit = PLAN_LIMITS[sub.plan].scans;
+  if (scanLimit !== Infinity && sub.aiScansUsed >= scanLimit) {
+    return res.status(403).json({
+      error: 'Monthly scan limit reached',
+      code: 'SCAN_LIMIT_REACHED',
+      limit: scanLimit,
+      used: sub.aiScansUsed,
+      resetsAt: sub.aiScansResetAt,
+    });
   }
 
   try {
@@ -58,6 +77,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (typeof data.artist !== 'string' || typeof data.title !== 'string') {
       return res.status(200).json(null);
     }
+
+    // Increment scan counter on successful identification
+    await incrementScanCount(auth.userId);
+
     return res.status(200).json({ artist: data.artist, title: data.title });
   } catch (error) {
     console.error('Gemini Identification Error:', error);

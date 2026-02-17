@@ -1,10 +1,58 @@
 
 import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem } from '../types';
+import { supabase } from './supabaseService';
 
-const authHeaders: Record<string, string> = {
-  'Content-Type': 'application/json',
-  ...(import.meta.env.VITE_API_SECRET ? { Authorization: `Bearer ${import.meta.env.VITE_API_SECRET}` } : {}),
-};
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  // Prefer Supabase session JWT for per-user identification
+  if (supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+      return headers;
+    }
+  }
+
+  // Fallback to legacy API_SECRET during migration
+  const secret = import.meta.env.VITE_API_SECRET;
+  if (secret) {
+    headers['Authorization'] = `Bearer ${secret}`;
+  }
+
+  return headers;
+}
+
+export class ScanLimitError extends Error {
+  constructor(public limit: number, public used: number, public resetsAt: string) {
+    super('Monthly scan limit reached');
+    this.name = 'ScanLimitError';
+  }
+}
+
+export class UpgradeRequiredError extends Error {
+  constructor(public requiredPlan: string, public currentPlan: string) {
+    super('Upgrade required');
+    this.name = 'UpgradeRequiredError';
+  }
+}
+
+async function handleGatingError(response: Response): Promise<void> {
+  if (response.status !== 403) return;
+  try {
+    const body = await response.clone().json();
+    if (body.code === 'SCAN_LIMIT_REACHED') {
+      throw new ScanLimitError(body.limit, body.used, body.resetsAt);
+    }
+    if (body.error === 'Upgrade required') {
+      throw new UpgradeRequiredError(body.requiredPlan, body.currentPlan);
+    }
+  } catch (e) {
+    if (e instanceof ScanLimitError || e instanceof UpgradeRequiredError) throw e;
+  }
+}
 
 export const geminiService = {
   async identifyAlbum(base64DataUrl: string): Promise<{ artist: string; title: string } | null> {
@@ -14,17 +62,21 @@ export const geminiService = {
 
       const response = await fetch('/api/identify', {
         method: 'POST',
-        headers: authHeaders,
+        headers: await getAuthHeaders(),
         body: JSON.stringify({ base64Data, mimeType })
       });
 
-      if (!response.ok) return null;
+      if (!response.ok) {
+        await handleGatingError(response);
+        return null;
+      }
       const data = await response.json();
       if (!data || typeof data.artist !== 'string' || typeof data.title !== 'string') {
         return null;
       }
       return { artist: data.artist, title: data.title };
     } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Identification Error:', error);
       return null;
     }
@@ -34,7 +86,7 @@ export const geminiService = {
     try {
       const response = await fetch('/api/metadata', {
         method: 'POST',
-        headers: authHeaders,
+        headers: await getAuthHeaders(),
         body: JSON.stringify({ artist, title })
       });
 
@@ -69,17 +121,21 @@ export const geminiService = {
     try {
       const response = await fetch('/api/lyrics', {
         method: 'POST',
-        headers: authHeaders,
+        headers: await getAuthHeaders(),
         body: JSON.stringify({ artist, track, album })
       });
 
-      if (!response.ok) return { lyrics: null, syncedLyrics: null };
+      if (!response.ok) {
+        await handleGatingError(response);
+        return { lyrics: null, syncedLyrics: null };
+      }
       const data = await response.json();
       return {
         lyrics: typeof data.lyrics === 'string' ? data.lyrics : null,
         syncedLyrics: typeof data.syncedLyrics === 'string' ? data.syncedLyrics : null,
       };
     } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Lyrics Fetch Error:', error);
       return { lyrics: null, syncedLyrics: null };
     }
@@ -89,11 +145,14 @@ export const geminiService = {
     try {
       const response = await fetch('/api/covers', {
         method: 'POST',
-        headers: authHeaders,
+        headers: await getAuthHeaders(),
         body: JSON.stringify({ artist, title })
       });
 
-      if (!response.ok) return [];
+      if (!response.ok) {
+        await handleGatingError(response);
+        return [];
+      }
       const data = await response.json();
       if (!Array.isArray(data.covers)) return [];
       return data.covers.filter((item: unknown) => {
@@ -116,6 +175,7 @@ export const geminiService = {
         return true;
       });
     } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Cover Fetch Error:', error);
       return [];
     }
@@ -125,7 +185,7 @@ export const geminiService = {
     try {
       const response = await fetch('/api/playlist', {
         method: 'POST',
-        headers: authHeaders,
+        headers: await getAuthHeaders(),
         body: JSON.stringify({
           albums: albums.map(a => ({ id: a.id, artist: a.artist, title: a.title, genre: a.genre, tags: a.tags, tracklist: a.tracklist })),
           mood,
@@ -133,7 +193,10 @@ export const geminiService = {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to generate playlist');
+      if (!response.ok) {
+        await handleGatingError(response);
+        throw new Error('Failed to generate playlist');
+      }
 
       const result = await response.json();
       if (!result || typeof result !== 'object') {
@@ -161,6 +224,7 @@ export const geminiService = {
 
       return { id: crypto.randomUUID(), name: typeof result.playlistName === 'string' ? result.playlistName : 'Crate Mix', mood, items: itemsWithArt };
     } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Playlist Generation Error:', error);
       return { id: crypto.randomUUID(), name: 'Crate Mix', mood, items: [] };
     }

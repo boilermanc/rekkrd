@@ -16,6 +16,9 @@ interface AlbumDetailModalProps {
   onToggleFavorite?: (albumId: string) => void;
   onSelectAlbum?: (album: Album) => void;
   onUpdateAlbum?: (albumId: string, updates: Partial<Album>) => void;
+  canUseLyrics?: boolean;
+  canUseCovers?: boolean;
+  onUpgradeRequired?: (feature: string) => void;
 }
 
 const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
@@ -25,7 +28,10 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   onUpdateTags,
   onToggleFavorite,
   onSelectAlbum,
-  onUpdateAlbum
+  onUpdateAlbum,
+  canUseLyrics = true,
+  canUseCovers = true,
+  onUpgradeRequired,
 }) => {
   const { showToast } = useToast();
   const modalRef = useRef<HTMLDivElement>(null);
@@ -42,6 +48,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   const handleTrackClick = useCallback(async (index: number, trackName: string) => {
     if (expandedTrack === index) {
       setExpandedTrack(null);
+      return;
+    }
+
+    // Gate lyrics behind Curator+
+    if (!canUseLyrics) {
+      onUpgradeRequired?.('lyrics');
       return;
     }
 
@@ -143,7 +155,13 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
         </button>
 
         <div className="w-full md:w-5/12 overflow-hidden bg-th-bg flex items-center justify-center p-6 md:p-12 relative flex-shrink-0">
-             <button onClick={() => !uploadingCover && setShowCoverPicker(true)} className="relative group cursor-pointer z-10">
+             <button onClick={() => {
+               if (!canUseCovers) {
+                 onUpgradeRequired?.('covers');
+                 return;
+               }
+               if (!uploadingCover) setShowCoverPicker(true);
+             }} className="relative group cursor-pointer z-10">
                <img src={proxyImageUrl(displayCoverUrl)} alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'} className={`w-full h-auto max-h-[40vh] md:max-h-full object-contain rounded-md shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-opacity ${uploadingCover ? 'opacity-50' : ''}`} />
                {uploadingCover ? (
                  <div className="absolute inset-0 bg-th-bg/60 rounded-md flex items-center justify-center">

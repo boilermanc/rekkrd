@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import dns from 'dns/promises';
-import { requireAuth } from './_auth';
+import { requireAuthWithUser } from './_auth';
 import { cors } from './_cors';
 import { USER_AGENT } from './_constants';
 import { validateStringLength } from './_validate';
@@ -33,7 +33,8 @@ function isPrivateIP(ip: string): boolean {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res, 'POST')) return;
-  if (!requireAuth(req, res)) return;
+  const auth = await requireAuthWithUser(req, res);
+  if (!auth) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

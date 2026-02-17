@@ -65,7 +65,7 @@ const faqs = [
   { q: 'How does the AI scan work?', a: 'Point your phone camera at any vinyl record cover and snap a photo. Our Google Gemini-powered AI analyzes the image, identifies the artist and album, then pulls in tracklist, genre, cover art, pricing data, and more automatically. It works with most commercially released records and typically takes under 3 seconds.' },
   { q: 'Where does pricing data come from?', a: "Market valuations (low, median, and high) are sourced from Discogs, the world's largest music database and marketplace. This gives you real-world pricing based on actual recent sales, not guesswork." },
   { q: 'How do AI playlists work?', a: 'Type a mood or vibe like "Late Night Jazz" or "Sunday Morning Chill." The AI analyzes your actual collection and picks albums, sides, or individual songs that match. No hallucinated recommendations \u2014 every pick is something you own.' },
-  { q: 'Can I try it before paying?', a: "Absolutely. The free Collector tier gives you up to 100 albums and 10 AI scans per month with no time limit. It's a real, functional experience \u2014 not a trial." },
+  { q: 'Can I try it before paying?', a: "Absolutely. Every new account gets a free 14-day trial of the Curator plan with full access to AI playlists, lyrics, and unlimited scans. After the trial, you can continue on the free Collector tier or upgrade to keep premium features." },
   { q: 'Is my data private?', a: "Your collection data is stored securely in Supabase (Postgres). We don't sell your data, serve ads, or track your listening habits. Your notes, tags, and collection details belong to you." },
   { q: "What if a scan doesn't recognize my record?", a: 'If the AI can\'t identify a cover, you can always search and add the album manually. Rekkrd pulls from iTunes and MusicBrainz databases with millions of releases.' },
 ];
@@ -74,6 +74,18 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
   const { user, signOut } = useAuthContext();
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Dynamic pricing from Stripe
+  interface TierPrice { priceId: string; amount: number; currency: string; interval: string; }
+  interface PricingData { tiers: Record<string, { monthly?: TierPrice; annual?: TierPrice; name: string }>; }
+  const [pricing, setPricing] = useState<PricingData | null>(null);
+
+  useEffect(() => {
+    fetch('/api/prices')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setPricing(data); })
+      .catch(() => {});
+  }, []);
 
   // Auth overlay state
   const [showAuth, setShowAuth] = useState(false);
@@ -157,6 +169,43 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
     }
   };
 
+  const handleCheckout = async (tier: 'curator' | 'enthusiast') => {
+    if (!user) {
+      openAuthPanel('signup');
+      return;
+    }
+
+    const priceData = pricing?.tiers?.[tier];
+    const priceId = isAnnual ? priceData?.annual?.priceId : priceData?.monthly?.priceId;
+    if (!priceId) {
+      // Fallback: just enter the app if pricing not loaded yet
+      if (onEnterApp) onEnterApp();
+      return;
+    }
+
+    try {
+      const session = await supabase?.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      if (!token) {
+        openAuthPanel('signup');
+        return;
+      }
+
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ priceId }),
+      });
+      const { url } = await response.json();
+      if (url) window.location.href = url;
+    } catch (err) {
+      console.error('Checkout error:', err);
+    }
+  };
+
   const checkItem = (text: string) => (
     <li key={text}>
       <span className="chk"><SmallCheck /></span>
@@ -168,7 +217,17 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
     <div className="landing-page">
       <nav className="nav">
         <div className="container">
-          <a href="#" className="nav-logo">Rekk<span>r</span>d</a>
+          <a href="#" className="nav-logo">
+            <svg className="nav-logo-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="11" fill="#f0a882"/>
+              <circle cx="12" cy="12" r="9.5" fill="none" stroke="#d48a6a" strokeWidth="0.4" opacity="0.5"/>
+              <circle cx="12" cy="12" r="8" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.4"/>
+              <circle cx="12" cy="12" r="6.5" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.3"/>
+              <circle cx="12" cy="12" r="5.2" fill="#c45a30"/>
+              <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#f0a882">R</text>
+            </svg>
+            Rekk<span>r</span>d
+          </a>
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
@@ -452,7 +511,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
               <h3>Premium</h3>
               <div className="price-amount">
                 <span className="currency">$</span>
-                <span className="dollars">{isAnnual ? '49' : '4.99'}</span>
+                <span className="dollars">{isAnnual
+                  ? ((pricing?.tiers?.curator?.annual?.amount ?? 4900) / 100)
+                  : ((pricing?.tiers?.curator?.monthly?.amount ?? 499) / 100)
+                }</span>
                 <span className="period">{isAnnual ? '/year' : '/month'}</span>
                 {isAnnual && <span className="annual-note">Billed annually</span>}
               </div>
@@ -465,15 +527,18 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
                 <li><Check />Pricing &amp; condition grading</li>
                 <li><Check />Export collection data</li>
               </ul>
-              <button className="price-btn primary" onClick={handleCTA}>Start Free Trial</button>
+              <button className="price-btn primary" onClick={() => handleCheckout('curator')}>Start Free Trial</button>
             </div>
 
             <div className="price-card">
-              <div className="tier">Archivist</div>
+              <div className="tier">Enthusiast</div>
               <h3>Pro</h3>
               <div className="price-amount">
                 <span className="currency">$</span>
-                <span className="dollars">{isAnnual ? '99' : '9.99'}</span>
+                <span className="dollars">{isAnnual
+                  ? ((pricing?.tiers?.enthusiast?.annual?.amount ?? 9900) / 100)
+                  : ((pricing?.tiers?.enthusiast?.monthly?.amount ?? 999) / 100)
+                }</span>
                 <span className="period">{isAnnual ? '/year' : '/month'}</span>
                 {isAnnual && <span className="annual-note">Billed annually</span>}
               </div>
@@ -486,7 +551,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
                 <li><Check />Early beta access</li>
                 <li><Check />Priority support</li>
               </ul>
-              <button className="price-btn outline">Contact Us</button>
+              <button className="price-btn outline" onClick={() => handleCheckout('enthusiast')}>Get Enthusiast</button>
             </div>
           </div>
         </div>
@@ -529,7 +594,17 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp }) => {
         <div className="container">
           <div className="footer-grid">
             <div className="footer-brand">
-              <a href="#" className="nav-logo">Rekk<span>r</span>d</a>
+              <a href="#" className="nav-logo">
+                <svg className="nav-logo-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="11" fill="#f0a882"/>
+                  <circle cx="12" cy="12" r="9.5" fill="none" stroke="#d48a6a" strokeWidth="0.4" opacity="0.5"/>
+                  <circle cx="12" cy="12" r="8" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.4"/>
+                  <circle cx="12" cy="12" r="6.5" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.3"/>
+                  <circle cx="12" cy="12" r="5.2" fill="#c45a30"/>
+                  <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#f0a882">R</text>
+                </svg>
+                Rekk<span>r</span>d
+              </a>
               <p>The AI-powered vinyl collection manager for serious crate diggers and casual collectors alike.</p>
             </div>
             <div className="footer-col">

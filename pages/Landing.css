@@ -82,6 +82,15 @@
   font-weight:700;
   color:var(--slate-dark);
   letter-spacing:-.02em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.landing-page .nav-logo-icon {
+  width:28px;
+  height:28px;
+  flex-shrink:0;
 }
 
 .landing-page .nav-logo span {

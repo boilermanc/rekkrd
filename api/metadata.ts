@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Type } from '@google/genai';
-import { requireAuth } from './_auth';
+import { requireAuthWithUser } from './_auth';
 import { cors } from './_cors';
 import { USER_AGENT } from './_constants';
 import { ai } from './_gemini';
@@ -31,7 +31,8 @@ async function findCoverUrl(artist: string, title: string, geminiUrl?: string): 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res, 'POST')) return;
-  if (!requireAuth(req, res)) return;
+  const auth = await requireAuthWithUser(req, res);
+  if (!auth) return;
   if (rateLimit(req, res)) return;
 
   if (req.method !== 'POST') {
