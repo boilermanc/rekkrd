@@ -5,6 +5,8 @@ import AdminDashboard from './AdminDashboard';
 import CustomersPage from './pages/CustomersPage';
 import CollectionsPage from './pages/CollectionsPage';
 import EmailsPage from './pages/EmailsPage';
+import ContentPage from './pages/ContentPage';
+import BlogPage from './pages/BlogPage';
 
 const AdminRoutes: React.FC = () => (
   <Routes>
@@ -13,6 +15,8 @@ const AdminRoutes: React.FC = () => (
       <Route path="customers" element={<CustomersPage />} />
       <Route path="collections" element={<CollectionsPage />} />
       <Route path="emails" element={<EmailsPage />} />
+      <Route path="content" element={<ContentPage />} />
+      <Route path="blog" element={<BlogPage />} />
     </Route>
   </Routes>
 );

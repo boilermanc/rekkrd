@@ -195,12 +195,15 @@ router.post('/api/stripe-webhook', async (req, res) => {
           break;
         }
 
+        const deletedAt = new Date().toISOString();
+
         await supabase
           .from('profiles')
           .update({
             plan: 'collector',
             subscription_status: 'inactive',
             stripe_subscription_id: null,
+            plan_period_end: deletedAt,
           })
           .eq('stripe_customer_id', customerId);
 
@@ -211,6 +214,7 @@ router.post('/api/stripe-webhook', async (req, res) => {
             plan: 'collector',
             status: 'canceled',
             stripe_subscription_id: null,
+            current_period_end: deletedAt,
           })
           .eq('user_id', profile.id);
 

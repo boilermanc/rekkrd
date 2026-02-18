@@ -52,3 +52,88 @@ export interface Playlist {
   items: PlaylistItem[];
   mood: string;
 }
+
+// ── Stakkd (Gear) ──────────────────────────────────────────────
+
+export const GEAR_CATEGORIES = [
+  'turntable',
+  'cartridge',
+  'phono_preamp',
+  'preamp',
+  'amplifier',
+  'receiver',
+  'speakers',
+  'headphones',
+  'dac',
+  'subwoofer',
+  'cables_other',
+] as const;
+
+export type GearCategory = typeof GEAR_CATEGORIES[number];
+
+/** Shape of a gear item before it has been persisted (no DB-generated fields). */
+export interface NewGear {
+  category: GearCategory;
+  brand: string;
+  model: string;
+  year?: string;
+  description?: string;
+  specs?: Record<string, string | number>;
+  manual_url?: string;
+  image_url?: string;
+  original_photo_url?: string;
+  purchase_price?: number;
+  purchase_date?: string;
+  notes?: string;
+  position?: number;
+}
+
+/** A saved gear item — always has an id and created_at from the database. */
+export interface Gear extends NewGear {
+  id: string;
+  created_at: string;
+}
+
+/** Shape returned by the /api/setup-guide endpoint. */
+export interface SetupGuideConnection {
+  from: string;
+  to: string;
+  cable_type: string;
+  connection_type: string;
+  notes: string;
+}
+
+export interface SetupGuideSetting {
+  gear: string;
+  setting: string;
+  recommended_value: string;
+  explanation: string;
+}
+
+export interface SetupGuide {
+  signal_chain: string[];
+  connections: SetupGuideConnection[];
+  settings: SetupGuideSetting[];
+  tips: string[];
+  warnings: string[];
+}
+
+/** Shape returned by the /api/find-manual endpoint. */
+export interface ManualSearchResult {
+  manual_url: string | null;
+  source: string;
+  confidence: string;
+  alternative_urls: string[];
+  search_url: string;
+}
+
+/** Shape returned by the /api/identify-gear endpoint. */
+export interface IdentifiedGear {
+  category: string;
+  brand: string;
+  model: string;
+  year: string;
+  description: string;
+  specs: Record<string, string | number>;
+  manual_search_query: string;
+}

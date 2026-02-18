@@ -1,5 +1,5 @@
 
-import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem } from '../types';
+import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem, IdentifiedGear, ManualSearchResult, SetupGuide } from '../types';
 import { supabase } from './supabaseService';
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
@@ -78,6 +78,43 @@ export const geminiService = {
     } catch (error) {
       if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Identification Error:', error);
+      return null;
+    }
+  },
+
+  async identifyGear(base64DataUrl: string): Promise<IdentifiedGear | null> {
+    try {
+      const [header, image] = base64DataUrl.split(',');
+      const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+
+      const response = await fetch('/api/identify-gear', {
+        method: 'POST',
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ image, mimeType }),
+      });
+
+      if (!response.ok) {
+        await handleGatingError(response);
+        return null;
+      }
+
+      const data = await response.json();
+      if (!data || typeof data.brand !== 'string' || typeof data.model !== 'string') {
+        return null;
+      }
+
+      return {
+        category: typeof data.category === 'string' ? data.category : 'cables_other',
+        brand: data.brand,
+        model: data.model,
+        year: typeof data.year === 'string' ? data.year : '',
+        description: typeof data.description === 'string' ? data.description : '',
+        specs: data.specs && typeof data.specs === 'object' ? data.specs : {},
+        manual_search_query: typeof data.manual_search_query === 'string' ? data.manual_search_query : '',
+      };
+    } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
+      console.error('Gear Identification Error:', error);
       return null;
     }
   },
@@ -178,6 +215,70 @@ export const geminiService = {
       if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Cover Fetch Error:', error);
       return [];
+    }
+  },
+
+  async findManual(brand: string, model: string, category?: string): Promise<ManualSearchResult> {
+    const fallback: ManualSearchResult = {
+      manual_url: null,
+      source: '',
+      confidence: 'low',
+      alternative_urls: [],
+      search_url: `https://www.google.com/search?q=${encodeURIComponent(`${brand} ${model} owner manual PDF`)}`,
+    };
+
+    try {
+      const response = await fetch('/api/find-manual', {
+        method: 'POST',
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ brand, model, category }),
+      });
+
+      if (!response.ok) {
+        await handleGatingError(response);
+        return fallback;
+      }
+
+      const data = await response.json();
+      return {
+        manual_url: typeof data.manual_url === 'string' ? data.manual_url : null,
+        source: typeof data.source === 'string' ? data.source : '',
+        confidence: typeof data.confidence === 'string' ? data.confidence : 'low',
+        alternative_urls: Array.isArray(data.alternative_urls) ? data.alternative_urls : [],
+        search_url: typeof data.search_url === 'string' ? data.search_url : fallback.search_url,
+      };
+    } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
+      console.error('Find Manual Error:', error);
+      return fallback;
+    }
+  },
+
+  async generateSetupGuide(gear: Array<{ category: string; brand: string; model: string; specs?: Record<string, unknown> }>): Promise<SetupGuide> {
+    try {
+      const response = await fetch('/api/setup-guide', {
+        method: 'POST',
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ gear }),
+      });
+
+      if (!response.ok) {
+        await handleGatingError(response);
+        throw new Error('Failed to generate setup guide');
+      }
+
+      const data = await response.json();
+      return {
+        signal_chain: Array.isArray(data.signal_chain) ? data.signal_chain : [],
+        connections: Array.isArray(data.connections) ? data.connections : [],
+        settings: Array.isArray(data.settings) ? data.settings : [],
+        tips: Array.isArray(data.tips) ? data.tips : [],
+        warnings: Array.isArray(data.warnings) ? data.warnings : [],
+      };
+    } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
+      console.error('Setup Guide Error:', error);
+      throw error;
     }
   },
 

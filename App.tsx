@@ -20,8 +20,9 @@ import { useTheme } from './contexts/ThemeContext';
 import { getProfile, createProfile, hasCompletedOnboarding } from './services/profileService';
 import { ScanLimitError, UpgradeRequiredError } from './services/geminiService';
 import OnboardingWizard from './components/OnboardingWizard';
-import UpgradePrompt from './components/UpgradePrompt';
-import TrialBanner from './components/TrialBanner';
+import UpgradeModal from './components/UpgradeModal';
+import SubscriptionBanner from './components/SubscriptionBanner';
+import PlanBadge from './components/PlanBadge';
 
 const PAGE_SIZE = 40;
 
@@ -33,13 +34,12 @@ const DEFAULT_BG = 'https://images.unsplash.com/photo-1603048588665-791ca8aea617
 const App: React.FC = () => {
   const { showToast } = useToast();
   const { user, loading: authLoading, signOut } = useAuthContext();
-  const { canUse, isTrialing, trialDaysLeft, scansRemaining, albumLimitReached, plan, refresh: refreshSubscription } = useSubscription();
+  const { canUse, scansRemaining, albumLimitReached, plan, refresh: refreshSubscription } = useSubscription();
   const { theme, toggleTheme } = useTheme();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const [showPricingPage, setShowPricingPage] = useState(false);
-  const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [processingStatus, setProcessingStatus] = useState<string | null>(null);
@@ -110,13 +110,30 @@ const App: React.FC = () => {
     }
   }, [user, currentView]);
 
-  // Handle Stripe checkout return
+  // Handle Stripe checkout / portal return / downgrade
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') === 'success') {
-      window.history.replaceState({}, '', window.location.pathname);
+    const checkoutStatus = params.get('checkout');
+    const portalReturned = params.has('portal');
+    const downgraded = params.has('downgraded');
+
+    if (!checkoutStatus && !portalReturned && !downgraded) return;
+
+    window.history.replaceState({}, '', window.location.pathname);
+
+    if (checkoutStatus === 'success') {
       refreshSubscription().then(() => {
-        showToast('Welcome! Your subscription is now active.', 'success');
+        showToast(`Welcome to your new plan! Your 14-day trial has started.`, 'success');
+      });
+    } else if (checkoutStatus === 'canceled') {
+      showToast('Checkout canceled. You can upgrade anytime.', 'info');
+    } else if (portalReturned) {
+      refreshSubscription().then(() => {
+        showToast('Billing settings updated.', 'info');
+      });
+    } else if (downgraded) {
+      refreshSubscription().then(() => {
+        showToast("You're now on the free Collector plan. Your records and gear are safe \u2014 upgrade anytime to unlock premium features.", 'info');
       });
     }
   }, []);
@@ -491,6 +508,11 @@ const App: React.FC = () => {
           </div>}
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Plan Badge */}
+            <div className="relative">
+              <PlanBadge albumCount={albums.length} onUpgrade={() => setUpgradeFeature('plan_upgrade')} />
+            </div>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -523,13 +545,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {isTrialing && !trialBannerDismissed && trialDaysLeft > 0 && (
-        <TrialBanner
-          daysLeft={trialDaysLeft}
-          onUpgrade={() => setUpgradeFeature('playlist')}
-          onDismiss={() => setTrialBannerDismissed(true)}
-        />
-      )}
+      <SubscriptionBanner onUpgrade={() => setUpgradeFeature('plan_upgrade')} />
 
       {showStats && !loading && albums.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 md:px-6 mt-6 animate-in slide-in-from-top duration-500">
@@ -881,13 +897,10 @@ const App: React.FC = () => {
         />
       )}
       {upgradeFeature && (
-        <UpgradePrompt
-          feature={upgradeFeature}
+        <UpgradeModal
+          isOpen={!!upgradeFeature}
           onClose={() => setUpgradeFeature(null)}
-          onUpgrade={() => {
-            setUpgradeFeature(null);
-            setShowPricingPage(true);
-          }}
+          feature={upgradeFeature}
         />
       )}
     </div>

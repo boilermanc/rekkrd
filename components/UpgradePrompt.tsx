@@ -28,6 +28,14 @@ const FEATURE_INFO: Record<string, { title: string; description: string }> = {
     title: 'Album Limit Reached',
     description: "You've reached the 100-album limit on the free plan. Upgrade to add unlimited albums.",
   },
+  gear_limit: {
+    title: 'Gear Limit Reached',
+    description: "You've reached the 3-gear limit on the free plan. Upgrade to add unlimited gear to your Stakkd.",
+  },
+  setup_guide: {
+    title: 'Setup Guide',
+    description: 'Get custom wiring and setup instructions for your exact gear combination. Available on Curator and above.',
+  },
 };
 
 const UpgradePrompt: React.FC<UpgradePromptProps> = ({ feature, onClose, onUpgrade }) => {

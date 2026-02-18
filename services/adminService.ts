@@ -71,6 +71,42 @@ export interface SendEmailResult {
   created_at: string;
 }
 
+export interface CmsContentRow {
+  id: string;
+  page: string;
+  section: string;
+  content: unknown;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+export interface BlogPostAdmin {
+  id: string;
+  title: string;
+  slug: string;
+  body: string;
+  excerpt: string | null;
+  featured_image: string | null;
+  tags: string[];
+  author: string;
+  status: 'draft' | 'published';
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlogIdeaAdmin {
+  id: string;
+  idea: string;
+  tags: string[];
+  status: string;
+  source: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export const adminService = {
   async getCustomers(): Promise<AdminCustomer[]> {
     const headers = await getAuthHeaders();
@@ -125,6 +161,24 @@ export const adminService = {
     if (!resp.ok) throw new Error(`Failed to delete template: ${resp.status}`);
   },
 
+  async getCmsContent(page: string): Promise<CmsContentRow[]> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`/api/admin?action=cms-content&page=${encodeURIComponent(page)}`, { headers });
+    if (!resp.ok) throw new Error(`Failed to fetch CMS content: ${resp.status}`);
+    return resp.json();
+  },
+
+  async saveCmsSection(page: string, section: string, content: unknown): Promise<CmsContentRow> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/admin?action=cms-content', {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ page, section, content }),
+    });
+    if (!resp.ok) throw new Error(`Failed to save CMS content: ${resp.status}`);
+    return resp.json();
+  },
+
   async sendTestEmail(payload: { to: string; subject: string; html: string }): Promise<SendEmailResult> {
     const headers = await getAuthHeaders();
     const resp = await fetch('/api/admin?action=send-email', {
@@ -136,6 +190,70 @@ export const adminService = {
       const err = await resp.json().catch(() => ({ error: 'Send failed' }));
       throw new Error(err.error || `Failed to send email: ${resp.status}`);
     }
+    return resp.json();
+  },
+
+  async getBlogPosts(): Promise<BlogPostAdmin[]> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/posts`, { headers });
+    if (!resp.ok) throw new Error(`Failed to fetch blog posts: ${resp.status}`);
+    return resp.json();
+  },
+
+  async getBlogPost(slug: string): Promise<BlogPostAdmin> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/posts/${encodeURIComponent(slug)}`, { headers });
+    if (!resp.ok) throw new Error(`Failed to fetch blog post: ${resp.status}`);
+    return resp.json();
+  },
+
+  async createBlogPost(post: { title: string; body: string; excerpt?: string; featured_image?: string; tags?: string[]; author?: string; status?: string }): Promise<BlogPostAdmin> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/posts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(post),
+    });
+    if (!resp.ok) throw new Error(`Failed to create blog post: ${resp.status}`);
+    return resp.json();
+  },
+
+  async updateBlogPost(id: string, updates: { title?: string; slug?: string; body?: string; excerpt?: string; featured_image?: string; tags?: string[]; author?: string; status?: string }): Promise<BlogPostAdmin> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/posts/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(updates),
+    });
+    if (!resp.ok) throw new Error(`Failed to update blog post: ${resp.status}`);
+    return resp.json();
+  },
+
+  async deleteBlogPost(id: string): Promise<void> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/posts/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!resp.ok) throw new Error(`Failed to delete blog post: ${resp.status}`);
+  },
+
+  async getBlogIdeas(): Promise<BlogIdeaAdmin[]> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/ideas`, { headers });
+    if (!resp.ok) throw new Error(`Failed to fetch blog ideas: ${resp.status}`);
+    const data = await resp.json();
+    return data.ideas;
+  },
+
+  async submitBlogIdea(data: { idea: string; tags: string[] }): Promise<BlogIdeaAdmin> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`${API_BASE}/api/blog/admin/ideas`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!resp.ok) throw new Error(`Failed to submit blog idea: ${resp.status}`);
     return resp.json();
   },
 };

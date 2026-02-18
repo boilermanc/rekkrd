@@ -1,8 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from './AuthContext';
-import { getSubscription, Plan, SubscriptionStatus, Subscription } from '../services/subscriptionService';
+import { getSubscription, getGearCount, Plan, SubscriptionStatus, Subscription } from '../services/subscriptionService';
+import { useSubscriptionApi } from '../hooks/useSubscription';
 
-type GatedFeature = 'playlist' | 'lyrics' | 'covers' | 'scan';
+type GatedFeature = 'playlist' | 'lyrics' | 'covers' | 'scan' | 'manual_finder' | 'setup_guide';
+
+const SCAN_LIMIT_FREE = 10;
+const ALBUM_LIMIT_FREE = 100;
+const GEAR_LIMIT_FREE = 3;
 
 interface SubscriptionContextValue {
   subscription: Subscription | null;
@@ -15,33 +20,51 @@ interface SubscriptionContextValue {
   scansRemaining: number | null; // null = unlimited
   albumLimitReached: (albumCount: number) => boolean;
   refresh: () => Promise<void>;
+  // New fields for plan badge & usage meters
+  periodEnd: string | null;
+  scansUsed: number;
+  scansLimit: number;     // -1 = unlimited
+  albumLimit: number;     // -1 = unlimited
+  gearCount: number;
+  gearLimit: number;      // -1 = unlimited
+  gearLimitReached: boolean;
+  hasStripeCustomer: boolean;
+  isPastDue: boolean;
 }
-
-const SCAN_LIMIT_FREE = 10;
-const ALBUM_LIMIT_FREE = 100;
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuthContext();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [gearCount, setGearCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Also fetch enriched data from the API endpoint
+  const apiData = useSubscriptionApi();
 
   const refresh = useCallback(async () => {
     if (!user) {
       setSubscription(null);
+      setGearCount(0);
       setLoading(false);
       return;
     }
     try {
-      const sub = await getSubscription(user.id);
+      const [sub, gc] = await Promise.all([
+        getSubscription(user.id),
+        getGearCount(),
+      ]);
       setSubscription(sub);
+      setGearCount(gc);
+      // Also refresh the API data
+      await apiData.refresh();
     } catch (e) {
       console.error('Failed to fetch subscription:', e);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, apiData.refresh]);
 
   useEffect(() => {
     setLoading(true);
@@ -65,7 +88,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (isPaidTier) return true;
       return (subscription?.ai_scans_used ?? 0) < SCAN_LIMIT_FREE;
     }
-    // playlist, lyrics, covers require Curator+
+    // playlist, lyrics, covers, manual_finder, setup_guide require Curator+
     return isPaidTier;
   }, [isActive, isPaidTier, subscription?.ai_scans_used]);
 
@@ -78,10 +101,23 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return albumCount >= ALBUM_LIMIT_FREE;
   }, [isPaidTier]);
 
+  // Derived values for plan badge & usage meters
+  const periodEnd = apiData.periodEnd ?? subscription?.current_period_end ?? null;
+  const scansUsed = subscription?.ai_scans_used ?? 0;
+  const scansLimit = isPaidTier ? -1 : SCAN_LIMIT_FREE;
+  const albumLimit = isPaidTier ? -1 : ALBUM_LIMIT_FREE;
+  const gearLimit = isPaidTier ? -1 : GEAR_LIMIT_FREE;
+  const gearLimitReached = !isPaidTier && gearCount >= GEAR_LIMIT_FREE;
+  const hasStripeCustomer = !!subscription?.stripe_customer_id;
+  const isPastDue = status === 'past_due';
+
   return (
     <SubscriptionContext.Provider value={{
       subscription, loading, plan, status, isTrialing,
       trialDaysLeft, canUse, scansRemaining, albumLimitReached, refresh,
+      periodEnd, scansUsed, scansLimit, albumLimit,
+      gearCount, gearLimit, gearLimitReached,
+      hasStripeCustomer, isPastDue,
     }}>
       {children}
     </SubscriptionContext.Provider>

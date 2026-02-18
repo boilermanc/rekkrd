@@ -475,6 +475,8 @@
 .landing-page .fi-4{background:rgba(192,214,223,.25);border:1.5px solid rgba(192,214,223,.4)}
 .landing-page .fi-5{background:rgba(221,110,66,.06);border:1.5px solid rgba(221,110,66,.1)}
 .landing-page .fi-6{background:rgba(79,109,122,.05);border:1.5px solid rgba(79,109,122,.1)}
+.landing-page .fi-stakkd{background:linear-gradient(135deg,rgba(79,109,122,.08),rgba(192,214,223,.2));border:1.5px solid rgba(79,109,122,.15)}
+.landing-page .fi-analytics{background:rgba(232,218,178,.2);border:1.5px solid rgba(232,218,178,.4)}
 
 .landing-page .feature-card h3 {
   font-size:1.2rem;
@@ -836,6 +838,117 @@
 
 .landing-page .playlist-text {
   order:2;
+}
+
+/* —— Stakkd —— */
+.landing-page .stakkd-section {
+  background:var(--bg);
+  overflow:hidden;
+}
+
+.landing-page .stakkd-section .container {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  align-items:center;
+}
+
+.landing-page .stakkd-visual {
+  order:1;
+}
+
+.landing-page .stakkd-text {
+  order:2;
+}
+
+.landing-page .signal-chain {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0;
+}
+
+.landing-page .signal-node {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:20px 24px;
+  border-radius:var(--radius-sm);
+  background:#fff;
+  border:2px solid var(--alabaster);
+  box-shadow:var(--shadow);
+  width:100%;
+  max-width:340px;
+  transition:all .3s;
+}
+
+.landing-page .signal-node:hover {
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--sky);
+}
+
+.landing-page .signal-node-icon {
+  width:44px;
+  height:44px;
+  border-radius:var(--radius-xs);
+  background:rgba(79,109,122,.06);
+  border:1.5px solid rgba(79,109,122,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.landing-page .signal-node-icon svg {
+  width:22px;
+  height:22px;
+  stroke:var(--slate);
+}
+
+.landing-page .signal-node-info h4 {
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--slate-dark);
+  margin-bottom:2px;
+}
+
+.landing-page .signal-node-label {
+  font-family:'Space Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--peach);
+}
+
+.landing-page .signal-connector {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  height:32px;
+  position:relative;
+}
+
+.landing-page .signal-connector span {
+  display:block;
+  width:2px;
+  height:100%;
+  background:var(--slate);
+  position:relative;
+}
+
+.landing-page .signal-connector span::after {
+  content:'';
+  position:absolute;
+  bottom:-1px;
+  left:50%;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-top:6px solid var(--slate);
 }
 
 /* —— Stats Band —— */
@@ -1383,9 +1496,12 @@
   .landing-page .hero-actions{justify-content:center}
   .landing-page .features-grid{grid-template-columns:repeat(2,1fr)}
   .landing-page .showcase .container,
-  .landing-page .playlist-section .container{grid-template-columns:1fr;gap:48px}
+  .landing-page .playlist-section .container,
+  .landing-page .stakkd-section .container{grid-template-columns:1fr;gap:48px}
   .landing-page .playlist-visual{order:2}
   .landing-page .playlist-text{order:1}
+  .landing-page .stakkd-visual{order:1}
+  .landing-page .stakkd-text{order:2}
   .landing-page .pricing-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}
   .landing-page .price-card.featured{order:-1}
   .landing-page .footer-grid{grid-template-columns:1fr 1fr}

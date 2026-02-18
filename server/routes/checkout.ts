@@ -90,6 +90,12 @@ router.post(
           .eq('user_id', userId);
       }
 
+      // Ensure profiles table has the customer ID (needed for webhook lookups)
+      await supabase
+        .from('profiles')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', userId);
+
       const appUrl = process.env.APP_URL || 'https://rekkrd.com';
       const hasExistingSubscription = !!sub?.stripe_subscription_id;
 

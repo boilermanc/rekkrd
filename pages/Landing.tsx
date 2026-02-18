@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import './Landing.css';
 import { useAuthContext } from '../contexts/AuthContext';
 import { supabase } from '../services/supabaseService';
+import { getPageContent } from '../services/contentService';
+import { LANDING_DEFAULTS } from '../constants/landingDefaults';
+import type { CmsLandingContent } from '../types/cms';
 
 interface LandingProps {
   onEnterApp?: () => void;
@@ -53,28 +56,29 @@ const PlusIcon: React.FC<{ open: boolean }> = ({ open }) => (
   </svg>
 );
 
-const features = [
-  { icon: '\uD83D\uDCF7', cls: 'fi-1', title: 'AI Camera Scan', desc: 'Point, snap, done. Our Gemini-powered AI identifies artist and album from cover art instantly. Upload a photo or use your camera.' },
-  { icon: '\u26A1', cls: 'fi-2', title: 'Auto Enrichment', desc: 'Every album gets filled in automatically: tracklist, genre, year, cover art, market pricing, AI description, and streaming links.' },
-  { icon: '\uD83D\uDCB0', cls: 'fi-3', title: 'Collection Valuation', desc: 'See low, median, and high market prices pulled from Discogs. Know what your crate is worth at a glance with portfolio stats.' },
-  { icon: '\uD83C\uDFB5', cls: 'fi-4', title: 'Playlist Studio', desc: 'Type a mood. Get a curated playlist from your own collection. Choose albums, sides, or individual songs. Print to PDF.' },
-  { icon: '\uD83D\uDD0D', cls: 'fi-5', title: 'Smart Search & Filter', desc: 'Real-time search across title, artist, and genre. Sort by year, value, or date added. Filter by decade, condition, or favorites.' },
-  { icon: '\uD83C\uDFB6', cls: 'fi-6', title: 'Lyrics & Liner Notes', desc: 'Look up lyrics for any track in your collection. Add personal notes, tags, and condition grades to every album.' },
-];
-
-const faqs = [
-  { q: 'How does the AI scan work?', a: 'Point your phone camera at any vinyl record cover and snap a photo. Our Google Gemini-powered AI analyzes the image, identifies the artist and album, then pulls in tracklist, genre, cover art, pricing data, and more automatically. It works with most commercially released records and typically takes under 3 seconds.' },
-  { q: 'Where does pricing data come from?', a: "Market valuations (low, median, and high) are sourced from Discogs, the world's largest music database and marketplace. This gives you real-world pricing based on actual recent sales, not guesswork." },
-  { q: 'How do AI playlists work?', a: 'Type a mood or vibe like "Late Night Jazz" or "Sunday Morning Chill." The AI analyzes your actual collection and picks albums, sides, or individual songs that match. No hallucinated recommendations \u2014 every pick is something you own.' },
-  { q: 'Can I try it before paying?', a: "Absolutely. Every new account gets a free 14-day trial of the Curator plan with full access to AI playlists, lyrics, and unlimited scans. After the trial, you can continue on the free Collector tier or upgrade to keep premium features." },
-  { q: 'Is my data private?', a: "Your collection data is stored securely in Supabase (Postgres). We don't sell your data, serve ads, or track your listening habits. Your notes, tags, and collection details belong to you." },
-  { q: "What if a scan doesn't recognize my record?", a: 'If the AI can\'t identify a cover, you can always search and add the album manually. Rekkrd pulls from iTunes and MusicBrainz databases with millions of releases.' },
-];
-
 const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   const { user, signOut } = useAuthContext();
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // CMS content with defaults
+  const [content, setContent] = useState<CmsLandingContent>({ ...LANDING_DEFAULTS });
+
+  useEffect(() => {
+    getPageContent('landing').then(cms => {
+      if (Object.keys(cms).length > 0) {
+        setContent(prev => {
+          const merged = { ...prev };
+          for (const key of Object.keys(LANDING_DEFAULTS) as (keyof CmsLandingContent)[]) {
+            if (cms[key] !== undefined) {
+              (merged as Record<string, unknown>)[key] = cms[key];
+            }
+          }
+          return merged;
+        });
+      }
+    });
+  }, []);
 
   // Dynamic pricing from Stripe
   interface TierPrice { priceId: string; amount: number; currency: string; interval: string; }
@@ -187,7 +191,6 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
     const priceData = pricing?.tiers?.[tier];
     const priceId = isAnnual ? priceData?.annual?.priceId : priceData?.monthly?.priceId;
     if (!priceId) {
-      // Fallback: just enter the app if pricing not loaded yet
       if (onEnterApp) onEnterApp();
       return;
     }
@@ -241,8 +244,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
             <a href="#playlist">Playlists</a>
+            <a href="#stakkd">Stakkd</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
+            <a href="/blog">Blog</a>
             {user ? (
               <>
                 <button className="nav-sign-in" onClick={signOut}>Sign Out</button>
@@ -283,13 +288,13 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
         <div className="container">
           <div>
             <div className="hero-badge">
-              <span className="dot"></span> AI-Powered Vinyl
+              <span className="dot"></span> {content.hero.badge}
             </div>
-            <h1>Your Vinyl<br />Collection, <em>Reimagined.</em></h1>
-            <p>Scan, catalog, and rediscover your record collection with AI. Get instant identification, valuations, tracklists, and curated playlists from what you already own.</p>
+            <h1 dangerouslySetInnerHTML={{ __html: content.hero.heading }} />
+            <p>{content.hero.subheading}</p>
             <div className="hero-actions">
-              <button className="btn-primary" onClick={handleCTA}>Start Free <Arrow /></button>
-              <a href="#features" className="btn-secondary">See Features</a>
+              <button className="btn-primary" onClick={handleCTA}>{content.hero.cta_primary} <Arrow /></button>
+              <a href="#features" className="btn-secondary">{content.hero.cta_secondary}</a>
             </div>
           </div>
           <div className="hero-video">
@@ -307,10 +312,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
 
       <section className="proof-bar">
         <div className="container">
-          {[['10K+', 'Records Cataloged'], ['98%', 'Scan Accuracy'], ['2.5K+', 'Playlists Created'], ['4.9\u2605', 'User Rating']].map(([n, l]) => (
-            <div className="proof-stat" key={l}>
-              <div className="num">{n}</div>
-              <div className="label">{l}</div>
+          {content.proof_stats.map(stat => (
+            <div className="proof-stat" key={stat.label}>
+              <div className="num">{stat.value}</div>
+              <div className="label">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -319,12 +324,12 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
       <section className="section features" id="features">
         <div className="container">
           <div className="section-header">
-            <div className="section-label">Features</div>
-            <h2 className="section-title">Everything Your Crate Deserves</h2>
-            <p className="section-sub">From AI scanning to playlist curation, Rekkrd is the most complete vinyl companion ever built.</p>
+            <div className="section-label">{content.features_header.label}</div>
+            <h2 className="section-title">{content.features_header.title}</h2>
+            <p className="section-sub">{content.features_header.subtitle}</p>
           </div>
           <div className="features-grid">
-            {features.map(f => (
+            {content.features.map(f => (
               <div className="feature-card" key={f.title}>
                 <div className={`feature-icon ${f.cls}`}>{f.icon}</div>
                 <h3>{f.title}</h3>
@@ -338,20 +343,16 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
       <section className="section how-it-works" id="how-it-works">
         <div className="container">
           <div className="section-header">
-            <div className="section-label">How It Works</div>
-            <h2 className="section-title">Three Steps to a Smarter Crate</h2>
-            <p className="section-sub">From physical vinyl to digital library in seconds.</p>
+            <div className="section-label">{content.how_it_works_header.label}</div>
+            <h2 className="section-title">{content.how_it_works_header.title}</h2>
+            <p className="section-sub">{content.how_it_works_header.subtitle}</p>
           </div>
           <div className="steps">
-            {[
-              ['1', 'Scan or Add', 'Point your camera at any record cover. AI identifies it instantly, or search and add manually.'],
-              ['2', 'Enrich Automatically', 'Tracklist, genre, cover art, market price, and an AI description all populate in seconds.'],
-              ['3', 'Explore & Play', 'Browse your collection, generate mood playlists, track value, and discover your vinyl from a new angle.'],
-            ].map(([n, t, d]) => (
-              <div className="step" key={n}>
-                <div className="step-num">{n}</div>
-                <h3>{t}</h3>
-                <p>{d}</p>
+            {content.how_it_works.map(step => (
+              <div className="step" key={step.num}>
+                <div className="step-num">{step.num}</div>
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
               </div>
             ))}
           </div>
@@ -361,32 +362,21 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
       <section className="section showcase" id="collection">
         <div className="container">
           <div className="showcase-text">
-            <div className="section-label">Your Collection</div>
-            <h2 className="section-title">A Crate That<br /><em style={{ color: 'var(--peach)', fontWeight: 400 }}>Knows Itself</em></h2>
-            <p className="section-sub">Every album in your collection is alive with data, art, and context.</p>
+            <div className="section-label">{content.showcase.label}</div>
+            <h2 className="section-title">{content.showcase.title}<br /><em style={{ color: 'var(--peach)', fontWeight: 400 }}>{content.showcase.title_em}</em></h2>
+            <p className="section-sub">{content.showcase.subtitle}</p>
             <ul className="showcase-list">
-              {[
-                'High-res cover art from iTunes and MusicBrainz',
-                'Live market valuations from Discogs',
-                'Full tracklists with per-track lyrics',
-                'AI-written poetic album descriptions',
-                'Duplicate detection and smart categorization',
-              ].map(checkItem)}
+              {content.showcase.checklist.map(checkItem)}
             </ul>
           </div>
           <div className="showcase-visual">
-            {[
-              { g: 'var(--beige),var(--peach)', e: '\uD83C\uDFB6', t: 'Kind of Blue', a: 'Miles Davis \u2022 1959', p: '$38.50' },
-              { g: 'var(--sky),var(--slate)', e: '\uD83E\uDDE0', t: 'OK Computer', a: 'Radiohead \u2022 1997', p: '$29.00' },
-              { g: 'var(--peach-light),var(--slate)', e: '\uD83C\uDF2C', t: 'Purple Rain', a: 'Prince \u2022 1984', p: '$22.75' },
-              { g: 'var(--bg3),var(--slate-light)', e: '\uD83C\uDFB8', t: 'Rumours', a: 'Fleetwood Mac \u2022 1977', p: '$41.00' },
-            ].map(c => (
-              <div className="mock-card" key={c.t}>
-                <div className="mock-card-art" style={{ background: `linear-gradient(135deg,${c.g})` }}>{c.e}</div>
+            {content.showcase_cards.map(c => (
+              <div className="mock-card" key={c.title}>
+                <div className="mock-card-art" style={{ background: `linear-gradient(135deg,${c.gradient})` }}>{c.emoji}</div>
                 <div className="mock-card-info">
-                  <h4>{c.t}</h4>
-                  <p>{c.a}</p>
-                  <p className="price">{c.p}</p>
+                  <h4>{c.title}</h4>
+                  <p>{c.artist}</p>
+                  <p className="price">{c.price}</p>
                 </div>
               </div>
             ))}
@@ -400,44 +390,110 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             <div className="playlist-demo">
               <div className="playlist-demo-header">
                 <h4>{'\uD83C\uDFB5'} Playlist Studio</h4>
-                <span className="mood-badge">Late Night Jazz</span>
+                <span className="mood-badge">{content.playlist_moods[0]}</span>
               </div>
               <div className="mood-chips">
-                {['Late Night Jazz', 'Sunday Morning', 'Road Trip Energy', 'Rainy Day Vinyl'].map((m, i) => (
+                {content.playlist_moods.map((m, i) => (
                   <button className={`mood-chip${i === 0 ? ' active' : ''}`} key={m}>{m}</button>
                 ))}
               </div>
               <div className="playlist-tracks">
-                {[
-                  { n: '01', c: 'art-1', e: '\uD83C\uDFB7', t: 'So What', a: 'Miles Davis \u2022 Kind of Blue', d: '9:22' },
-                  { n: '02', c: 'art-2', e: '\uD83E\uDDE0', t: 'Take Five', a: 'Dave Brubeck \u2022 Time Out', d: '5:24' },
-                  { n: '03', c: 'art-3', e: '\uD83C\uDFBA', t: 'Round Midnight', a: 'Thelonious Monk \u2022 Genius of Modern Music', d: '5:47' },
-                  { n: '04', c: 'art-4', e: '\uD83C\uDFB9', t: 'A Love Supreme Pt. I', a: 'John Coltrane \u2022 A Love Supreme', d: '7:43' },
-                ].map(tr => (
-                  <div className="playlist-track" key={tr.n}>
-                    <span className="num">{tr.n}</span>
-                    <div className={`art ${tr.c}`}>{tr.e}</div>
+                {content.playlist_tracks.map(tr => (
+                  <div className="playlist-track" key={tr.num}>
+                    <span className="num">{tr.num}</span>
+                    <div className={`art ${tr.cls}`}>{tr.emoji}</div>
                     <div className="info">
-                      <h5>{tr.t}</h5>
-                      <p>{tr.a}</p>
+                      <h5>{tr.title}</h5>
+                      <p>{tr.artist}</p>
                     </div>
-                    <span className="dur">{tr.d}</span>
+                    <span className="dur">{tr.duration}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
           <div className="playlist-text">
-            <div className="section-label">Playlist Studio</div>
-            <h2 className="section-title">Spin a Mood,<br /><em style={{ color: 'var(--peach)', fontWeight: 400 }}>Not Just a Record</em></h2>
-            <p className="section-sub">Tell Rekkrd a vibe and it builds a curated playlist from your actual collection. No streaming services, no algorithms from strangers.</p>
+            <div className="section-label">{content.playlist_header.label}</div>
+            <h2 className="section-title">{content.playlist_header.title}<br /><em style={{ color: 'var(--peach)', fontWeight: 400 }}>{content.playlist_header.title_em}</em></h2>
+            <p className="section-sub">{content.playlist_header.subtitle}</p>
             <ul className="showcase-list" style={{ marginTop: 28 }}>
-              {[
-                'Albums, sides, or individual songs',
-                'Player and manifest views',
-                'Print-ready PDF playlist cards',
-                'Only picks albums that match from your crate',
-              ].map(checkItem)}
+              {content.playlist_header.checklist.map(checkItem)}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="section stakkd-section" id="stakkd">
+        <div className="container">
+          <div className="stakkd-visual">
+            <div className="signal-chain">
+              <div className="signal-node">
+                <div className="signal-node-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="3" />
+                    <line x1="12" y1="2" x2="12" y2="5" />
+                    <line x1="12" y1="19" x2="12" y2="22" />
+                  </svg>
+                </div>
+                <div className="signal-node-info">
+                  <h4>Technics SL-1200MK7</h4>
+                  <span className="signal-node-label">Turntable</span>
+                </div>
+              </div>
+              <div className="signal-connector" aria-hidden="true"><span /></div>
+              <div className="signal-node">
+                <div className="signal-node-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <circle cx="8" cy="12" r="2" />
+                    <circle cx="16" cy="12" r="2" />
+                  </svg>
+                </div>
+                <div className="signal-node-info">
+                  <h4>Pro-Ject Phono Box S2</h4>
+                  <span className="signal-node-label">Phono Preamp</span>
+                </div>
+              </div>
+              <div className="signal-connector" aria-hidden="true"><span /></div>
+              <div className="signal-node">
+                <div className="signal-node-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="6" width="20" height="12" rx="2" />
+                    <line x1="6" y1="10" x2="6" y2="14" />
+                    <line x1="10" y1="9" x2="10" y2="15" />
+                    <line x1="14" y1="10" x2="14" y2="14" />
+                    <line x1="18" y1="8" x2="18" y2="16" />
+                  </svg>
+                </div>
+                <div className="signal-node-info">
+                  <h4>Yamaha A-S801</h4>
+                  <span className="signal-node-label">Amplifier</span>
+                </div>
+              </div>
+              <div className="signal-connector" aria-hidden="true"><span /></div>
+              <div className="signal-node">
+                <div className="signal-node-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="4" y="2" width="16" height="20" rx="2" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="12" cy="19" r="1" />
+                  </svg>
+                </div>
+                <div className="signal-node-info">
+                  <h4>KEF LS50 Meta</h4>
+                  <span className="signal-node-label">Speakers</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="stakkd-text">
+            <div className="section-label">{content.stakkd.label}</div>
+            <h2 className="section-title">{content.stakkd.title}<br /><em style={{ color: 'var(--peach)', fontWeight: 400 }}>{content.stakkd.title_em}</em></h2>
+            <p className="section-sub">{content.stakkd.subtitle}</p>
+            <ul className="showcase-list" style={{ marginTop: 28 }}>
+              {content.stakkd.checklist.map(checkItem)}
             </ul>
           </div>
         </div>
@@ -445,14 +501,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
 
       <section className="stats-band">
         <div className="container">
-          {[
-            ['6 Sources', 'Enrichment from iTunes, MusicBrainz, Discogs, Gemini AI, and more'],
-            ['<3s', 'Average time from scan to fully enriched album entry'],
-            ['100%', 'Your data. Your collection. No ads, no tracking, no lock-in.'],
-          ].map(([h, p]) => (
-            <div className="stat-item" key={h}>
-              <h3>{h}</h3>
-              <p>{p}</p>
+          {content.stats_band.map(s => (
+            <div className="stat-item" key={s.heading}>
+              <h3>{s.heading}</h3>
+              <p>{s.description}</p>
             </div>
           ))}
         </div>
@@ -461,10 +513,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
       <section className="testimonial-section">
         <div className="container">
           <span className="quote-mark">&ldquo;</span>
-          <blockquote>I scanned my entire crate in an afternoon. The playlist feature alone is worth it &mdash; it actually knows my collection better than I do.</blockquote>
+          <blockquote>{content.testimonial.quote}</blockquote>
           <cite>
-            <strong>Jordan M.</strong>
-            Vinyl collector &bull; 340 records
+            <strong>{content.testimonial.author}</strong>
+            {content.testimonial.detail}
           </cite>
         </div>
       </section>
@@ -508,6 +560,9 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
                 <li><Check />Grid &amp; list views</li>
                 <li><Check />Search, sort &amp; filter</li>
                 <li><Check />Personal notes &amp; tags</li>
+                <li><Check />Up to 3 gear items</li>
+                <li className="disabled"><X />AI gear identification</li>
+                <li className="disabled"><X />Manual finder &amp; setup guides</li>
                 <li className="disabled"><X />AI playlists</li>
                 <li className="disabled"><X />Lyrics lookup</li>
               </ul>
@@ -535,6 +590,9 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
                 <li><Check />Multi-source cover art</li>
                 <li><Check />Pricing &amp; condition grading</li>
                 <li><Check />Export collection data</li>
+                <li><Check />Stakkd &mdash; unlimited gear</li>
+                <li><Check />AI gear identification</li>
+                <li><Check />Manual finder &amp; setup guides</li>
               </ul>
               <button className="price-btn primary" onClick={() => handleCheckout('curator')}>Start Free Trial</button>
             </div>
@@ -553,6 +611,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               </div>
               <ul className="price-features">
                 <li><Check />Everything in Curator</li>
+                <li><Check />Full Stakkd with signal chain</li>
                 <li><Check />Bulk import &amp; export</li>
                 <li><Check />API access</li>
                 <li><Check />Advanced analytics</li>
@@ -569,11 +628,11 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
       <section className="section faq-section" id="faq">
         <div className="container">
           <div className="section-header">
-            <div className="section-label">FAQ</div>
-            <h2 className="section-title">Got Questions?</h2>
+            <div className="section-label">{content.faq_header.label}</div>
+            <h2 className="section-title">{content.faq_header.title}</h2>
           </div>
           <div className="faq-list">
-            {faqs.map((f, i) => (
+            {content.faqs.map((f, i) => (
               <div className={`faq-item${openFaq === i ? ' open' : ''}`} key={i}>
                 <button className="faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)} aria-expanded={openFaq === i}>
                   {f.q}
@@ -590,11 +649,11 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
 
       <section className="final-cta" id="cta">
         <div className="container">
-          <h2>Ready to <em>Rekkrd</em><br />Your Collection?</h2>
-          <p>Join thousands of collectors who've digitized, valued, and rediscovered their vinyl with AI.</p>
+          <h2 dangerouslySetInnerHTML={{ __html: content.final_cta.heading }} />
+          <p>{content.final_cta.description}</p>
           <div className="final-cta-actions">
-            <button className="btn-light" onClick={handleCTA}>Start Free &mdash; No Card Required <Arrow /></button>
-            <a href="#pricing" className="btn-ghost">View Pricing</a>
+            <button className="btn-light" onClick={handleCTA}>{content.final_cta.cta_primary} <Arrow /></button>
+            <a href="#pricing" className="btn-ghost">{content.final_cta.cta_secondary}</a>
           </div>
         </div>
       </section>
@@ -614,7 +673,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
                 </svg>
                 <span>Rekk<span>r</span>d</span>
               </a>
-              <p>The AI-powered vinyl collection manager for serious crate diggers and casual collectors alike.</p>
+              <p>{content.footer.brand_description}</p>
             </div>
             <div className="footer-col">
               <h4>Product</h4>
@@ -638,15 +697,15 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               <h4>Company</h4>
               <ul>
                 <li><a href="#">About</a></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Privacy</a></li>
-                <li><a href="#">Terms</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/privacy">Privacy</a></li>
+                <li><a href="/terms">Terms</a></li>
               </ul>
             </div>
           </div>
           <div className="footer-bottom">
-            <span>&copy; 2025 Rekkrd. All rights reserved.</span>
-            <span>Made with &hearts; for vinyl lovers</span>
+            <span>{content.footer.copyright}</span>
+            <span>{content.footer.tagline}</span>
           </div>
         </div>
       </footer>

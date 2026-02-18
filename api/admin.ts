@@ -219,6 +219,55 @@ async function handleSendEmail(req: VercelRequest, res: VercelResponse) {
   });
 }
 
+// ── CMS Content ───────────────────────────────────────────────────
+const VALID_CMS_PAGES = ['landing', 'privacy', 'terms'];
+
+async function handleCmsContent(req: VercelRequest, res: VercelResponse) {
+  const supabase = getSupabaseAdmin();
+
+  switch (req.method) {
+    case 'GET': {
+      const page = req.query.page as string;
+      if (!page) return res.status(400).json({ error: 'page query param required' });
+      if (!VALID_CMS_PAGES.includes(page)) {
+        return res.status(400).json({ error: 'Invalid page' });
+      }
+
+      const { data, error } = await supabase
+        .from('cms_content')
+        .select('*')
+        .eq('page', page)
+        .order('section');
+      if (error) throw error;
+      return res.status(200).json(data || []);
+    }
+
+    case 'PUT': {
+      const { page, section, content } = req.body;
+      if (!page || !section || content === undefined) {
+        return res.status(400).json({ error: 'page, section, and content are required' });
+      }
+      if (!VALID_CMS_PAGES.includes(page)) {
+        return res.status(400).json({ error: 'Invalid page' });
+      }
+
+      const { data, error } = await supabase
+        .from('cms_content')
+        .upsert(
+          { page, section, content, updated_at: new Date().toISOString() },
+          { onConflict: 'page,section' }
+        )
+        .select()
+        .single();
+      if (error) throw error;
+      return res.status(200).json(data);
+    }
+
+    default:
+      return res.status(405).json({ error: 'Method not allowed' });
+  }
+}
+
 // ── Router ─────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cors(req, res, 'GET, POST, PUT, DELETE')) return;
@@ -238,6 +287,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return await handleEmailTemplates(req, res);
       case 'send-email':
         return await handleSendEmail(req, res);
+      case 'cms-content':
+        return await handleCmsContent(req, res);
       default:
         return res.status(400).json({ error: `Unknown action: ${action}` });
     }

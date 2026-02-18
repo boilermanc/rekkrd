@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekkrd - Your Vinyl Collection, Reimagined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;
+  --text:#f0f0f5;--text2:#a0a0b8;--text3:#6a6a80;
+  --orange:#ff6b35;--magenta:#e040fb;--cyan:#00e5ff;--lime:#b2ff59;
+  --gold:#ffd740;--coral:#ff6b6b;
+  --grad-hero:linear-gradient(135deg,#ff6b35 0%,#e040fb 50%,#00e5ff 100%);
+  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --shadow:0 8px 32px rgba(0,0,0,.4);
+  --nav-h:72px;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;line-height:1.2}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{cursor:pointer;border:none;font-family:inherit}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.grad-text{background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06);height:var(--nav-h);display:flex;align-items:center}
+.nav .container{display:flex;align-items:center;justify-content:space-between;width:100%}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
+.nav-logo span{background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:.875rem;font-weight:500;color:var(--text2);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--grad-hero);color:#fff;padding:10px 24px;border-radius:50px;font-size:.875rem;font-weight:600;transition:transform .2s,box-shadow .2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,107,53,.3)}
+.nav-mobile{display:none;background:none;color:var(--text);font-size:1.5rem;padding:8px}
+
+/* Hero */
+.hero{padding:calc(var(--nav-h) + 80px) 0 80px;position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center}
+.hero::before{content:'';position:absolute;top:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(255,107,53,.15),transparent 70%);animation:float 8s ease-in-out infinite;pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(0,229,255,.12),transparent 70%);animation:float 10s ease-in-out infinite reverse;pointer-events:none}
+.hero .container{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:50px;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);font-size:.8rem;font-weight:600;color:var(--orange);margin-bottom:24px;letter-spacing:.03em;text-transform:uppercase}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s ease-in-out infinite}
+.hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:700;margin-bottom:20px;letter-spacing:-.03em}
+.hero p{font-size:1.15rem;color:var(--text2);max-width:480px;margin-bottom:36px}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap}
+.btn-primary{background:var(--grad-hero);color:#fff;padding:14px 32px;border-radius:50px;font-size:1rem;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:transform .2s,box-shadow .2s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,107,53,.3)}
+.btn-secondary{background:rgba(255,255,255,.06);color:var(--text);padding:14px 32px;border-radius:50px;font-size:1rem;font-weight:600;border:1px solid rgba(255,255,255,.1);transition:all .2s}
+.btn-secondary:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.hero-video{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--bg2);border:1px solid rgba(255,255,255,.08);aspect-ratio:16/9;box-shadow:var(--shadow),0 0 80px rgba(224,64,251,.08)}
+.hero-video::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(255,107,53,.3),rgba(224,64,251,.3),rgba(0,229,255,.3));z-index:0;opacity:.5}
+.hero-video-inner{position:absolute;inset:2px;border-radius:calc(var(--radius) - 2px);background:var(--bg2);display:flex;align-items:center;justify-content:center;z-index:1;overflow:hidden}
+.video-placeholder{text-align:center;color:var(--text3)}
+.play-btn{width:72px;height:72px;border-radius:50%;background:var(--grad-hero);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.play-btn:hover{transform:scale(1.08);box-shadow:0 0 40px rgba(255,107,53,.4)}
+.play-btn svg{width:28px;height:28px;fill:#fff;margin-left:4px}
+.video-placeholder span{font-size:.85rem;font-weight:500}
+
+/* Proof Bar */
+.proof-bar{padding:48px 0;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);background:var(--bg2)}
+.proof-bar .container{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center}
+.proof-stat .num{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;margin-bottom:4px}
+.proof-stat .num.c1{color:var(--orange)}.proof-stat .num.c2{color:var(--magenta)}.proof-stat .num.c3{color:var(--cyan)}.proof-stat .num.c4{color:var(--lime)}
+.proof-stat .label{font-size:.85rem;color:var(--text3);font-weight:500}
+
+/* Sections */
+.section{padding:100px 0}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);margin-bottom:16px}
+.section-label::before{content:'';width:20px;height:2px;background:var(--cyan);border-radius:2px}
+.section-title{font-size:clamp(2rem,3.5vw,2.75rem);font-weight:700;margin-bottom:16px;letter-spacing:-.02em}
+.section-sub{font-size:1.05rem;color:var(--text2);max-width:560px}
+.section-header{text-align:center;margin-bottom:64px}
+.section-header .section-sub{margin:0 auto}
+
+/* Features */
+.features{background:var(--bg)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feature-card{padding:36px 28px;border-radius:var(--radius);background:var(--bg2);border:1px solid rgba(255,255,255,.05);transition:all .3s;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-hero);opacity:0;transition:opacity .3s}
+.feature-card:hover{border-color:rgba(255,255,255,.1);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:20px}
+.feature-icon.orange{background:rgba(255,107,53,.12)}.feature-icon.magenta{background:rgba(224,64,251,.12)}.feature-icon.cyan{background:rgba(0,229,255,.12)}.feature-icon.lime{background:rgba(178,255,89,.12)}.feature-icon.gold{background:rgba(255,215,64,.12)}.feature-icon.coral{background:rgba(255,107,107,.12)}
+.feature-card h3{font-size:1.15rem;font-weight:600;margin-bottom:10px}
+.feature-card p{font-size:.9rem;color:var(--text2);line-height:1.65}
+
+/* How It Works */
+.how-it-works{background:var(--bg2)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;position:relative}
+.steps::before{content:'';position:absolute;top:40px;left:calc(16.67% + 20px);right:calc(16.67% + 20px);height:2px;background:linear-gradient(90deg,var(--orange),var(--magenta),var(--cyan));opacity:.3}
+.step{text-align:center;position:relative}
+.step-num{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;margin:0 auto 24px;position:relative;z-index:1}
+.step:nth-child(1) .step-num{background:rgba(255,107,53,.12);color:var(--orange);border:2px solid rgba(255,107,53,.2)}
+.step:nth-child(2) .step-num{background:rgba(224,64,251,.12);color:var(--magenta);border:2px solid rgba(224,64,251,.2)}
+.step:nth-child(3) .step-num{background:rgba(0,229,255,.12);color:var(--cyan);border:2px solid rgba(0,229,255,.2)}
+.step h3{font-size:1.2rem;font-weight:600;margin-bottom:10px}
+.step p{font-size:.9rem;color:var(--text2);max-width:300px;margin:0 auto;line-height:1.65}
+
+/* Showcase */
+.showcase{background:var(--bg);overflow:hidden}
+.showcase .container{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.showcase-text .section-label::before{background:var(--magenta)}
+.showcase-text .section-label{color:var(--magenta)}
+.showcase-list{list-style:none;margin-top:28px;display:flex;flex-direction:column;gap:16px}
+.showcase-list li{display:flex;gap:14px;align-items:flex-start}
+.showcase-list .check{width:24px;height:24px;border-radius:50%;background:rgba(178,255,89,.1);color:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.8rem;margin-top:2px}
+.showcase-list .check svg{width:14px;height:14px;stroke:var(--lime);fill:none;stroke-width:3}
+.showcase-list span{font-size:.95rem;color:var(--text2)}
+.showcase-visual{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.mock-card{border-radius:var(--radius-sm);background:var(--bg2);border:1px solid rgba(255,255,255,.06);overflow:hidden;transition:transform .3s}
+.mock-card:hover{transform:scale(1.03)}
+.mock-card-art{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.mock-card-info{padding:14px}
+.mock-card-info h4{font-size:.85rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mock-card-info p{font-size:.75rem;color:var(--text3)}
+.mock-card-info .price{font-size:.75rem;color:var(--lime);font-weight:600;margin-top:6px}
+.mock-card:nth-child(2){margin-top:32px}
+.mock-card:nth-child(3){margin-top:-32px}
+
+/* Playlist */
+.playlist-section{background:var(--bg2);position:relative}
+.playlist-section .container{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.playlist-visual{order:1}
+.playlist-demo{background:var(--bg);border-radius:var(--radius);padding:32px;border:1px solid rgba(255,255,255,.06)}
+.playlist-demo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.playlist-demo-header h4{font-size:1rem;font-weight:600}
+.mood-badge{padding:6px 14px;border-radius:50px;background:rgba(224,64,251,.1);color:var(--magenta);font-size:.75rem;font-weight:600}
+.mood-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.mood-chip{padding:6px 14px;border-radius:50px;font-size:.75rem;font-weight:500;border:1px solid rgba(255,255,255,.08);color:var(--text2);transition:all .2s;cursor:pointer}
+.mood-chip:hover,.mood-chip.active{border-color:var(--magenta);color:var(--magenta);background:rgba(224,64,251,.06)}
+.playlist-tracks{display:flex;flex-direction:column;gap:10px}
+.playlist-track{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:var(--radius-xs);background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);transition:background .2s}
+.playlist-track:hover{background:rgba(255,255,255,.04)}
+.playlist-track .num{font-size:.75rem;color:var(--text3);width:20px;font-weight:600}
+.playlist-track .art{width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.playlist-track .art.a1{background:rgba(255,107,53,.12)}.playlist-track .art.a2{background:rgba(0,229,255,.12)}.playlist-track .art.a3{background:rgba(224,64,251,.12)}.playlist-track .art.a4{background:rgba(178,255,89,.12)}
+.playlist-track .info h5{font-size:.85rem;font-weight:600;margin-bottom:1px}.playlist-track .info p{font-size:.75rem;color:var(--text3)}
+.playlist-track .dur{font-size:.75rem;color:var(--text3);margin-left:auto}
+.playlist-text{order:2}
+.playlist-text .section-label::before{background:var(--orange)}
+.playlist-text .section-label{color:var(--orange)}
+
+/* Stats */
+.stats-band{padding:64px 0;background:linear-gradient(135deg,rgba(255,107,53,.06),rgba(224,64,251,.06),rgba(0,229,255,.06));border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
+.stats-band .container{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;text-align:center}
+.stat-item h3{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;margin-bottom:4px}
+.stat-item p{font-size:.9rem;color:var(--text2)}
+
+/* Testimonial */
+.testimonial{background:var(--bg);text-align:center;padding:100px 0}
+.testimonial blockquote{font-size:clamp(1.25rem,2.5vw,1.75rem);font-style:italic;color:var(--text);max-width:700px;margin:0 auto 32px;line-height:1.5}
+.testimonial cite{font-style:normal;color:var(--text2);font-size:.95rem;display:block}
+.testimonial cite strong{color:var(--text);display:block;margin-bottom:2px}
+.quote-mark{font-size:4rem;line-height:1;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;display:block}
+
+/* Pricing */
+.pricing{background:var(--bg2)}
+.pricing-toggle{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:56px}
+.pricing-toggle span{font-size:.9rem;font-weight:500;color:var(--text3);transition:color .2s}
+.pricing-toggle span.active{color:var(--text)}
+.toggle-switch{width:56px;height:30px;border-radius:50px;background:rgba(255,255,255,.1);position:relative;cursor:pointer;transition:background .2s}
+.toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--orange);transition:transform .3s}
+.toggle-switch.annual::after{transform:translateX(26px)}
+.toggle-switch.annual{background:rgba(255,107,53,.2)}
+.save-badge{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:50px;background:rgba(178,255,89,.12);color:var(--lime);vertical-align:middle}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:start}
+.price-card{padding:40px 32px;border-radius:var(--radius);background:var(--bg);border:1px solid rgba(255,255,255,.06);position:relative;transition:all .3s}
+.price-card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-4px);box-shadow:var(--shadow)}
+.price-card.featured{border-color:rgba(224,64,251,.3);background:linear-gradient(180deg,rgba(224,64,251,.04),var(--bg))}
+.price-card.featured::before{content:'Most Popular';position:absolute;top:-14px;left:50%;transform:translateX(-50%);padding:6px 20px;border-radius:50px;background:var(--grad-hero);font-size:.75rem;font-weight:700;color:#fff;white-space:nowrap}
+.price-card .tier{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.price-card:nth-child(1) .tier{color:var(--cyan)}
+.price-card:nth-child(2) .tier{color:var(--magenta)}
+.price-card:nth-child(3) .tier{color:var(--orange)}
+.price-card h3{font-size:1.5rem;font-weight:700;margin-bottom:16px}
+.price-amount{margin-bottom:28px}
+.price-amount .currency{font-size:1.25rem;font-weight:600;vertical-align:top;line-height:1.8}
+.price-amount .dollars{font-family:'Space Grotesk',sans-serif;font-size:3.5rem;font-weight:700;letter-spacing:-.03em}
+.price-amount .period{font-size:.9rem;color:var(--text3);font-weight:500}
+.price-amount .annual-note{display:block;font-size:.8rem;color:var(--text3);margin-top:4px}
+.price-features{list-style:none;margin-bottom:32px;display:flex;flex-direction:column;gap:12px}
+.price-features li{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text2)}
+.price-features li svg{width:18px;height:18px;flex-shrink:0}
+.price-features li svg.check{stroke:var(--lime);fill:none;stroke-width:2.5}
+.price-features li svg.x{stroke:var(--text3);fill:none;stroke-width:2.5;opacity:.5}
+.price-features li.disabled{color:var(--text3);opacity:.5}
+.price-btn{display:block;width:100%;padding:14px;border-radius:50px;font-size:.95rem;font-weight:600;text-align:center;transition:all .2s}
+.price-btn.primary{background:var(--grad-hero);color:#fff}
+.price-btn.primary:hover{box-shadow:0 6px 24px rgba(255,107,53,.3);transform:translateY(-1px)}
+.price-btn.outline{background:none;border:1px solid rgba(255,255,255,.12);color:var(--text)}
+.price-btn.outline:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.04)}
+
+/* FAQ */
+.faq{background:var(--bg)}
+.faq-list{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{border-radius:var(--radius-sm);background:var(--bg2);border:1px solid rgba(255,255,255,.05);overflow:hidden}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;cursor:pointer;font-weight:600;font-size:.95rem;transition:color .2s;gap:16px;width:100%;background:none;color:var(--text);text-align:left}
+.faq-q:hover{color:var(--cyan)}
+.faq-q .icon{width:24px;height:24px;flex-shrink:0;transition:transform .3s;color:var(--text3)}
+.faq-item.open .faq-q .icon{transform:rotate(45deg);color:var(--cyan)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-item.open .faq-a{max-height:300px}
+.faq-a-inner{padding:0 24px 20px;font-size:.9rem;color:var(--text2);line-height:1.7}
+
+/* CTA */
+.final-cta{padding:120px 0;text-align:center;position:relative;overflow:hidden}
+.final-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(224,64,251,.08),transparent 70%);pointer-events:none}
+.final-cta .container{position:relative;z-index:1}
+.final-cta h2{font-size:clamp(2rem,4vw,3rem);font-weight:700;margin-bottom:20px;letter-spacing:-.02em}
+.final-cta p{font-size:1.1rem;color:var(--text2);max-width:480px;margin:0 auto 40px}
+.final-cta-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+/* Footer */
+.footer{padding:64px 0 32px;border-top:1px solid rgba(255,255,255,.04);background:var(--bg2)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand p{font-size:.85rem;color:var(--text3);margin-top:12px;max-width:280px;line-height:1.6}
+.footer-col h4{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:16px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{font-size:.875rem;color:var(--text3);transition:color .2s}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid rgba(255,255,255,.04);font-size:.8rem;color:var(--text3)}
+
+/* Animations */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* Responsive */
+@media(max-width:1024px){
+  .hero .container{grid-template-columns:1fr;text-align:center;gap:48px}
+  .hero p{margin:0 auto 36px}
+  .hero-actions{justify-content:center}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .showcase .container,.playlist-section .container{grid-template-columns:1fr;gap:48px}
+  .playlist-visual{order:2}.playlist-text{order:1}
+  .pricing-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}
+  .price-card.featured{order:-1}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}.nav-mobile{display:block}
+  .proof-bar .container{grid-template-columns:repeat(2,1fr)}
+  .features-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:48px}.steps::before{display:none}
+  .stats-band .container{grid-template-columns:1fr;gap:24px}
+  .showcase-visual{grid-template-columns:repeat(2,1fr)}
+  .mock-card:nth-child(2){margin-top:0}.mock-card:nth-child(3){margin-top:0}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .section{padding:72px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" aria-label="Main navigation">
+  <div class="container">
+    <a href="#" class="nav-logo"><span>Rekkrd</span></a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#playlist">Playlists</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#cta" class="nav-cta">Get Started Free</a>
+    </div>
+    <button class="nav-mobile" aria-label="Open menu">&#9776;</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge"><span class="dot"></span> AI-Powered Vinyl Management</div>
+      <h1>Your Vinyl Collection,<br><span class="grad-text">Reimagined.</span></h1>
+      <p>Scan, catalog, and rediscover your record collection with AI. Get instant identification, valuations, tracklists, and curated playlists from what you already own.</p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">Start Collecting Free <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <a href="#features" class="btn-secondary">See Features</a>
+      </div>
+    </div>
+    <div class="hero-video" role="img" aria-label="Product demo video">
+      <div class="hero-video-inner">
+        <div class="video-placeholder">
+          <div class="play-btn" role="button" aria-label="Play demo video" tabindex="0">
+            <svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+          </div>
+          <span>Watch the 60-second demo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Social Proof -->
+<section class="proof-bar" aria-label="Platform statistics">
+  <div class="container">
+    <div class="proof-stat"><div class="num c1">10K+</div><div class="label">Records Cataloged</div></div>
+    <div class="proof-stat"><div class="num c2">98%</div><div class="label">Scan Accuracy</div></div>
+    <div class="proof-stat"><div class="num c3">2.5K+</div><div class="label">Playlists Created</div></div>
+    <div class="proof-stat"><div class="num c4">4.9&#9733;</div><div class="label">User Rating</div></div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section features" id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Features</div>
+      <h2 class="section-title">Everything Your Crate Deserves</h2>
+      <p class="section-sub">From AI scanning to playlist curation, Rekkrd is the most complete vinyl companion ever built.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon orange">&#128247;</div>
+        <h3>AI Camera Scan</h3>
+        <p>Point, snap, done. Our Gemini-powered AI identifies artist and album from cover art instantly. Upload a photo or use your camera.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon magenta">&#9889;</div>
+        <h3>Auto Enrichment</h3>
+        <p>Every album gets filled in automatically: tracklist, genre, year, cover art, market pricing, AI description, and streaming links.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon cyan">&#128176;</div>
+        <h3>Collection Valuation</h3>
+        <p>See low, median, and high market prices pulled from Discogs. Know what your crate is worth at a glance with portfolio stats.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon lime">&#127925;</div>
+        <h3>Playlist Studio</h3>
+        <p>Type a mood. Get a curated playlist from your own collection. Choose albums, sides, or individual songs. Print to PDF.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon gold">&#128270;</div>
+        <h3>Smart Search &amp; Filter</h3>
+        <p>Real-time search across title, artist, and genre. Sort by year, value, or date added. Filter by decade, condition, or favorites.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon coral">&#127926;</div>
+        <h3>Lyrics &amp; Liner Notes</h3>
+        <p>Look up lyrics for any track in your collection. Add personal notes, tags, and condition grades to every album.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="section how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Three Steps to a Smarter Crate</h2>
+      <p class="section-sub">From physical vinyl to digital library in seconds.</p>
+    </div>
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-num">1</div>
+        <h3>Scan or Add</h3>
+        <p>Point your camera at any record cover. AI identifies it instantly, or search and add manually.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">2</div>
+        <h3>Enrich Automatically</h3>
+        <p>Tracklist, genre, cover art, market price, and an AI description all populate in seconds.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">3</div>
+        <h3>Explore &amp; Play</h3>
+        <p>Browse your collection, generate mood playlists, track value, and discover your vinyl from a new angle.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Collection Showcase -->
+<section class="section showcase" id="collection">
+  <div class="container">
+    <div class="showcase-text">
+      <div class="section-label">Your Collection</div>
+      <h2 class="section-title">A Crate That<br><span class="grad-text">Knows Itself</span></h2>
+      <p class="section-sub">Every album in your collection is alive with data, art, and context.</p>
+      <ul class="showcase-list">
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>High-res cover art from iTunes and MusicBrainz</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Live market valuations from Discogs</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Full tracklists with per-track lyrics</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>AI-written poetic album descriptions</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Duplicate detection and smart categorization</span></li>
+      </ul>
+    </div>
+    <div class="showcase-visual" aria-hidden="true">
+      <div class="mock-card">
+        <div class="mock-card-art" style="background:linear-gradient(135deg,#1a0a2e,#ff6b35)">&#127926;</div>
+        <div class="mock-card-info"><h4>Kind of Blue</h4><p>Miles Davis &#8226; 1959</p><p class="price">$38.50</p></div>
+      </div>
+      <div class="mock-card">
+        <div class="mock-card-art" style="background:linear-gradient(135deg,#0a1628,#00e5ff)">&#127911;</div>
+        <div class="mock-card-info"><h4>OK Computer</h4><p>Radiohead &#8226; 1997</p><p class="price">$29.00</p></div>
+      </div>
+      <div class="mock-card">
+        <div class="mock-card-art" style="background:linear-gradient(135deg,#1a0628,#e040fb)">&#127932;</div>
+        <div class="mock-card-info"><h4>Purple Rain</h4><p>Prince &#8226; 1984</p><p class="price">$22.75</p></div>
+      </div>
+      <div class="mock-card">
+        <div class="mock-card-art" style="background:linear-gradient(135deg,#0a1a0a,#b2ff59)">&#127928;</div>
+        <div class="mock-card-info"><h4>Rumours</h4><p>Fleetwood Mac &#8226; 1977</p><p class="price">$41.00</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Playlist Studio -->
+<section class="section playlist-section" id="playlist">
+  <div class="container">
+    <div class="playlist-visual">
+      <div class="playlist-demo">
+        <div class="playlist-demo-header">
+          <h4>&#127925; Playlist Studio</h4>
+          <span class="mood-badge">Late Night Jazz</span>
+        </div>
+        <div class="mood-chips">
+          <span class="mood-chip active">Late Night Jazz</span>
+          <span class="mood-chip">Sunday Morning</span>
+          <span class="mood-chip">Road Trip Energy</span>
+          <span class="mood-chip">Rainy Day Vinyl</span>
+        </div>
+        <div class="playlist-tracks">
+          <div class="playlist-track">
+            <span class="num">01</span>
+            <div class="art a1">&#127927;</div>
+            <div class="info"><h5>So What</h5><p>Miles Davis &#8226; Kind of Blue</p></div>
+            <span class="dur">9:22</span>
+          </div>
+          <div class="playlist-track">
+            <span class="num">02</span>
+            <div class="art a2">&#127911;</div>
+            <div class="info"><h5>Take Five</h5><p>Dave Brubeck &#8226; Time Out</p></div>
+            <span class="dur">5:24</span>
+          </div>
+          <div class="playlist-track">
+            <span class="num">03</span>
+            <div class="art a3">&#127930;</div>
+            <div class="info"><h5>Round Midnight</h5><p>Thelonious Monk &#8226; Genius of Modern Music</p></div>
+            <span class="dur">5:47</span>
+          </div>
+          <div class="playlist-track">
+            <span class="num">04</span>
+            <div class="art a4">&#127929;</div>
+            <div class="info"><h5>A Love Supreme Pt. I</h5><p>John Coltrane &#8226; A Love Supreme</p></div>
+            <span class="dur">7:43</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="playlist-text">
+      <div class="section-label">Playlist Studio</div>
+      <h2 class="section-title">Spin a Mood,<br><span class="grad-text">Not Just a Record</span></h2>
+      <p class="section-sub">Tell Rekkrd a vibe and it builds a curated playlist from your actual collection. No streaming services, no algorithms from strangers.</p>
+      <ul class="showcase-list" style="margin-top:28px">
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Albums, sides, or individual songs</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Player and manifest views</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Print-ready PDF playlist cards</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>Only picks albums that match from your crate</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Band -->
+<section class="stats-band" aria-label="Key metrics">
+  <div class="container">
+    <div class="stat-item"><h3 class="grad-text">6 Sources</h3><p>Enrichment from iTunes, MusicBrainz, Discogs, Gemini AI, and more</p></div>
+    <div class="stat-item"><h3 class="grad-text">&lt;3s</h3><p>Average time from scan to fully enriched album entry</p></div>
+    <div class="stat-item"><h3 class="grad-text">100%</h3><p>Your data. Your collection. No ads, no tracking, no lock-in.</p></div>
+  </div>
+</section>
+
+<!-- Testimonial -->
+<section class="testimonial">
+  <div class="container">
+    <span class="quote-mark">&ldquo;</span>
+    <blockquote>I scanned my entire crate in an afternoon. The playlist feature alone is worth it &mdash; it actually knows my collection better than I do.</blockquote>
+    <cite><strong>Jordan M.</strong>Vinyl collector &#8226; 340 records</cite>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="section pricing" id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Pick Your Groove</h2>
+      <p class="section-sub">Start free. Upgrade when your collection demands it.</p>
+    </div>
+    <div class="pricing-toggle">
+      <span class="active" id="label-monthly">Monthly</span>
+      <div class="toggle-switch" id="billing-toggle" role="switch" aria-checked="false" aria-label="Toggle annual billing" tabindex="0"></div>
+      <span id="label-annual">Annual <span class="save-badge">Save 18%</span></span>
+    </div>
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="price-card">
+        <div class="tier">Collector</div>
+        <h3>Free</h3>
+        <div class="price-amount"><span class="dollars">$0</span><span class="period">/forever</span></div>
+        <ul class="price-features">
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 100 albums</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>10 AI scans per month</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Grid &amp; list views</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Search, sort &amp; filter</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Personal notes &amp; tags</li>
+          <li class="disabled"><svg class="x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>AI playlists</li>
+          <li class="disabled"><svg class="x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Lyrics lookup</li>
+        </ul>
+        <a href="#cta" class="price-btn outline">Get Started</a>
+      </div>
+      <!-- Curator -->
+      <div class="price-card featured">
+        <div class="tier">Curator</div>
+        <h3>Premium</h3>
+        <div class="price-amount">
+          <span class="currency">$</span><span class="dollars price-value" data-monthly="4.99" data-annual="49">4.99</span>
+          <span class="period price-period">/month</span>
+          <span class="annual-note price-annual-note" style="display:none">Billed annually</span>
+        </div>
+        <ul class="price-features">
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited albums</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited AI scans</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>AI playlist generation</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Lyrics for all tracks</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Multi-source cover art</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Pricing &amp; condition grading</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Export collection data</li>
+        </ul>
+        <a href="#cta" class="price-btn primary">Start Free Trial</a>
+      </div>
+      <!-- Archivist -->
+      <div class="price-card">
+        <div class="tier">Archivist</div>
+        <h3>Pro</h3>
+        <div class="price-amount">
+          <span class="currency">$</span><span class="dollars price-value" data-monthly="9.99" data-annual="99">9.99</span>
+          <span class="period price-period">/month</span>
+          <span class="annual-note price-annual-note" style="display:none">Billed annually</span>
+        </div>
+        <ul class="price-features">
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Curator</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Bulk import &amp; export</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>API access</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Advanced analytics</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>PDF collection catalogs</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Early beta access</li>
+          <li><svg class="check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+        </ul>
+        <a href="#cta" class="price-btn outline">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section faq" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Got Questions?</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">How does the AI scan work?<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-a"><div class="faq-a-inner">Point your phone camera at any vinyl record cover and snap a photo. Our Google Gemini-powered AI analyzes the image, identifies the artist and album, then pulls in tracklist, genre, cover art, pricing data, and more automatically. It works with most commercially released records and typically takes under 3 seconds.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Where does pricing data come from?<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-a"><div class="faq-a-inner">Market valuations (low, median, and high) are sourced from Discogs, the world's largest music database and marketplace. This gives you real-world pricing based on actual recent sales, not guesswork.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">How do AI playlists work?<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-a"><div class="faq-a-inner">Type a mood or vibe like "Late Night Jazz" or "Sunday Morning Chill." The AI analyzes your actual collection and picks albums, sides, or individual songs that match. No hallucinated recommendations &mdash; every pick is something you own. You can browse in a player view, see a full manifest, or print it as a PDF playlist card.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Can I try it before paying?<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-a"><div class="faq-a-inner">Absolutely. The free Collector tier gives you up to 100 albums and 10 AI scans per month with no time limit. It's a real, functional experience &mdash; not a trial. Upgrade to Curator when you're ready for unlimited everything.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Is my data private?<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-a"><div class="faq-a-inner">Your collection data is stored securely in Supabase (Postgres). We don't sell your data, serve ads, or track your listening habits. Your notes, tags, and collection details belong to you.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">What if a scan doesn't recognize my record?<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-a"><div class="faq-a-inner">If the AI can't identify a cover, you can always search and add the album manually. Rekkrd pulls from iTunes and MusicBrainz databases with millions of releases, so manual search covers virtually everything. You can also enter completely custom albums.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta" id="cta">
+  <div class="container">
+    <h2>Ready to <span class="grad-text">Rekkrd</span> Your Collection?</h2>
+    <p>Join thousands of collectors who've digitized, valued, and rediscovered their vinyl with AI.</p>
+    <div class="final-cta-actions">
+      <a href="#" class="btn-primary">Start Free &mdash; No Card Required <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="#pricing" class="btn-secondary">View Pricing</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo"><span>Rekkrd</span></a>
+        <p>The AI-powered vinyl collection manager for serious crate diggers and casual collectors alike.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul><li><a href="#features">Features</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#playlist">Playlists</a></li><li><a href="#">Changelog</a></li></ul>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul><li><a href="#">Documentation</a></li><li><a href="#faq">FAQ</a></li><li><a href="#">API Reference</a></li><li><a href="#">Status</a></li></ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 Rekkrd. All rights reserved.</span>
+      <span>Made with &#10084;&#65039; for vinyl lovers</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Pricing toggle
+const toggle=document.getElementById('billing-toggle'),labelM=document.getElementById('label-monthly'),labelA=document.getElementById('label-annual');
+let isAnnual=false;
+function updatePricing(){
+  toggle.classList.toggle('annual',isAnnual);
+  toggle.setAttribute('aria-checked',String(isAnnual));
+  labelM.classList.toggle('active',!isAnnual);
+  labelA.classList.toggle('active',isAnnual);
+  document.querySelectorAll('.price-value').forEach(el=>{
+    el.textContent=isAnnual?el.dataset.annual:el.dataset.monthly;
+  });
+  document.querySelectorAll('.price-period').forEach(el=>{
+    el.textContent=isAnnual?'/year':'/month';
+  });
+  document.querySelectorAll('.price-annual-note').forEach(el=>{
+    el.style.display=isAnnual?'block':'none';
+  });
+}
+toggle.addEventListener('click',()=>{isAnnual=!isAnnual;updatePricing()});
+toggle.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();isAnnual=!isAnnual;updatePricing()}
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.parentElement,wasOpen=item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i=>{
+      i.classList.remove('open');
+      i.querySelector('.faq-q').setAttribute('aria-expanded','false');
+    });
+    if(!wasOpen){item.classList.add('open');btn.setAttribute('aria-expanded','true')}
+  });
+});
+
+// Scroll fade-in
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
+},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+</script>
+
+</body>
+</html>

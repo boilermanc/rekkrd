@@ -20,6 +20,22 @@ function assertClient() {
   }
 }
 
+export async function getGearCount(): Promise<number> {
+  if (!supabase) return 0;
+  try {
+    const { count, error } = await supabase
+      .from('gear')
+      .select('*', { count: 'exact', head: true });
+    if (error) {
+      console.error('Error fetching gear count:', error);
+      return 0;
+    }
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 export async function getSubscription(userId: string): Promise<Subscription | null> {
   assertClient();
 
