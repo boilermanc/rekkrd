@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 
 interface FAQItem {
@@ -287,7 +288,25 @@ const SupportForm: React.FC = () => {
 
 const SupportPage: React.FC = () => {
   return (
-    <div className="max-w-6xl mx-auto space-y-16 pb-20 px-4">
+    <div className="min-h-screen bg-th-bg">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 bg-th-bg/90 backdrop-blur-xl border-b border-th-surface/[0.10] h-[72px] flex items-center">
+        <div className="max-w-6xl mx-auto w-full px-4 flex items-center">
+          <Link to="/" className="flex items-center gap-2.5 font-display text-xl font-bold text-th-text hover:opacity-80 transition-opacity">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="32" height="32">
+              <circle cx="12" cy="12" r="11" fill="#f0a882"/>
+              <circle cx="12" cy="12" r="9.5" fill="none" stroke="#d48a6a" strokeWidth="0.4" opacity="0.5"/>
+              <circle cx="12" cy="12" r="8" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.4"/>
+              <circle cx="12" cy="12" r="6.5" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.3"/>
+              <circle cx="12" cy="12" r="5.2" fill="#c45a30"/>
+              <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#f0a882">R</text>
+            </svg>
+            <span>Rekk<span className="text-[var(--peach-dark)]">r</span>d</span>
+          </Link>
+        </div>
+      </nav>
+
+      <div className="max-w-6xl mx-auto space-y-16 pb-20 px-4">
       {/* Hero */}
       <div className="text-center space-y-6 pt-8">
         <span className="inline-block font-label px-5 py-2 bg-[var(--peach)]/10 text-[var(--peach)] rounded-full text-xs font-bold uppercase tracking-widest">
@@ -359,6 +378,7 @@ const SupportPage: React.FC = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
