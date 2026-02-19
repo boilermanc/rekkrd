@@ -5,7 +5,7 @@ import { geminiService, ScanLimitError, UpgradeRequiredError } from '../services
 import { gearService } from '../services/gearService';
 import { useToast } from '../contexts/ToastContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
-import CameraModal from './CameraModal';
+import GearCaptureGuide from './GearCaptureGuide';
 import GearConfirmModal from './GearConfirmModal';
 import SpinningRecord from './SpinningRecord';
 
@@ -40,7 +40,7 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
   // Start flow when isOpen becomes true
   const effectiveStep = isOpen && flowStep === null ? 'camera' : flowStep;
 
-  const handleCapture = useCallback(async (base64: string) => {
+  const handleCaptureComplete = useCallback(async (images: { front: string; label?: string }) => {
     // Check scan limit before calling the API
     if (!canUse('scan')) {
       onUpgradeRequired?.('scan');
@@ -48,6 +48,9 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
       return;
     }
 
+    // TODO: Multi-image identification can be added later by sending images.label
+    // alongside images.front to the identify-gear API.
+    const base64 = images.front;
     setCapturedImage(base64);
     setFlowStep('identifying');
 
@@ -99,10 +102,11 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
 
   return (
     <>
-      {/* Camera step */}
+      {/* Guided capture step */}
       {effectiveStep === 'camera' && (
-        <CameraModal
-          onCapture={handleCapture}
+        <GearCaptureGuide
+          isOpen={true}
+          onComplete={handleCaptureComplete}
           onClose={resetFlow}
         />
       )}

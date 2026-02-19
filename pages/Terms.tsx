@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import './Terms.css';
 import { getPageContent } from '../services/contentService';
 import type { CmsLegalBody } from '../types/cms';
@@ -22,6 +23,10 @@ const Terms: React.FC = () => {
 
   return (
     <div className="terms-page">
+      <SEO
+        title="Terms of Service"
+        description="Terms and conditions for using the Rekkrd vinyl collection platform."
+      />
       <nav className="terms-nav">
         <div className="terms-container">
           <Link to="/" className="terms-logo">

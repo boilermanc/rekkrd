@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import './Blog.css';
 
 const NotFound: React.FC = () => {
-  useEffect(() => {
-    document.title = 'Not Found | Rekkrd';
-    return () => { document.title = 'Rekkrd'; };
-  }, []);
-
   return (
     <div className="blog-page">
+      <SEO
+        title="Not Found"
+        description="The page you're looking for doesn't exist or has been moved."
+      />
       {/* Nav */}
       <nav className="nav">
         <div className="container">

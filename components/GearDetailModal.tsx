@@ -275,6 +275,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
             <img
               src={imageUrl}
               alt={`${gear.brand} ${gear.model}`}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           ) : (

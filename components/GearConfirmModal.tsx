@@ -117,6 +117,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
             <img
               src={originalPhoto}
               alt={`Captured photo of ${brand} ${model}`}
+              loading="lazy"
               className="w-full max-w-xs h-auto max-h-48 object-contain rounded-xl border border-th-surface/[0.10]"
             />
           </div>

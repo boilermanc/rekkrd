@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
+import SEO from './SEO';
 
 interface FAQItem {
   category: string;
@@ -289,6 +290,10 @@ const SupportForm: React.FC = () => {
 const SupportPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-th-bg">
+      <SEO
+        title="Support"
+        description="Get help with Rekkrd. Browse FAQs or contact our support team."
+      />
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-th-bg/90 backdrop-blur-xl border-b border-th-surface/[0.10] h-[72px] flex items-center">
         <div className="max-w-6xl mx-auto w-full px-4 flex items-center">

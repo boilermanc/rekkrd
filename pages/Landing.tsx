@@ -5,6 +5,7 @@ import { supabase } from '../services/supabaseService';
 import { getPageContent } from '../services/contentService';
 import { LANDING_DEFAULTS } from '../constants/landingDefaults';
 import type { CmsLandingContent } from '../types/cms';
+import SEO from '../components/SEO';
 
 interface LandingProps {
   onEnterApp?: () => void;
@@ -71,6 +72,19 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   const { user, signOut } = useAuthContext();
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Latest blog post
+  interface LatestPost { id: string; title: string; slug: string; excerpt: string | null; featured_image: string | null; author: string; published_at: string; }
+  const [latestPost, setLatestPost] = useState<LatestPost | null>(null);
+  const [blogLoading, setBlogLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/blog?limit=1')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.posts?.[0]) setLatestPost(data.posts[0]); })
+      .catch(() => {})
+      .finally(() => setBlogLoading(false));
+  }, []);
 
   // CMS content with defaults
   const [content, setContent] = useState<CmsLandingContent>({ ...LANDING_DEFAULTS });
@@ -238,6 +252,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
 
   return (
     <div className="landing-page">
+      <SEO
+        title="Rekkrd — Your Vinyl Collection, Elevated"
+        description="Scan, catalog, and explore your vinyl record collection with AI-powered tools."
+      />
       <nav className="nav">
         <div className="container">
           <a href="#" className="nav-logo">
@@ -658,6 +676,39 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
         </div>
       </section>
 
+      {!blogLoading && latestPost && (
+        <section className="section latest-blog">
+          <div className="container">
+            <div className="section-header">
+              <div className="section-label">From the Crate</div>
+              <h2 className="section-title">Latest from the Blog</h2>
+            </div>
+            <a href={`/blog/${latestPost.slug}`} className="latest-blog-card">
+              {latestPost.featured_image && (
+                <img
+                  className="latest-blog-img"
+                  src={latestPost.featured_image.replace(/^=+/, '')}
+                  alt={`Hero image for ${latestPost.title}`}
+                  loading="lazy"
+                />
+              )}
+              <div className="latest-blog-body">
+                <h3>{latestPost.title}</h3>
+                {latestPost.excerpt && <p className="latest-blog-excerpt">{latestPost.excerpt}</p>}
+                <div className="latest-blog-meta">
+                  <span>{latestPost.author}</span>
+                  <span>{new Date(latestPost.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+                <span className="latest-blog-link">Read more →</span>
+              </div>
+            </a>
+            <div className="latest-blog-all">
+              <a href="/blog">View all posts →</a>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="final-cta" id="cta">
         <div className="container">
           <h2 dangerouslySetInnerHTML={{ __html: content.final_cta.heading }} />
@@ -692,15 +743,12 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
                 <li><a href="#features">Features</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#playlist">Playlists</a></li>
-                <li><a href="#">Changelog</a></li>
               </ul>
             </div>
             <div className="footer-col">
               <h4>Resources</h4>
               <ul>
-                <li><a href="#">Documentation</a></li>
                 <li><a href="#faq">FAQ</a></li>
-                <li><a href="#">API Reference</a></li>
                 <li><a href="#">Status</a></li>
                 <li><a href="/support">Support</a></li>
               </ul>
@@ -716,7 +764,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             </div>
           </div>
           <div className="footer-bottom">
-            <span>{brandify(content.footer.copyright)}</span>
+            <span>&copy; 2026 Rekk<span style={{ color: '#dd6e42' }}>r</span>d. All rights reserved.</span>
             <span>{content.footer.tagline}</span>
           </div>
         </div>

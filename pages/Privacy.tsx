@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import './Privacy.css';
 import { getPageContent } from '../services/contentService';
 import type { CmsLegalBody } from '../types/cms';
@@ -22,6 +23,10 @@ const Privacy: React.FC = () => {
 
   return (
     <div className="privacy-page">
+      <SEO
+        title="Privacy Policy"
+        description="How Rekkrd collects, uses, and protects your personal information."
+      />
       <nav className="privacy-nav">
         <div className="container">
           <Link to="/" className="nav-logo">

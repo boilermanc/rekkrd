@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Markdown from 'react-markdown';
+import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 import './Blog.css';
 
 interface BlogPostData {
@@ -13,6 +15,7 @@ interface BlogPostData {
   tags: string[];
   author: string;
   published_at: string;
+  updated_at?: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -33,10 +36,6 @@ const BlogPost: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => { document.title = 'Rekkrd'; };
-  }, []);
-
-  useEffect(() => {
     if (!slug) return;
     setLoading(true);
     setNotFound(false);
@@ -46,17 +45,13 @@ const BlogPost: React.FC = () => {
       .then(res => {
         if (res.status === 404) {
           setNotFound(true);
-          document.title = 'Not Found | Rekkrd';
           return null;
         }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
       .then((data: BlogPostData | null) => {
-        if (data) {
-          setPost(data);
-          document.title = `${data.title} | Rekkrd`;
-        }
+        if (data) setPost(data);
       })
       .catch(err => {
         setError(err.message || 'Failed to load post');
@@ -64,8 +59,35 @@ const BlogPost: React.FC = () => {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  const jsonLd = post ? {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    ...(post.excerpt && { description: post.excerpt }),
+    ...(post.featured_image && { image: post.featured_image.replace(/^=+/, '') }),
+    datePublished: post.published_at,
+    ...(post.updated_at && { dateModified: post.updated_at }),
+    author: { '@type': 'Person', name: post.author },
+    publisher: { '@type': 'Organization', name: 'Rekkrd' },
+  } : null;
+
   return (
     <div className="blog-page">
+      {post ? (
+        <SEO
+          title={post.title}
+          description={post.excerpt || `Read ${post.title} on the Rekkrd blog.`}
+          image={post.featured_image || undefined}
+          type="article"
+        />
+      ) : notFound ? (
+        <SEO title="Not Found" description="The post you're looking for doesn't exist." />
+      ) : null}
+      {jsonLd && (
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        </Helmet>
+      )}
       {/* Nav */}
       <nav className="nav">
         <div className="container">
@@ -109,6 +131,15 @@ const BlogPost: React.FC = () => {
           <article className="blog-post-detail">
             <Link to="/blog" className="blog-back-link">← Back to Blog</Link>
 
+            {post.featured_image && (
+              <img
+                className="blog-post-hero"
+                src={post.featured_image.replace(/^=+/, '')}
+                alt={`Hero image for ${post.title}`}
+                loading="lazy"
+              />
+            )}
+
             <header className="blog-post-header">
               <h1>{post.title}</h1>
               <div className="blog-post-meta">
@@ -126,14 +157,6 @@ const BlogPost: React.FC = () => {
                 </div>
               )}
             </header>
-
-            {post.featured_image && (
-              <img
-                className="blog-post-hero"
-                src={post.featured_image}
-                alt={post.title}
-              />
-            )}
 
             <div className="blog-post-body">
               <Markdown>{post.body}</Markdown>

@@ -162,7 +162,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                }
                if (!uploadingCover) setShowCoverPicker(true);
              }} className="relative group cursor-pointer z-10">
-               <img src={proxyImageUrl(displayCoverUrl)} alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'} className={`w-full h-auto max-h-[40vh] md:max-h-full object-contain rounded-md shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-opacity ${uploadingCover ? 'opacity-50' : ''}`} />
+               <img src={proxyImageUrl(displayCoverUrl)} alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'} loading="lazy" className={`w-full h-auto max-h-[40vh] md:max-h-full object-contain rounded-md shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-opacity ${uploadingCover ? 'opacity-50' : ''}`} />
                {uploadingCover ? (
                  <div className="absolute inset-0 bg-th-bg/60 rounded-md flex items-center justify-center">
                    <div className="flex flex-col items-center gap-3">

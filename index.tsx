@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -33,6 +34,7 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
+      <HelmetProvider>
       <BrowserRouter>
         <ThemeProvider>
           <ToastProvider>
@@ -58,6 +60,7 @@ root.render(
           </ToastProvider>
         </ThemeProvider>
       </BrowserRouter>
+      </HelmetProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

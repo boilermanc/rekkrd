@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 import './Blog.css';
 
 interface BlogPost {
@@ -42,10 +43,6 @@ const BlogList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = 'Blog | Rekkrd';
-    return () => { document.title = 'Rekkrd'; };
-  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -70,6 +67,10 @@ const BlogList: React.FC = () => {
 
   return (
     <div className="blog-page">
+      <SEO
+        title="Blog"
+        description="Tips, guides, and stories for vinyl collectors and audiophiles."
+      />
       {/* Nav */}
       <nav className="nav">
         <div className="container">
@@ -125,8 +126,8 @@ const BlogList: React.FC = () => {
                   {post.featured_image ? (
                     <img
                       className="blog-card-image"
-                      src={post.featured_image}
-                      alt={post.title}
+                      src={post.featured_image.replace(/^=+/, '')}
+                      alt={`Hero image for ${post.title}`}
                       loading="lazy"
                     />
                   ) : (

@@ -28,6 +28,8 @@ import identifyGearRouter from './routes/identifyGear.js';
 import findManualRouter from './routes/findManual.js';
 import setupGuideRouter from './routes/setupGuide.js';
 import supportRouter from './routes/support.js';
+import sitemapRouter from './routes/sitemap.js';
+import crawlerMeta from './middleware/crawlerMeta.js';
 
 // ── Boot diagnostics: verify all imports resolved ────────────────────
 console.log('[boot] All static imports loaded');
@@ -36,7 +38,7 @@ const _routerMap: Record<string, unknown> = {
   lyricsRouter, uploadCoverRouter, imageProxyRouter, subscriptionRouter,
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
-  findManualRouter, setupGuideRouter, supportRouter,
+  findManualRouter, setupGuideRouter, supportRouter, sitemapRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -124,6 +126,7 @@ mountRouter('identifyGearRouter', identifyGearRouter);
 mountRouter('findManualRouter', findManualRouter);
 mountRouter('setupGuideRouter', setupGuideRouter);
 mountRouter('supportRouter', supportRouter);
+mountRouter('sitemapRouter', sitemapRouter);
 console.log('[boot] All routes registered');
 
 // Ensure gear-photos storage bucket exists
@@ -151,6 +154,9 @@ async function ensureGearPhotosBucket() {
 ensureGearPhotosBucket().catch(err =>
   console.error('gear-photos bucket check failed:', err)
 );
+
+// Crawler/bot meta tag pre-rendering — before static files + SPA fallback
+app.use(crawlerMeta);
 
 // Serve static files from the Vite build output
 const distPath = path.join(__dirname, '..', 'dist');

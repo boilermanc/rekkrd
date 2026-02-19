@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import SEO from './SEO';
 
 type ErrorType = '404' | '500' | 'offline';
 
@@ -392,6 +393,7 @@ export default function ErrorPage({ type, onGoHome }: ErrorPageProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-th-bg px-4">
+      <SEO title={heading} description={description} />
       <div className="flex flex-col items-center text-center max-w-[600px] py-10 sm:py-0">
         {/* Illustration */}
         <Illustration />

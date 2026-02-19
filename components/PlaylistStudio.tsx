@@ -82,7 +82,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
         <div className="space-y-12">
           {playlist?.items.map((item, idx) => (
             <div key={idx} className="flex gap-8 md:gap-12 items-center break-inside-avoid">
-              <img src={proxyImageUrl(item.cover_url)} className="w-24 h-24 md:w-40 md:h-40 object-cover border-4 border-[#2d3a3e] shadow-[8px_8px_0_rgba(0,0,0,0.1)]" />
+              <img src={proxyImageUrl(item.cover_url)} loading="lazy" className="w-24 h-24 md:w-40 md:h-40 object-cover border-4 border-[#2d3a3e] shadow-[8px_8px_0_rgba(0,0,0,0.1)]" />
               <div>
                 <span className="text-sm md:text-lg font-black opacity-20 block mb-1">TRACK {idx + 1}</span>
                 <h3 className="text-2xl md:text-4xl font-bold leading-tight">
@@ -158,6 +158,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
                  <img
                   key={currentItem?.cover_url}
                   src={proxyImageUrl(currentItem?.cover_url)}
+                  loading="lazy"
                   className="w-full h-full object-cover rounded-md shadow-[0_0_80px_rgba(0,0,0,0.8)] relative z-10 transition-all duration-1000 transform hover:scale-105"
                 />
                 <div className="absolute -bottom-4 -right-4 z-20 bg-[#4f6d7a] text-th-text px-4 py-1.5 md:px-6 md:py-2 rounded-full font-label text-[9px] md:text-[10px] tracking-widest font-bold shadow-xl">
@@ -231,7 +232,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose }) => {
               {playlist.items.map((item, idx) => (
                 <div key={idx} className="group flex items-center gap-4 md:gap-6 p-3 md:p-4 rounded-2xl hover:bg-th-surface/[0.04] transition-all">
                   <span className="font-label text-th-text3/30 text-lg md:text-xl font-black w-8 md:w-12">{idx + 1}</span>
-                  <img src={proxyImageUrl(item.cover_url)} className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover shadow-lg flex-shrink-0" />
+                  <img src={proxyImageUrl(item.cover_url)} loading="lazy" className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover shadow-lg flex-shrink-0" />
                   <div className="min-w-0">
                     <h4 className="text-sm md:text-xl font-bold text-th-text group-hover:text-[#dd6e42] transition-colors truncate">
                       {focus === 'album' ? item.albumTitle : item.itemTitle}

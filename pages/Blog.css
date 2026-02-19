@@ -373,7 +373,7 @@
   width:100%;
   border-radius:var(--radius);
   object-fit:cover;
-  max-height:420px;
+  max-height:400px;
   margin-bottom:36px;
   background:var(--bg2);
 }

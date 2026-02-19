@@ -25,6 +25,7 @@ import UpgradeModal from './components/UpgradeModal';
 import SubscriptionBanner from './components/SubscriptionBanner';
 import PlanBadge from './components/PlanBadge';
 import ErrorPage from './components/ErrorPage';
+import SEO from './components/SEO';
 
 const PAGE_SIZE = 40;
 
@@ -436,6 +437,10 @@ const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${currentView !== 'landing' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
+      <SEO
+        title="My Collection"
+        description="Browse and manage your vinyl record collection."
+      />
       {!isSupabaseReady && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-red-600 text-white text-[10px] py-1 text-center font-bold tracking-widest uppercase">
           Missing Supabase Configuration - Data will not persist

@@ -160,7 +160,7 @@ const CollectionsPage: React.FC = () => {
                 <tr key={a.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
                   <td className="px-5 py-2">
                     {a.cover_url ? (
-                      <img src={a.cover_url} alt="" className="w-8 h-8 rounded object-cover" />
+                      <img src={a.cover_url} alt="" loading="lazy" className="w-8 h-8 rounded object-cover" />
                     ) : (
                       <div className="w-8 h-8 rounded flex items-center justify-center" style={{ backgroundColor: 'rgb(243,244,246)' }}>
                         <svg className="w-4 h-4" style={{ color: 'rgb(209,213,219)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
