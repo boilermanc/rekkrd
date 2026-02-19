@@ -7,6 +7,7 @@ import CollectionsPage from './pages/CollectionsPage';
 import EmailsPage from './pages/EmailsPage';
 import ContentPage from './pages/ContentPage';
 import BlogPage from './pages/BlogPage';
+import CardAnalytics from '../src/components/admin/CardAnalytics';
 
 const AdminRoutes: React.FC = () => (
   <Routes>
@@ -17,6 +18,7 @@ const AdminRoutes: React.FC = () => (
       <Route path="emails" element={<EmailsPage />} />
       <Route path="content" element={<ContentPage />} />
       <Route path="blog" element={<BlogPage />} />
+      <Route path="analytics" element={<CardAnalytics />} />
     </Route>
   </Routes>
 );

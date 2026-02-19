@@ -105,6 +105,29 @@ export interface BlogIdeaAdmin {
   updated_at: string;
 }
 
+export interface UtmRecentSignup {
+  created_at: string;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  subscription_tier: string | null;
+}
+
+export interface UtmDateCount {
+  date: string;
+  count: number;
+}
+
+export interface UtmStats {
+  total_signups: number;
+  by_source: Record<string, number>;
+  by_medium: Record<string, number>;
+  by_campaign: Record<string, number>;
+  by_tier: Record<string, number>;
+  recent_signups: UtmRecentSignup[];
+  by_date: UtmDateCount[];
+}
+
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export const adminService = {
@@ -244,6 +267,13 @@ export const adminService = {
     if (!resp.ok) throw new Error(`Failed to fetch blog ideas: ${resp.status}`);
     const data = await resp.json();
     return data.ideas;
+  },
+
+  async getUtmStats(): Promise<UtmStats> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/admin/utm-stats', { headers });
+    if (!resp.ok) throw new Error(`Failed to fetch UTM stats: ${resp.status}`);
+    return resp.json();
   },
 
   async submitBlogIdea(data: { idea: string; tags: string[] }): Promise<BlogIdeaAdmin> {
