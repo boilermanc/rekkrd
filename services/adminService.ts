@@ -286,4 +286,24 @@ export const adminService = {
     if (!resp.ok) throw new Error(`Failed to submit blog idea: ${resp.status}`);
     return resp.json();
   },
+
+  async fetchEmailTemplateHtml(templateId: string): Promise<string> {
+    const resp = await fetch(`/api/email/templates/${encodeURIComponent(templateId)}`);
+    if (!resp.ok) throw new Error(`Failed to fetch template: ${resp.status}`);
+    return resp.text();
+  },
+
+  async sendComposerTestEmail(payload: { templateId: string; variables: Record<string, string> }): Promise<{ success: boolean; html: string }> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/email/send-test', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Send test failed' }));
+      throw new Error(err.error || `Failed to send test: ${resp.status}`);
+    }
+    return resp.json();
+  },
 };

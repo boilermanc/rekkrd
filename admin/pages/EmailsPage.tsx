@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { adminService, EmailTemplate, SendEmailResult } from '../../services/adminService';
+import EmailComposer from '../../src/components/admin/EmailComposer';
 
-type Tab = 'templates' | 'send';
+type Tab = 'templates' | 'send' | 'compose';
 
 const EmailsPage: React.FC = () => {
   const [tab, setTab] = useState<Tab>('templates');
@@ -138,6 +139,14 @@ const EmailsPage: React.FC = () => {
       <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ backgroundColor: 'rgb(243,244,246)' }}>
         <button onClick={() => setTab('templates')} className={tabClasses('templates')}>Templates</button>
         <button onClick={() => setTab('send')} className={tabClasses('send')}>Send Test</button>
+        <button onClick={() => setTab('compose')} className={tabClasses('compose')}>
+          <span className="flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Compose
+          </span>
+        </button>
       </div>
 
       {tab === 'templates' && (
@@ -262,6 +271,8 @@ const EmailsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {tab === 'compose' && <EmailComposer />}
 
       {tab === 'send' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
