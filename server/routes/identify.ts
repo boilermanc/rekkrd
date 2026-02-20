@@ -8,6 +8,17 @@ import { getSubscription, incrementScanCount, PLAN_LIMITS } from '../lib/subscri
 
 const router = Router();
 
+const GEMINI_TIMEOUT_MS = 90_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
+    ),
+  ]);
+}
+
 router.post(
   '/api/identify',
   requireAuthWithUser,
@@ -50,7 +61,7 @@ router.post(
         return;
       }
 
-      const response = await ai.models.generateContent({
+      const response = await withTimeout(ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
           parts: [
@@ -69,7 +80,7 @@ router.post(
             required: ['artist', 'title']
           }
         }
-      });
+      }), GEMINI_TIMEOUT_MS);
 
       const data = JSON.parse(response.text || '{}');
       if (typeof data.artist !== 'string' || typeof data.title !== 'string') {
@@ -83,7 +94,12 @@ router.post(
       res.status(200).json({ artist: data.artist, title: data.title });
     } catch (error) {
       console.error('Gemini Identification Error:', error);
-      res.status(500).json({ error: 'Failed to identify album' });
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('timed out')) {
+        res.status(504).json({ error: 'AI identification timed out. Try a smaller or clearer image.' });
+      } else {
+        res.status(500).json({ error: 'Failed to identify album' });
+      }
     }
   }
 );

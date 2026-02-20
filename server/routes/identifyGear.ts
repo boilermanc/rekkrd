@@ -10,6 +10,16 @@ import { GEAR_CATEGORIES } from '../../types.js';
 const router = Router();
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const GEMINI_TIMEOUT_MS = 90_000; // 90s — under typical proxy timeouts (120s)
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
+    ),
+  ]);
+}
 
 router.post(
   '/api/identify-gear',
@@ -57,7 +67,7 @@ router.post(
 
       const categoryList = GEAR_CATEGORIES.join(', ');
 
-      const response = await ai.models.generateContent({
+      const response = await withTimeout(ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
           parts: [
@@ -99,7 +109,7 @@ If you cannot identify the gear, return null for all fields.`,
             required: ['category', 'brand', 'model', 'year', 'description', 'specs', 'manual_search_query'],
           },
         },
-      });
+      }), GEMINI_TIMEOUT_MS);
 
       const raw = response.text || '{}';
       let data: Record<string, unknown>;
@@ -140,7 +150,12 @@ If you cannot identify the gear, return null for all fields.`,
       });
     } catch (error) {
       console.error('Gemini Gear Identification Error:', error);
-      res.status(500).json({ error: 'Failed to identify gear' });
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('timed out')) {
+        res.status(504).json({ error: 'AI identification timed out. Try a smaller or clearer image.' });
+      } else {
+        res.status(500).json({ error: 'Failed to identify gear' });
+      }
     }
   }
 );

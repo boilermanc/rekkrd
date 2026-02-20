@@ -2,6 +2,30 @@
 import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem, IdentifiedGear, ManualSearchResult, SetupGuide } from '../types';
 import { supabase } from './supabaseService';
 
+/**
+ * Resize a base64 data URL image so its longest edge is at most `maxPx`.
+ * Returns the original unchanged if it's already small enough.
+ */
+function resizeForAI(base64DataUrl: string, maxPx = 1024): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w <= maxPx && h <= maxPx) { resolve(base64DataUrl); return; }
+      const scale = maxPx / Math.max(w, h);
+      w = Math.round(w * scale);
+      h = Math.round(h * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => resolve(base64DataUrl);
+    img.src = base64DataUrl;
+  });
+}
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -57,7 +81,8 @@ async function handleGatingError(response: Response): Promise<void> {
 export const geminiService = {
   async identifyAlbum(base64DataUrl: string): Promise<{ artist: string; title: string } | null> {
     try {
-      const [header, base64Data] = base64DataUrl.split(',');
+      const resized = await resizeForAI(base64DataUrl);
+      const [header, base64Data] = resized.split(',');
       const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
 
       const response = await fetch('/api/identify', {
@@ -84,7 +109,8 @@ export const geminiService = {
 
   async identifyGear(base64DataUrl: string): Promise<IdentifiedGear | null> {
     try {
-      const [header, image] = base64DataUrl.split(',');
+      const resized = await resizeForAI(base64DataUrl);
+      const [header, image] = resized.split(',');
       const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
 
       const response = await fetch('/api/identify-gear', {
