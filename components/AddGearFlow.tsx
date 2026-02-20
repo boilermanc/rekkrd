@@ -1,22 +1,23 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { NewGear, Gear, IdentifiedGear } from '../types';
 import { geminiService, ScanLimitError, UpgradeRequiredError } from '../services/geminiService';
 import { gearService } from '../services/gearService';
 import { useToast } from '../contexts/ToastContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import GearCaptureGuide from './GearCaptureGuide';
+import GearUploadGuide from './GearUploadGuide';
 import GearConfirmModal from './GearConfirmModal';
 import SpinningRecord from './SpinningRecord';
 
-type FlowStep = 'camera' | 'identifying' | 'confirm' | null;
+type FlowStep = 'capture' | 'identifying' | 'confirm' | null;
 
 interface AddGearFlowProps {
   isOpen: boolean;
   onClose: () => void;
   onGearSaved: (gear: Gear) => void;
   onUpgradeRequired?: (feature: string) => void;
-  initialImage?: string;
+  mode?: 'scan' | 'upload';
 }
 
 const AddGearFlow: React.FC<AddGearFlowProps> = ({
@@ -24,7 +25,7 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
   onClose,
   onGearSaved,
   onUpgradeRequired,
-  initialImage,
+  mode = 'scan',
 }) => {
   const { showToast } = useToast();
   const { canUse } = useSubscription();
@@ -38,6 +39,9 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
     setIdentifiedGear(null);
     onClose();
   }, [onClose]);
+
+  // Start flow when isOpen becomes true
+  const effectiveStep = isOpen && flowStep === null ? 'capture' : flowStep;
 
   const handleCaptureComplete = useCallback(async (images: { front: string; label?: string }) => {
     // Check scan limit before calling the API
@@ -58,7 +62,7 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
 
       if (!result) {
         showToast("Couldn't identify that gear. Try a clearer shot!", 'error');
-        setFlowStep('camera');
+        setFlowStep('capture');
         return;
       }
 
@@ -74,27 +78,10 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
       } else {
         console.error('Gear identification failed:', err);
         showToast('Something went wrong during identification.', 'error');
-        setFlowStep('camera');
+        setFlowStep('capture');
       }
     }
   }, [canUse, showToast, onUpgradeRequired, resetFlow]);
-
-  // Start flow when isOpen becomes true
-  const effectiveStep = isOpen && flowStep === null
-    ? (initialImage ? 'identifying' : 'camera')
-    : flowStep;
-
-  // When opened with an initialImage, kick off identification immediately
-  const initialImageTriggered = useRef(false);
-  useEffect(() => {
-    if (isOpen && initialImage && flowStep === null && !initialImageTriggered.current) {
-      initialImageTriggered.current = true;
-      handleCaptureComplete({ front: initialImage });
-    }
-    if (!isOpen) {
-      initialImageTriggered.current = false;
-    }
-  }, [isOpen, initialImage, flowStep, handleCaptureComplete]);
 
   const handleSave = useCallback(async (gear: NewGear) => {
     try {
@@ -109,22 +96,30 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
   }, [showToast, onGearSaved, resetFlow]);
 
   const handleConfirmClose = useCallback(() => {
-    // Go back to camera for rescan
+    // Go back to capture for rescan/re-upload
     setIdentifiedGear(null);
-    setFlowStep('camera');
+    setFlowStep('capture');
   }, []);
 
   if (!isOpen && flowStep === null) return null;
 
   return (
     <>
-      {/* Guided capture step */}
-      {effectiveStep === 'camera' && (
-        <GearCaptureGuide
-          isOpen={true}
-          onComplete={handleCaptureComplete}
-          onClose={resetFlow}
-        />
+      {/* Guided capture/upload step */}
+      {effectiveStep === 'capture' && (
+        mode === 'upload' ? (
+          <GearUploadGuide
+            isOpen={true}
+            onComplete={handleCaptureComplete}
+            onClose={resetFlow}
+          />
+        ) : (
+          <GearCaptureGuide
+            isOpen={true}
+            onComplete={handleCaptureComplete}
+            onClose={resetFlow}
+          />
+        )
       )}
 
       {/* Identifying loading overlay */}

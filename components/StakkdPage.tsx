@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Gear, SetupGuide, GearCategory } from '../types';
 import { gearService } from '../services/gearService';
 import { geminiService, UpgradeRequiredError } from '../services/geminiService';
@@ -55,8 +55,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [manualModalOpen, setManualModalOpen] = useState(false);
-  const [uploadImage, setUploadImage] = useState<string | null>(null);
-  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [uploadFlowOpen, setUploadFlowOpen] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [activeCategory, setActiveCategory] = useState<GearCategory | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('position');
@@ -230,20 +229,8 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
       onUpgradeRequired?.('gear_limit');
       return;
     }
-    uploadInputRef.current?.click();
+    setUploadFlowOpen(true);
   }, [gearLimitReached, onUpgradeRequired]);
-
-  const handleFileSelected = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setUploadImage(reader.result as string);
-      setAddFlowOpen(true);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  }, []);
 
   // ── Setup Guide ─────────────────────────────────────────────────
 
@@ -423,25 +410,23 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
 
         <AddGearFlow
           isOpen={addFlowOpen}
-          onClose={() => { setAddFlowOpen(false); setUploadImage(null); }}
+          onClose={() => setAddFlowOpen(false)}
           onGearSaved={handleGearSaved}
           onUpgradeRequired={onUpgradeRequired}
-          initialImage={uploadImage ?? undefined}
+        />
+
+        <AddGearFlow
+          isOpen={uploadFlowOpen}
+          onClose={() => setUploadFlowOpen(false)}
+          onGearSaved={handleGearSaved}
+          onUpgradeRequired={onUpgradeRequired}
+          mode="upload"
         />
 
         <AddGearManualModal
           isOpen={manualModalOpen}
           onClose={() => setManualModalOpen(false)}
           onGearSaved={handleGearSaved}
-        />
-
-        <input
-          ref={uploadInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelected}
-          className="hidden"
-          aria-hidden="true"
         />
       </div>
     );
@@ -689,6 +674,14 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         onUpgradeRequired={onUpgradeRequired}
       />
 
+      <AddGearFlow
+        isOpen={uploadFlowOpen}
+        onClose={() => setUploadFlowOpen(false)}
+        onGearSaved={handleGearSaved}
+        onUpgradeRequired={onUpgradeRequired}
+        mode="upload"
+      />
+
       <AddGearManualModal
         isOpen={manualModalOpen}
         onClose={() => setManualModalOpen(false)}
@@ -711,16 +704,6 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         loading={isGuideLoading}
         isOpen={isGuideModalOpen}
         onClose={() => { setIsGuideModalOpen(false); setSetupGuide(null); }}
-      />
-
-      {/* Hidden file input for upload */}
-      <input
-        ref={uploadInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelected}
-        className="hidden"
-        aria-hidden="true"
       />
 
       {/* Upgrade banner for free-tier users */}
