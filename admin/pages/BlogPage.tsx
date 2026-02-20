@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { adminService, BlogPostAdmin, BlogIdeaAdmin } from '../../services/adminService';
 import BlogEditor from './BlogEditor';
 import BlogIdeaForm from './BlogIdeaForm';
@@ -45,6 +45,9 @@ const BlogPage: React.FC = () => {
   // Ideas state
   const [ideas, setIdeas] = useState<BlogIdeaAdmin[]>([]);
 
+  // Editor ref for scroll-into-view
+  const editorRef = useRef<HTMLDivElement>(null);
+
   // Delete confirmation
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -88,14 +91,22 @@ const BlogPage: React.FC = () => {
       .catch(err => console.error('Failed to refresh blog posts:', err));
   }, []);
 
+  const scrollToEditor = useCallback(() => {
+    requestAnimationFrame(() => {
+      editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+
   const handleNewPost = () => {
     setEditingPost(null);
     setIsCreating(true);
+    scrollToEditor();
   };
 
   const handleEditPost = (post: BlogPostAdmin) => {
     setIsCreating(false);
     setEditingPost(post);
+    scrollToEditor();
   };
 
   const handleEditorSave = () => {
@@ -156,12 +167,14 @@ const BlogPage: React.FC = () => {
 
       {/* Blog Editor */}
       {(isCreating || editingPost) && (
-        <BlogEditor
-          key={editingPost?.id || 'new'}
-          post={editingPost || undefined}
-          onSave={handleEditorSave}
-          onCancel={handleEditorCancel}
-        />
+        <div ref={editorRef}>
+          <BlogEditor
+            key={editingPost?.id || 'new'}
+            post={editingPost || undefined}
+            onSave={handleEditorSave}
+            onCancel={handleEditorCancel}
+          />
+        </div>
       )}
 
       {/* Posts table */}
@@ -188,14 +201,17 @@ const BlogPage: React.FC = () => {
               posts.map(post => (
                 <tr key={post.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
                   <td className="px-5 py-3">
-                    <div className="min-w-0">
-                      <p className="font-medium truncate max-w-[300px]" style={{ color: 'rgb(17,24,39)' }}>
+                    <button
+                      className="min-w-0 text-left group"
+                      onClick={() => handleEditPost(post)}
+                    >
+                      <p className="font-medium truncate max-w-[300px] group-hover:text-[rgb(99,102,241)] transition-colors" style={{ color: 'rgb(17,24,39)' }}>
                         {post.title}
                       </p>
                       <p className="text-xs truncate max-w-[300px]" style={{ color: 'rgb(156,163,175)' }}>
                         /{post.slug}
                       </p>
-                    </div>
+                    </button>
                   </td>
                   <td className="px-5 py-3">
                     <span
