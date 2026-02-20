@@ -125,6 +125,8 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
   // Find Manual flow state
   const [manualSearching, setManualSearching] = useState(false);
   const [manualResult, setManualResult] = useState<ManualSearchResult | null>(null);
+  const [uploadingManual, setUploadingManual] = useState(false);
+  const manualInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen || !gear) return null;
 
@@ -243,6 +245,41 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
     } catch (err) {
       console.error('Failed to save manual URL:', err);
       showToast('Failed to save manual link.', 'error');
+    }
+  };
+
+  const handleManualUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so the same file can be re-selected
+    e.target.value = '';
+
+    if (file.type !== 'application/pdf') {
+      showToast('Only PDF files are allowed.', 'error');
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      showToast('File exceeds 25 MB limit.', 'error');
+      return;
+    }
+
+    setUploadingManual(true);
+    try {
+      // Delete the old PDF if replacing
+      if (gear.manual_pdf_url) {
+        await gearService.deleteManualPdf(gear.manual_pdf_url);
+      }
+
+      const publicUrl = await gearService.uploadManualPdf(file, gear.id);
+      const updated = await gearService.updateGear(gear.id, { manual_pdf_url: publicUrl });
+      showToast('Manual PDF uploaded.', 'success');
+      onUpdate(updated);
+    } catch (err) {
+      console.error('Manual PDF upload failed:', err);
+      showToast('Failed to upload manual PDF.', 'error');
+    } finally {
+      setUploadingManual(false);
     }
   };
 
@@ -382,8 +419,35 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
           <section>
             <h4 className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase mb-3">Manual</h4>
 
-            {gear.manual_url ? (
-              <div>
+            {/* Hidden file input for PDF upload */}
+            <input
+              ref={manualInputRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              onChange={handleManualUpload}
+              className="hidden"
+            />
+
+            {/* Uploaded PDF link */}
+            {gear.manual_pdf_url && (
+              <div className="mb-3">
+                <a
+                  href={gear.manual_pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#dd6e42]/10 border border-[#dd6e42]/25 rounded-xl px-4 py-2.5 text-sm text-th-text hover:bg-[#dd6e42]/20 transition-all"
+                >
+                  <svg className="w-4 h-4 text-[#f0a882]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                  </svg>
+                  View Manual (PDF)
+                </a>
+              </div>
+            )}
+
+            {/* External manual link */}
+            {gear.manual_url && (
+              <div className="mb-3">
                 <a
                   href={gear.manual_url}
                   target="_blank"
@@ -391,19 +455,38 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                   className="inline-flex items-center gap-2 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-2.5 text-sm text-th-text hover:bg-th-surface/[0.08] transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                   </svg>
-                  View Manual
+                  View Manual (Link)
                 </a>
-                <button
-                  onClick={handleFindManual}
-                  disabled={manualSearching}
-                  className="block mt-2 text-[#f0a882]/70 text-[10px] tracking-widest hover:text-[#dd6e42] transition-colors disabled:opacity-40"
-                >
-                  {manualSearching ? 'Searching...' : 'Find a different manual'}
-                </button>
               </div>
-            ) : (
+            )}
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => manualInputRef.current?.click()}
+                disabled={uploadingManual}
+                className="inline-flex items-center gap-2 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-2.5 text-sm text-th-text hover:bg-th-surface/[0.08] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {uploadingManual ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    {gear.manual_pdf_url ? 'Replace PDF' : 'Upload PDF'}
+                  </>
+                )}
+              </button>
+
               <button
                 onClick={handleFindManual}
                 disabled={manualSearching}
@@ -426,7 +509,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                   </>
                 )}
               </button>
-            )}
+            </div>
 
             {/* Low-confidence results — alternatives for user to pick */}
             {manualResult && (

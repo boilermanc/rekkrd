@@ -80,6 +80,7 @@ export interface NewGear {
   description?: string;
   specs?: Record<string, string | number>;
   manual_url?: string;
+  manual_pdf_url?: string;
   image_url?: string;
   original_photo_url?: string;
   purchase_price?: number;

@@ -20,7 +20,7 @@ function getAuth(req: Request): string {
 
 const UPDATABLE_FIELDS = [
   'category', 'brand', 'model', 'year', 'description', 'specs',
-  'manual_url', 'image_url', 'original_photo_url',
+  'manual_url', 'manual_pdf_url', 'image_url', 'original_photo_url',
   'purchase_price', 'purchase_date', 'notes', 'position',
 ] as const;
 

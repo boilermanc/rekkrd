@@ -3,6 +3,8 @@ import { supabase } from './supabaseService';
 import { Gear, NewGear } from '../types';
 
 const GEAR_PHOTOS_BUCKET = 'gear-photos';
+const GEAR_MANUALS_BUCKET = 'gear-manuals';
+const MAX_MANUAL_SIZE = 25 * 1024 * 1024; // 25 MB
 
 function assertClient() {
   if (!supabase) {
@@ -52,31 +54,31 @@ async function uploadGearPhoto(base64Data: string): Promise<string | null> {
   }
 }
 
-/** Extract the Storage file path from a Supabase public URL for the gear-photos bucket. */
-function extractStoragePath(url: string): string | null {
-  const marker = `/storage/v1/object/public/${GEAR_PHOTOS_BUCKET}/`;
+/** Extract the Storage file path from a Supabase public URL for a given bucket. */
+function extractStoragePath(url: string, bucket: string): string | null {
+  const marker = `/storage/v1/object/public/${bucket}/`;
   const idx = url.indexOf(marker);
   if (idx === -1) return null;
   return url.substring(idx + marker.length);
 }
 
-/** Delete a file from the gear-photos bucket if the URL points to Supabase Storage. */
-async function deleteStorageFile(url: string): Promise<void> {
-  const path = extractStoragePath(url);
+/** Delete a file from a Supabase Storage bucket if the URL points to it. */
+async function deleteStorageFile(url: string, bucket: string): Promise<void> {
+  const path = extractStoragePath(url, bucket);
   if (!path) return;
 
   const { error } = await supabase!.storage
-    .from(GEAR_PHOTOS_BUCKET)
+    .from(bucket)
     .remove([path]);
 
   if (error) {
-    console.error('Error deleting gear photo from storage:', error);
+    console.error(`Error deleting file from ${bucket}:`, error);
   }
 }
 
 const UPDATABLE_FIELDS: (keyof NewGear)[] = [
   'category', 'brand', 'model', 'year', 'description', 'specs',
-  'manual_url', 'image_url', 'original_photo_url',
+  'manual_url', 'manual_pdf_url', 'image_url', 'original_photo_url',
   'purchase_price', 'purchase_date', 'notes', 'position',
 ];
 
@@ -184,7 +186,7 @@ export const gearService = {
     // Fetch the gear item first to get storage URLs for cleanup
     const { data: gear, error: fetchError } = await supabase!
       .from('gear')
-      .select('image_url, original_photo_url')
+      .select('image_url, original_photo_url, manual_pdf_url')
       .eq('id', id)
       .single();
 
@@ -193,9 +195,10 @@ export const gearService = {
       throw fetchError;
     }
 
-    // Delete associated photos from Storage
-    if (gear?.image_url) await deleteStorageFile(gear.image_url);
-    if (gear?.original_photo_url) await deleteStorageFile(gear.original_photo_url);
+    // Delete associated files from Storage
+    if (gear?.image_url) await deleteStorageFile(gear.image_url, GEAR_PHOTOS_BUCKET);
+    if (gear?.original_photo_url) await deleteStorageFile(gear.original_photo_url, GEAR_PHOTOS_BUCKET);
+    if (gear?.manual_pdf_url) await deleteStorageFile(gear.manual_pdf_url, GEAR_MANUALS_BUCKET);
 
     const { error } = await supabase!
       .from('gear')
@@ -206,6 +209,37 @@ export const gearService = {
       console.error('Error deleting gear:', error);
       throw error;
     }
+  },
+
+  /** Upload a PDF manual to Supabase Storage and return the public URL. */
+  async uploadManualPdf(file: File, gearId: string): Promise<string> {
+    assertClient();
+
+    if (file.type !== 'application/pdf') {
+      throw new Error('Only PDF files are allowed');
+    }
+    if (file.size > MAX_MANUAL_SIZE) {
+      throw new Error('File size exceeds 25 MB limit');
+    }
+
+    const fileName = `${gearId}-${Date.now()}.pdf`;
+    const { error } = await supabase!.storage
+      .from(GEAR_MANUALS_BUCKET)
+      .upload(fileName, file, { contentType: 'application/pdf', upsert: false });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase!.storage
+      .from(GEAR_MANUALS_BUCKET)
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  },
+
+  /** Delete an existing manual PDF from storage (when replacing). */
+  async deleteManualPdf(url: string): Promise<void> {
+    assertClient();
+    await deleteStorageFile(url, GEAR_MANUALS_BUCKET);
   },
 
   async reorderGear(orderedIds: string[]): Promise<void> {

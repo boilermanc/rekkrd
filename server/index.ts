@@ -162,6 +162,36 @@ ensureGearPhotosBucket().catch(err =>
   console.error('gear-photos bucket check failed:', err)
 );
 
+// Ensure gear-manuals storage bucket exists
+async function ensureGearManualsBucket() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+
+  const { createClient } = await import('@supabase/supabase-js');
+  const admin = createClient(url, key);
+
+  const { data: buckets } = await admin.storage.listBuckets();
+  const exists = buckets?.some((b: { name: string }) => b.name === 'gear-manuals');
+
+  if (!exists) {
+    const { error } = await admin.storage.createBucket('gear-manuals', {
+      public: true,
+      fileSizeLimit: 25 * 1024 * 1024, // 25 MB
+      allowedMimeTypes: ['application/pdf'],
+    });
+    if (error) {
+      console.error('Failed to create gear-manuals bucket:', error.message);
+    } else {
+      console.log('Created gear-manuals storage bucket');
+    }
+  }
+}
+
+ensureGearManualsBucket().catch(err =>
+  console.error('gear-manuals bucket check failed:', err)
+);
+
 // Crawler/bot meta tag pre-rendering — before static files + SPA fallback
 app.use(crawlerMeta);
 
