@@ -21,9 +21,14 @@ const AdminLayout: React.FC = () => {
       <aside className="w-64 border-r flex flex-col shrink-0" style={{ borderColor: 'rgb(229,231,235)', backgroundColor: 'rgb(255,255,255)' }}>
         <div className="p-5 border-b" style={{ borderColor: 'rgb(229,231,235)' }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #dd6e42, #4f6d7a)' }}>
-              <span className="text-white text-xs font-bold">R</span>
-            </div>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="32" height="32">
+              <circle cx="12" cy="12" r="11" fill="#f0a882"/>
+              <circle cx="12" cy="12" r="9.5" fill="none" stroke="#d48a6a" strokeWidth="0.4" opacity="0.5"/>
+              <circle cx="12" cy="12" r="8" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.4"/>
+              <circle cx="12" cy="12" r="6.5" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.3"/>
+              <circle cx="12" cy="12" r="5.2" fill="#c45a30"/>
+              <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#f0a882">R</text>
+            </svg>
             <div>
               <h1 className="text-sm font-semibold" style={{ color: 'rgb(17,24,39)' }}>REKKRD</h1>
               <p className="text-[10px]" style={{ color: 'rgb(156,163,175)' }}>Admin Panel</p>

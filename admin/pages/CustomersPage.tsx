@@ -1,11 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { adminService, AdminCustomer } from '../../services/adminService';
+
+type SortKey = 'display_name' | 'email' | 'subscription_plan' | 'created_at' | 'last_sign_in_at';
+type SortDir = 'asc' | 'desc';
+
+const PAGE_SIZES = [10, 25, 50];
 
 const CustomersPage: React.FC = () => {
   const [customers, setCustomers] = useState<AdminCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editSub, setEditSub] = useState<{ plan: string; status: string } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('created_at');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     adminService.getCustomers()
@@ -14,11 +25,63 @@ const CustomersPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = customers.filter(c => {
-    const q = search.toLowerCase();
-    return c.email.toLowerCase().includes(q) ||
-      (c.display_name || '').toLowerCase().includes(q);
-  });
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const handleSaveSub = async (userId: string) => {
+    if (!editSub) return;
+    setSaving(true);
+    try {
+      await adminService.updateCustomerSubscription(userId, editSub);
+      setCustomers(prev =>
+        prev.map(c =>
+          c.id === userId
+            ? { ...c, subscription_plan: editSub.plan, subscription_status: editSub.status }
+            : c
+        )
+      );
+      setEditSub(null);
+    } catch (err) {
+      console.error('Failed to update subscription:', err);
+      alert(err instanceof Error ? err.message : 'Failed to update subscription');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    let result = customers.filter(c => {
+      const q = search.toLowerCase();
+      return c.email.toLowerCase().includes(q) ||
+        (c.display_name || '').toLowerCase().includes(q);
+    });
+
+    result.sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'display_name': cmp = (a.display_name || '').localeCompare(b.display_name || ''); break;
+        case 'email': cmp = a.email.localeCompare(b.email); break;
+        case 'subscription_plan': cmp = (a.subscription_plan || '').localeCompare(b.subscription_plan || ''); break;
+        case 'created_at': cmp = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime(); break;
+        case 'last_sign_in_at': cmp = new Date(a.last_sign_in_at || 0).getTime() - new Date(b.last_sign_in_at || 0).getTime(); break;
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return result;
+  }, [customers, search, sortKey, sortDir]);
+
+  // Reset to page 1 when search or sort changes
+  useEffect(() => { setPage(1); }, [search, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const formatDate = (d: string | null) => {
     if (!d) return '—';
@@ -46,6 +109,23 @@ const CustomersPage: React.FC = () => {
       </span>
     );
   };
+
+  const SortHeader: React.FC<{ label: string; field: SortKey; className?: string }> = ({ label, field, className }) => (
+    <th
+      className={`text-left px-5 py-3 font-medium text-xs uppercase tracking-wider cursor-pointer hover:text-[rgb(17,24,39)] select-none ${className || ''}`}
+      style={{ color: sortKey === field ? 'rgb(99,102,241)' : 'rgb(107,114,128)' }}
+      onClick={() => handleSort(field)}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {sortKey === field && (
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sortDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
+          </svg>
+        )}
+      </span>
+    </th>
+  );
 
   if (loading) {
     return (
@@ -86,19 +166,27 @@ const CustomersPage: React.FC = () => {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ backgroundColor: 'rgb(249,250,251)' }}>
-              <th className="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style={{ color: 'rgb(107,114,128)' }}>User</th>
-              <th className="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style={{ color: 'rgb(107,114,128)' }}>Plan</th>
+              <SortHeader label="User" field="display_name" />
+              <SortHeader label="Plan" field="subscription_plan" />
               <th className="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider hidden md:table-cell" style={{ color: 'rgb(107,114,128)' }}>Genres</th>
-              <th className="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider hidden lg:table-cell" style={{ color: 'rgb(107,114,128)' }}>Joined</th>
-              <th className="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider hidden lg:table-cell" style={{ color: 'rgb(107,114,128)' }}>Last Active</th>
+              <SortHeader label="Joined" field="created_at" className="hidden lg:table-cell" />
+              <SortHeader label="Last Active" field="last_sign_in_at" className="hidden lg:table-cell" />
             </tr>
           </thead>
           <tbody className="divide-y" style={{ borderColor: 'rgb(243,244,246)' }}>
-            {filtered.map(c => (
+            {paged.map(c => (
               <React.Fragment key={c.id}>
                 <tr
                   className="hover:bg-[rgb(249,250,251)] cursor-pointer transition-colors"
-                  onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
+                  onClick={() => {
+                    if (expandedId === c.id) {
+                      setExpandedId(null);
+                      setEditSub(null);
+                    } else {
+                      setExpandedId(c.id);
+                      setEditSub({ plan: c.subscription_plan || 'collector', status: c.subscription_status || 'active' });
+                    }
+                  }}
                 >
                   <td className="px-5 py-3">
                     <div>
@@ -139,12 +227,60 @@ const CustomersPage: React.FC = () => {
                           <p style={{ color: 'rgb(17,24,39)' }}>{c.collecting_goal || '—'}</p>
                         </div>
                       </div>
+                      {/* Subscription Override */}
+                      <div className="mt-4 pt-4 border-t" style={{ borderColor: 'rgb(229,231,235)' }}>
+                        <p className="font-medium uppercase tracking-wider mb-1 text-xs" style={{ color: 'rgb(107,114,128)' }}>
+                          Subscription Override
+                        </p>
+                        <p className="text-xs mb-3" style={{ color: 'rgb(156,163,175)' }}>
+                          Manually set this user's plan and status without Stripe. Saving resets their scan counter and sets the billing period to 1 year from now.
+                        </p>
+                        <div className="flex items-end gap-3">
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: 'rgb(107,114,128)' }}>Plan</label>
+                            <select
+                              value={editSub?.plan || 'collector'}
+                              onChange={e => setEditSub(prev => prev ? { ...prev, plan: e.target.value } : null)}
+                              className="text-xs border rounded px-2 py-1.5"
+                              style={{ borderColor: 'rgb(229,231,235)' }}
+                            >
+                              <option value="collector">collector</option>
+                              <option value="curator">curator</option>
+                              <option value="enthusiast">enthusiast</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: 'rgb(107,114,128)' }}>Status</label>
+                            <select
+                              value={editSub?.status || 'active'}
+                              onChange={e => setEditSub(prev => prev ? { ...prev, status: e.target.value } : null)}
+                              className="text-xs border rounded px-2 py-1.5"
+                              style={{ borderColor: 'rgb(229,231,235)' }}
+                            >
+                              <option value="active">active</option>
+                              <option value="trialing">trialing</option>
+                              <option value="canceled">canceled</option>
+                              <option value="past_due">past_due</option>
+                              <option value="incomplete">incomplete</option>
+                              <option value="expired">expired</option>
+                            </select>
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleSaveSub(c.id); }}
+                            disabled={saving}
+                            className="text-xs px-3 py-1.5 rounded font-medium text-white disabled:opacity-50 transition-colors"
+                            style={{ backgroundColor: 'rgb(99,102,241)' }}
+                          >
+                            {saving ? 'Saving...' : 'Save'}
+                          </button>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 )}
               </React.Fragment>
             ))}
-            {filtered.length === 0 && (
+            {paged.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-5 py-12 text-center" style={{ color: 'rgb(156,163,175)' }}>
                   {search ? 'No customers match your search' : 'No customers yet'}
@@ -153,6 +289,60 @@ const CustomersPage: React.FC = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'rgb(107,114,128)' }}>
+          <span>Showing {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}</span>
+          <select
+            value={pageSize}
+            onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+            className="border rounded px-1.5 py-0.5 text-xs"
+            style={{ borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' }}
+          >
+            {PAGE_SIZES.map(s => <option key={s} value={s}>{s} / page</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-2.5 py-1 text-xs rounded border disabled:opacity-40 hover:bg-[rgb(249,250,251)] transition-colors"
+            style={{ borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' }}
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+            .reduce<(number | 'ellipsis')[]>((acc, p, i, arr) => {
+              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('ellipsis');
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((p, i) =>
+              p === 'ellipsis' ? (
+                <span key={`e${i}`} className="px-1 text-xs" style={{ color: 'rgb(156,163,175)' }}>...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-7 h-7 text-xs rounded border transition-colors ${page === p ? 'bg-[rgb(99,102,241)] text-white border-[rgb(99,102,241)]' : 'hover:bg-[rgb(249,250,251)]'}`}
+                  style={page !== p ? { borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' } : undefined}
+                >
+                  {p}
+                </button>
+              )
+            )}
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-2.5 py-1 text-xs rounded border disabled:opacity-40 hover:bg-[rgb(249,250,251)] transition-colors"
+            style={{ borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' }}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

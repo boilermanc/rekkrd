@@ -4,6 +4,8 @@ import { adminService, AdminAlbum, AdminCollectionStats } from '../../services/a
 type SortKey = 'title' | 'artist' | 'year' | 'genre' | 'price_median' | 'created_at';
 type SortDir = 'asc' | 'desc';
 
+const PAGE_SIZES = [10, 25, 50];
+
 const CollectionsPage: React.FC = () => {
   const [albums, setAlbums] = useState<AdminAlbum[]>([]);
   const [stats, setStats] = useState<AdminCollectionStats | null>(null);
@@ -11,6 +13,8 @@ const CollectionsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('created_at');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     adminService.getCollections()
@@ -54,6 +58,12 @@ const CollectionsPage: React.FC = () => {
 
     return result;
   }, [albums, search, sortKey, sortDir]);
+
+  // Reset to page 1 when search or sort changes
+  useEffect(() => { setPage(1); }, [search, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const paged = sorted.slice((page - 1) * pageSize, page * pageSize);
 
   const SortHeader: React.FC<{ label: string; field: SortKey; className?: string }> = ({ label, field, className }) => (
     <th
@@ -156,7 +166,7 @@ const CollectionsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: 'rgb(243,244,246)' }}>
-              {sorted.map(a => (
+              {paged.map(a => (
                 <tr key={a.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
                   <td className="px-5 py-2">
                     {a.cover_url ? (
@@ -185,7 +195,7 @@ const CollectionsPage: React.FC = () => {
                   </td>
                 </tr>
               ))}
-              {sorted.length === 0 && (
+              {paged.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-5 py-12 text-center" style={{ color: 'rgb(156,163,175)' }}>
                     {search ? 'No albums match your search' : 'No albums in the platform'}
@@ -196,7 +206,59 @@ const CollectionsPage: React.FC = () => {
           </table>
         </div>
       </div>
-      <p className="text-xs mt-3" style={{ color: 'rgb(156,163,175)' }}>Showing {sorted.length} of {albums.length} albums</p>
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'rgb(107,114,128)' }}>
+          <span>Showing {sorted.length === 0 ? 0 : (page - 1) * pageSize + 1}–{Math.min(page * pageSize, sorted.length)} of {sorted.length}</span>
+          <select
+            value={pageSize}
+            onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+            className="border rounded px-1.5 py-0.5 text-xs"
+            style={{ borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' }}
+          >
+            {PAGE_SIZES.map(s => <option key={s} value={s}>{s} / page</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-2.5 py-1 text-xs rounded border disabled:opacity-40 hover:bg-[rgb(249,250,251)] transition-colors"
+            style={{ borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' }}
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+            .reduce<(number | 'ellipsis')[]>((acc, p, i, arr) => {
+              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('ellipsis');
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((p, i) =>
+              p === 'ellipsis' ? (
+                <span key={`e${i}`} className="px-1 text-xs" style={{ color: 'rgb(156,163,175)' }}>...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-7 h-7 text-xs rounded border transition-colors ${page === p ? 'bg-[rgb(99,102,241)] text-white border-[rgb(99,102,241)]' : 'hover:bg-[rgb(249,250,251)]'}`}
+                  style={page !== p ? { borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' } : undefined}
+                >
+                  {p}
+                </button>
+              )
+            )}
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-2.5 py-1 text-xs rounded border disabled:opacity-40 hover:bg-[rgb(249,250,251)] transition-colors"
+            style={{ borderColor: 'rgb(229,231,235)', color: 'rgb(107,114,128)' }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

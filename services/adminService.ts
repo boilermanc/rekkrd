@@ -332,6 +332,23 @@ export const adminService = {
     return resp.text();
   },
 
+  async updateCustomerSubscription(
+    userId: string,
+    payload: { plan: string; status: string }
+  ): Promise<{ user_id: string; plan: string; status: string; period_end: string; scans_reset: boolean }> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch(`/api/admin/customers/${encodeURIComponent(userId)}/subscription`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Update failed' }));
+      throw new Error(err.error || `Failed to update subscription: ${resp.status}`);
+    }
+    return resp.json();
+  },
+
   async sendComposerTestEmail(payload: { templateId: string; variables: Record<string, string>; to: string; subject: string; presetId?: string }): Promise<ComposerSendResult> {
     const headers = await getAuthHeaders();
     const resp = await fetch('/api/email/send-test', {
