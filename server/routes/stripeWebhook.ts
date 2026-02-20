@@ -3,6 +3,7 @@ import type Stripe from 'stripe';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { stripe, webhookSecret } from '../lib/stripe.js';
 import { getPlanFromPriceId } from '../lib/stripeConfig.js';
+import { sendTemplatedEmail } from '../services/emailService.js';
 
 const router = Router();
 
@@ -35,6 +36,12 @@ function mapStatus(stripeStatus: string): 'active' | 'trialing' | 'past_due' | '
   };
   return map[stripeStatus] || 'inactive';
 }
+
+/** Map internal plan tier to user-facing display name. */
+const PLAN_DISPLAY_NAMES: Record<string, string> = {
+  curator: 'Curator',
+  enthusiast: 'Archivist',
+};
 
 /** Look up a user's profile by their Stripe customer ID. Returns the profile row or null. */
 async function findProfileByCustomerId(
@@ -132,6 +139,23 @@ router.post('/api/stripe-webhook', async (req, res) => {
           .eq('user_id', userId);
 
         console.log(`Webhook checkout.session.completed: profile ${profile.id} → plan=${plan}, status=${status}`);
+
+        // Fire-and-forget: subscription confirmation email
+        const checkoutEmail = session.customer_details?.email || session.customer_email;
+        if (checkoutEmail && plan !== 'collector') {
+          const planName = PLAN_DISPLAY_NAMES[plan] || 'Premium';
+          sendTemplatedEmail({
+            to: checkoutEmail,
+            presetId: 'subscription-confirmed',
+            variableOverrides: {
+              headline: `Welcome to ${planName}`,
+              subject: `You're upgraded — welcome to ${planName} ✨`,
+            },
+          })
+            .then(result => result && console.log('[email] Subscription confirmed sent to', checkoutEmail))
+            .catch(err => console.error('[email] Subscription confirmed failed:', err));
+        }
+
         break;
       }
 
@@ -219,6 +243,17 @@ router.post('/api/stripe-webhook', async (req, res) => {
           .eq('user_id', profile.id);
 
         console.log(`Webhook customer.subscription.deleted: profile ${profile.id} → plan=collector, status=inactive`);
+
+        // Fire-and-forget: subscription cancelled email
+        stripe.customers.retrieve(customerId)
+          .then(customer => {
+            if (customer.deleted || !('email' in customer) || !customer.email) return;
+            sendTemplatedEmail({ to: customer.email, presetId: 'subscription-cancelled' })
+              .then(result => result && console.log('[email] Subscription cancelled sent to', customer.email))
+              .catch(err => console.error('[email] Subscription cancelled failed:', err));
+          })
+          .catch(err => console.error('[email] Could not retrieve customer for cancellation email:', err));
+
         break;
       }
 

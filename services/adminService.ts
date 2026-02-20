@@ -252,7 +252,8 @@ export const adminService = {
     const headers = await getAuthHeaders();
     const resp = await fetch(`${API_BASE}/api/blog/admin/posts`, { headers });
     if (!resp.ok) throw new Error(`Failed to fetch blog posts: ${resp.status}`);
-    return resp.json();
+    const data = await resp.json();
+    return data.posts;
   },
 
   async getBlogPost(slug: string): Promise<BlogPostAdmin> {
@@ -331,7 +332,7 @@ export const adminService = {
     return resp.text();
   },
 
-  async sendComposerTestEmail(payload: { templateId: string; variables: Record<string, string>; to: string; subject: string }): Promise<ComposerSendResult> {
+  async sendComposerTestEmail(payload: { templateId: string; variables: Record<string, string>; to: string; subject: string; presetId?: string }): Promise<ComposerSendResult> {
     const headers = await getAuthHeaders();
     const resp = await fetch('/api/email/send-test', {
       method: 'POST',

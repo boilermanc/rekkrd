@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { updateProfile } from '../services/profileService';
+import { supabase } from '../services/supabaseService';
 import '../pages/Landing.css';
 
 type SelectedTier = 'collector' | 'curator' | 'archivist' | null;
@@ -558,6 +559,20 @@ const StepGetStarted: React.FC<StepGetStartedProps> = ({ userId, selectedGenres,
         subscription_tier: selectedTier ?? 'collector',
         onboarding_completed: true,
       });
+
+      // Fire-and-forget: welcome email on onboarding completion
+      (async () => {
+        try {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+          if (supabase) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+              headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+          }
+          await fetch('/api/onboarding/complete', { method: 'POST', headers });
+        } catch { /* welcome email is best-effort */ }
+      })();
     } catch (err) {
       console.error('Failed to save onboarding profile:', err);
       setError('Could not save preferences \u2014 you can update them later.');

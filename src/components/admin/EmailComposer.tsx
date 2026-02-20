@@ -316,6 +316,7 @@ const EmailComposer: React.FC = () => {
         variables: fields,
         to: testEmail.trim(),
         subject: subject.trim(),
+        presetId: selectedPresetId && selectedPresetId !== 'blank' ? selectedPresetId : undefined,
       });
       setModal({ open: true, type: 'success', result, error: null });
     } catch (err) {

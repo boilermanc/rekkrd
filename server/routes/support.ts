@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { sendTemplatedEmail } from '../services/emailService.js';
 
 const router = Router();
 
@@ -44,6 +45,17 @@ router.post('/api/support', async (req, res) => {
       res.status(500).json({ error: 'Failed to submit support request' });
       return;
     }
+
+    // Fire-and-forget: support confirmation email
+    sendTemplatedEmail({
+      to: email,
+      presetId: 'support-confirmation',
+      variableOverrides: {
+        hero_body: `We received your message about "${subject}" and will get back to you within 24 hours.`,
+      },
+    })
+      .then(result => result && console.log('[email] Support confirmation sent to', email))
+      .catch(err => console.error('[email] Support confirmation failed:', err));
 
     // Fire-and-forget webhook to n8n
     fetch('https://n8n.sproutify.app/webhook/support-request', {

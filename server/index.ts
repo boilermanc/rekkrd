@@ -30,6 +30,8 @@ import setupGuideRouter from './routes/setupGuide.js';
 import supportRouter from './routes/support.js';
 import sitemapRouter from './routes/sitemap.js';
 import emailRouter from './routes/email.js';
+import onboardingRouter from './routes/onboarding.js';
+import collectionRouter from './routes/collection.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 
 // ── Boot diagnostics: verify all imports resolved ────────────────────
@@ -40,6 +42,7 @@ const _routerMap: Record<string, unknown> = {
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, supportRouter, sitemapRouter, emailRouter,
+  onboardingRouter, collectionRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -129,6 +132,8 @@ mountRouter('setupGuideRouter', setupGuideRouter);
 mountRouter('supportRouter', supportRouter);
 mountRouter('sitemapRouter', sitemapRouter);
 mountRouter('emailRouter', emailRouter);
+mountRouter('onboardingRouter', onboardingRouter);
+mountRouter('collectionRouter', collectionRouter);
 console.log('[boot] All routes registered');
 
 // Ensure gear-photos storage bucket exists

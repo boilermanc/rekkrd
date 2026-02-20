@@ -2,9 +2,9 @@ import { Router, type Request, type Response } from 'express';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { Resend } from 'resend';
 import { requireAdmin } from '../middleware/adminAuth.js';
 import { emailPresets, getPresetById } from '../data/emailPresets.js';
+import { processUnsubscribeBlock, sendRawEmail } from '../services/emailService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
@@ -79,13 +79,7 @@ router.get('/api/email/templates/:templateId', (req: Request, res: Response) => 
 // ── POST /api/email/send-test ────────────────────────────────────────
 // Processes template with variables, sends via Resend — requires admin auth
 router.post('/api/email/send-test', requireAdmin, async (req: Request, res: Response) => {
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    res.status(500).json({ error: 'RESEND_API_KEY not configured' });
-    return;
-  }
-
-  const { templateId, variables, to, subject } = req.body;
+  const { templateId, variables, to, subject, presetId } = req.body;
 
   if (!templateId || !isValidTemplateId(templateId)) {
     res.status(400).json({ error: 'Valid templateId required (light, orange, dark-blue)' });
@@ -114,24 +108,29 @@ router.post('/api/email/send-test', requireAdmin, async (req: Request, res: Resp
 
   try {
     const rawHtml = readTemplate(templateId);
-    const processedHtml = processTemplate(rawHtml, variables);
+    let processedHtml = processTemplate(rawHtml, variables);
 
-    const resend = new Resend(resendKey);
-    const result = await resend.emails.send({
-      from: 'Rekkrd <onboarding@resend.dev>',
-      to: [to],
+    // Process unsubscribe block based on preset category
+    const preset = presetId ? getPresetById(presetId) : undefined;
+    const category = preset?.category ?? 'transactional';
+    const automated = preset?.automated ?? true;
+    processedHtml = processUnsubscribeBlock(processedHtml, category, automated);
+
+    const result = await sendRawEmail({
+      to,
       subject,
       html: processedHtml,
+      from: 'Rekkrd <onboarding@resend.dev>',
     });
 
-    if (result.error) {
-      res.status(400).json({ error: result.error.message, details: result.error });
+    if (!result) {
+      res.status(500).json({ error: 'Failed to send email — check server logs' });
       return;
     }
 
     res.status(200).json({
       success: true,
-      id: result.data?.id,
+      id: result.id,
       from: 'Rekkrd <onboarding@resend.dev>',
       to: [to],
       subject,

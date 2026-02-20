@@ -257,6 +257,20 @@ const App: React.FC = () => {
       setAlbums(prev => [saved, ...prev]);
       setSelectedAlbum(saved);
       if (saved.cover_url) setHeroBg(saved.cover_url);
+
+      // Fire-and-forget: milestone email check
+      (async () => {
+        try {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+          if (supabase) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+              headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+          }
+          await fetch('/api/collection/milestone-check', { method: 'POST', headers });
+        } catch { /* milestone email is best-effort */ }
+      })();
     } catch (err) {
       if (err instanceof ScanLimitError) {
         setUpgradeFeature('scan');
