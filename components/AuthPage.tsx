@@ -8,6 +8,8 @@ const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -67,6 +69,32 @@ const AuthPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const PasswordToggle = ({ visible, onClick }: { visible: boolean; onClick: () => void }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-th-text3 hover:text-th-text2 transition-colors"
+      aria-label={visible ? 'Hide password' : 'Show password'}
+      tabIndex={-1}
+    >
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+        {/* Outer rim */}
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        {/* Grooves */}
+        <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="0.75" opacity="0.5" fill="none" />
+        <circle cx="12" cy="12" r="5.5" stroke="currentColor" strokeWidth="0.75" opacity="0.4" fill="none" />
+        {/* Label area */}
+        <circle cx="12" cy="12" r="3.5" fill="currentColor" opacity="0.3" />
+        {/* Spindle hole */}
+        <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+        {/* Slash when password is visible (showing "off" state) */}
+        {visible && (
+          <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        )}
+      </svg>
+    </button>
+  );
 
   return (
     <div className="min-h-screen bg-th-bg flex items-center justify-center px-4">
@@ -150,16 +178,19 @@ const AuthPage: React.FC = () => {
                 <label htmlFor="auth-password" className="block text-xs text-th-text2 mb-1.5 uppercase tracking-wider">
                   Password
                 </label>
-                <input
-                  id="auth-password"
-                  type="password"
-                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                  required
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-th-text placeholder-th-text3 text-sm focus:outline-none focus:border-[#dd6e42] focus:ring-1 focus:ring-[#dd6e42] transition-colors"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="auth-password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                    required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 pr-10 text-th-text placeholder-th-text3 text-sm focus:outline-none focus:border-[#dd6e42] focus:ring-1 focus:ring-[#dd6e42] transition-colors"
+                    placeholder="••••••••"
+                  />
+                  <PasswordToggle visible={showPassword} onClick={() => setShowPassword(v => !v)} />
+                </div>
               </div>
 
               {mode === 'signup' && (
@@ -167,16 +198,19 @@ const AuthPage: React.FC = () => {
                   <label htmlFor="auth-confirm-password" className="block text-xs text-th-text2 mb-1.5 uppercase tracking-wider">
                     Confirm Password
                   </label>
-                  <input
-                    id="auth-confirm-password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-th-text placeholder-th-text3 text-sm focus:outline-none focus:border-[#dd6e42] focus:ring-1 focus:ring-[#dd6e42] transition-colors"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      id="auth-confirm-password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      required
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 pr-10 text-th-text placeholder-th-text3 text-sm focus:outline-none focus:border-[#dd6e42] focus:ring-1 focus:ring-[#dd6e42] transition-colors"
+                      placeholder="••••••••"
+                    />
+                    <PasswordToggle visible={showConfirmPassword} onClick={() => setShowConfirmPassword(v => !v)} />
+                  </div>
                 </div>
               )}
             </div>

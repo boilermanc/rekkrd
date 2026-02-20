@@ -15,6 +15,7 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
   // Login form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -107,17 +108,40 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
             </div>
             <div>
               <label htmlFor="admin-password" className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(55,65,81)' }}>Password</label>
-              <input
-                id="admin-password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                style={{ borderColor: 'rgb(209,213,219)', color: 'rgb(17,24,39)' }}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="admin-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  style={{ borderColor: 'rgb(209,213,219)', color: 'rgb(17,24,39)' }}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'rgb(156,163,175)' }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'rgb(107,114,128)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgb(156,163,175)')}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                    <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="0.75" opacity="0.5" fill="none" />
+                    <circle cx="12" cy="12" r="5.5" stroke="currentColor" strokeWidth="0.75" opacity="0.4" fill="none" />
+                    <circle cx="12" cy="12" r="3.5" fill="currentColor" opacity="0.3" />
+                    <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+                    {showPassword && (
+                      <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
             <button
               type="submit"
