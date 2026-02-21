@@ -66,7 +66,7 @@ const CoverPicker: React.FC<CoverPickerProps> = ({ artist, title, currentCoverUr
     <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Choose cover art" className="fixed inset-0 z-[70] flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none">
       <div className="relative w-full max-w-4xl max-h-[90vh] glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-th-surface/[0.06]">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-4 sm:py-6 border-b border-th-surface/[0.06]">
           <h3 className="text-[#f0a882] text-[11px] font-label tracking-[0.3em] uppercase font-bold">
             Choose Cover Art
           </h3>
@@ -81,18 +81,18 @@ const CoverPicker: React.FC<CoverPickerProps> = ({ artist, title, currentCoverUr
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="px-6 pt-4 pb-2">
-          <div className="flex gap-3">
+        <form onSubmit={handleSearch} className="px-3 sm:px-6 pt-4 pb-2">
+          <div className="flex gap-2 sm:gap-3">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search artist + album..."
-              className="flex-1 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+              className="min-w-0 flex-1 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-3 sm:px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
             />
             <button
               type="submit"
-              className="bg-[#dd6e42]/20 border border-[#dd6e42]/30 text-[#f0a882] text-[10px] uppercase tracking-widest px-5 py-3 rounded-xl hover:bg-[#dd6e42]/30 transition-all font-label font-bold"
+              className="shrink-0 bg-[#dd6e42]/20 border border-[#dd6e42]/30 text-[#f0a882] text-[10px] uppercase tracking-widest px-3 sm:px-5 py-3 rounded-xl hover:bg-[#dd6e42]/30 transition-all font-label font-bold"
             >
               Search
             </button>
@@ -100,7 +100,7 @@ const CoverPicker: React.FC<CoverPickerProps> = ({ artist, title, currentCoverUr
         </form>
 
         {/* Cover Grid */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-6">
               <SpinningRecord size="w-20 h-20" />

@@ -24,7 +24,7 @@ const SpinningRecord: React.FC<{ size?: string; labelColor?: string }> = ({
         <div className={`w-[35%] h-[35%] ${labelColor} rounded-full border-2 border-th-surface/[0.15] flex items-center justify-center shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] relative`}>
           <div className="w-3 h-3 bg-[#1a2528] rounded-full shadow-inner border border-th-surface/[0.08] z-10"></div>
           <div className="absolute inset-0 flex items-center justify-center text-[7px] font-label text-th-text2 uppercase tracking-widest">
-            <span className="rotate-0 absolute -top-5 font-bold">THE CROWE</span>
+            <span className="rotate-0 absolute -top-5 font-bold">REKKRD</span>
             <span className="rotate-180 absolute -bottom-5 font-bold">COLLECTION</span>
           </div>
           <div className="absolute inset-0 bg-th-surface/[0.04] rounded-full pointer-events-none"></div>
