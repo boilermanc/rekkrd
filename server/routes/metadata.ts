@@ -47,16 +47,18 @@ router.post(
       const title = sanitizePromptInput(rawTitle, 500);
 
       const prompt = `Search for the official high-quality album details for "${title}" by "${artist}".
-      I need:
-      1. Release year and primary genre.
-      2. A short poetic description and 3-5 tags.
-      3. Link to high-quality cover art.
-      4. Discogs marketplace pricing: I need "price_low", "price_median", and "price_high" in USD based on recent sales.
-      5. Official links to Discogs and MusicBrainz.
-      6. A "sample_url" (YouTube or Preview).
-      7. The tracklist.
 
-Respond with valid JSON only — no markdown, no code fences.`;
+I need the following information:
+1. Release year and primary genre.
+2. A short poetic description and 3-5 tags.
+3. Link to high-quality cover art (cover_url).
+4. Discogs marketplace pricing in USD based on recent sales — you MUST include all three: "price_low", "price_median", and "price_high" as numbers.
+5. Official links: "discogs_url" and "musicbrainz_url".
+6. A "sample_url" (YouTube or Preview link).
+7. The tracklist as an array of strings.
+
+Respond with ONLY valid JSON matching this exact structure (no markdown, no code fences):
+{"artist":"...","title":"...","year":"...","genre":"...","description":"...","cover_url":"...","price_low":0,"price_median":0,"price_high":0,"discogs_url":"...","musicbrainz_url":"...","sample_url":"...","tracklist":["..."],"tags":["..."]}`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
@@ -82,8 +84,9 @@ Respond with valid JSON only — no markdown, no code fences.`;
       // Validate cover_url — Gemini often returns stale/invalid Discogs URLs
       data.cover_url = await findCoverUrl(artist, title, data.cover_url);
 
-      if (!data.year || !data.genre || !data.price_median) {
-        const fallbackPrompt = `Find missing info for "${title}" by "${artist}": year, genre, and median Discogs price (USD). Respond with valid JSON only — no markdown, no code fences.`;
+      const missingPricing = !data.price_low || !data.price_median || !data.price_high;
+      if (!data.year || !data.genre || missingPricing) {
+        const fallbackPrompt = `Find missing info for "${title}" by "${artist}": year, genre, and Discogs marketplace pricing in USD (price_low, price_median, price_high). Respond with valid JSON only — no markdown, no code fences.`;
         const fallbackResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
           contents: fallbackPrompt,
@@ -96,7 +99,9 @@ Respond with valid JSON only — no markdown, no code fences.`;
         // Only fill in missing fields, don't overwrite existing data
         if (!data.year && fallbackData.year) data.year = fallbackData.year;
         if (!data.genre && fallbackData.genre) data.genre = fallbackData.genre;
-        if (!data.price_median && fallbackData.price_median) data.price_median = fallbackData.price_median;
+        if (!data.price_low && fallbackData.price_low) data.price_low = Number(fallbackData.price_low) || 0;
+        if (!data.price_median && fallbackData.price_median) data.price_median = Number(fallbackData.price_median) || 0;
+        if (!data.price_high && fallbackData.price_high) data.price_high = Number(fallbackData.price_high) || 0;
       }
 
       res.status(200).json(data);
