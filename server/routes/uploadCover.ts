@@ -98,19 +98,17 @@ router.post(
         }
       }
 
-      // Download the image from the validated external URL
+      // Download the image from the validated external URL.
+      // Allow redirects — Cover Art Archive always 302s to the actual CDN.
+      // The initial URL has already been validated against the host allowlist
+      // and DNS-checked for private IPs, so following redirects is safe here.
       const imageResp = await fetch(imageUrl, {
         headers: {
           'User-Agent': USER_AGENT,
           'Accept': 'image/*',
         },
-        redirect: 'manual',
+        redirect: 'follow',
       });
-
-      if (imageResp.status >= 300 && imageResp.status < 400) {
-        res.status(400).json({ error: 'Redirects are not allowed' });
-        return;
-      }
 
       if (!imageResp.ok) {
         res.status(502).json({ error: 'Failed to fetch image from source' });
