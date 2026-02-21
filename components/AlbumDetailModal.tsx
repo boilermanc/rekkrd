@@ -120,6 +120,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
 
   const handleCoverSelect = async (url: string) => {
     setUploadingCover(true);
+    const previousCoverUrl = displayCoverUrl;
     try {
       const resp = await fetch('/api/upload-cover', {
         method: 'POST',
@@ -129,17 +130,18 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
         },
         body: JSON.stringify({ imageUrl: url, albumId: album.id }),
       });
-      if (resp.ok) {
-        const { publicUrl } = await resp.json();
-        setDisplayCoverUrl(publicUrl);
-        if (onUpdateAlbum) {
-          onUpdateAlbum(album.id, { cover_url: publicUrl });
-        }
-        showToast('Cover art saved', 'success');
-      } else {
+      if (!resp.ok) {
         showToast('Failed to save cover', 'error');
+        return;
       }
+      const { publicUrl } = await resp.json();
+      setDisplayCoverUrl(publicUrl);
+      if (onUpdateAlbum) {
+        await onUpdateAlbum(album.id, { cover_url: publicUrl });
+      }
+      showToast('Cover art saved', 'success');
     } catch {
+      setDisplayCoverUrl(previousCoverUrl);
       showToast('Failed to save cover', 'error');
     } finally {
       setUploadingCover(false);

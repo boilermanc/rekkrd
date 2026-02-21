@@ -33,7 +33,7 @@ router.post(
   requireAuthWithUser,
   async (req, res) => {
     const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) {
       res.status(500).json({ error: 'Supabase not configured' });
       return;
@@ -137,18 +137,6 @@ router.post(
       const { data: { publicUrl } } = supabase.storage
         .from('album-photos')
         .getPublicUrl(fileName);
-
-      // Update the album's cover_url in the database
-      const { error: dbError } = await supabase
-        .from('albums')
-        .update({ cover_url: publicUrl })
-        .eq('id', albumId);
-
-      if (dbError) {
-        console.error('DB update error:', dbError);
-        res.status(500).json({ error: 'Failed to update album' });
-        return;
-      }
 
       res.status(200).json({ publicUrl });
     } catch (error) {
