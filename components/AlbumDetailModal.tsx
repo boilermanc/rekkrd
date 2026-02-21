@@ -140,7 +140,10 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
         body: JSON.stringify({ imageUrl: url, albumId: album.id }),
       });
       if (!resp.ok) {
-        showToast('Failed to save cover', 'error');
+        const errBody = await resp.json().catch(() => null);
+        const detail = errBody?.error || resp.statusText;
+        console.error('upload-cover failed:', resp.status, detail);
+        showToast(`Failed to save cover: ${detail}`, 'error');
         return;
       }
       const { publicUrl } = await resp.json();
