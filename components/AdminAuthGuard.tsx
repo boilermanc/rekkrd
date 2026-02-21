@@ -1,7 +1,8 @@
-import React, { useEffect, useState, FormEvent } from 'react';
+import React, { useEffect, useState, useCallback, FormEvent } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { isAdmin } from '../services/profileService';
 import { supabase } from '../services/supabaseService';
+import Turnstile from './Turnstile';
 
 interface AdminAuthGuardProps {
   children: React.ReactNode;
@@ -18,6 +19,10 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  const handleTurnstileVerify = useCallback((token: string) => setTurnstileToken(token), []);
+  const handleTurnstileExpire = useCallback(() => setTurnstileToken(null), []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -48,8 +53,25 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
       return;
     }
 
+    if (!turnstileToken) {
+      setLoginError('Please complete the verification challenge.');
+      return;
+    }
+
     setLoginLoading(true);
     try {
+      // Verify Turnstile token server-side first
+      const verifyRes = await fetch('/api/auth/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ turnstileToken }),
+      });
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json().catch(() => ({}));
+        setTurnstileToken(null);
+        throw new Error(data.error || 'Verification failed. Please try again.');
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -143,9 +165,14 @@ const AdminAuthGuard: React.FC<AdminAuthGuardProps> = ({ children }) => {
                 </button>
               </div>
             </div>
+            <Turnstile
+              onVerify={handleTurnstileVerify}
+              onExpire={handleTurnstileExpire}
+              theme="light"
+            />
             <button
               type="submit"
-              disabled={loginLoading}
+              disabled={loginLoading || !turnstileToken}
               className="w-full py-2.5 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{ background: loginLoading ? 'rgb(129,140,248)' : 'rgb(99,102,241)' }}
             >

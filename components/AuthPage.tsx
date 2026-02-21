@@ -1,5 +1,6 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useCallback, FormEvent } from 'react';
 import { supabase } from '../services/supabaseService';
+import Turnstile from './Turnstile';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -12,11 +13,16 @@ const AuthPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  const handleTurnstileVerify = useCallback((token: string) => setTurnstileToken(token), []);
+  const handleTurnstileExpire = useCallback(() => setTurnstileToken(null), []);
 
   const toggleMode = () => {
     setMode(m => (m === 'signin' ? 'signup' : 'signin'));
     setError(null);
     setConfirmPassword('');
+    setTurnstileToken(null);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -38,9 +44,26 @@ const AuthPage: React.FC = () => {
       return;
     }
 
+    if (!turnstileToken) {
+      setError('Please complete the verification challenge.');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Verify Turnstile token server-side first
+      const verifyRes = await fetch('/api/auth/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ turnstileToken }),
+      });
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json().catch(() => ({}));
+        setTurnstileToken(null);
+        throw new Error(data.error || 'Verification failed. Please try again.');
+      }
+
       if (mode === 'signin') {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -124,7 +147,7 @@ const AuthPage: React.FC = () => {
           <div className="flex mb-6 rounded-lg overflow-hidden border border-th-surface/[0.10]">
             <button
               type="button"
-              onClick={() => { setMode('signin'); setError(null); setConfirmPassword(''); }}
+              onClick={() => { setMode('signin'); setError(null); setConfirmPassword(''); setTurnstileToken(null); }}
               className={`flex-1 py-2 text-sm font-medium tracking-wide transition-colors ${
                 mode === 'signin'
                   ? 'bg-[#c45a30] text-th-text'
@@ -135,7 +158,7 @@ const AuthPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => { setMode('signup'); setError(null); }}
+              onClick={() => { setMode('signup'); setError(null); setTurnstileToken(null); }}
               className={`flex-1 py-2 text-sm font-medium tracking-wide transition-colors ${
                 mode === 'signup'
                   ? 'bg-[#c45a30] text-th-text'
@@ -215,10 +238,16 @@ const AuthPage: React.FC = () => {
               )}
             </div>
 
+            <Turnstile
+              onVerify={handleTurnstileVerify}
+              onExpire={handleTurnstileExpire}
+              resetKey={mode}
+            />
+
             <button
               type="submit"
-              disabled={loading}
-              className="w-full mt-6 py-2.5 rounded-lg bg-[#c45a30] hover:bg-[#dd6e42] text-th-text font-medium text-sm tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={loading || !turnstileToken}
+              className="w-full mt-3 py-2.5 rounded-lg bg-[#c45a30] hover:bg-[#dd6e42] text-th-text font-medium text-sm tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

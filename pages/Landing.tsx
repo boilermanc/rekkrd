@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, FormEvent } from 'react';
+import React, { useState, useRef, useEffect, useCallback, FormEvent } from 'react';
 import './Landing.css';
 import { useAuthContext } from '../contexts/AuthContext';
 import { supabase } from '../services/supabaseService';
@@ -6,6 +6,7 @@ import { getPageContent } from '../services/contentService';
 import { LANDING_DEFAULTS } from '../constants/landingDefaults';
 import type { CmsLandingContent } from '../types/cms';
 import SEO from '../components/SEO';
+import Turnstile from '../components/Turnstile';
 
 interface LandingProps {
   onEnterApp?: () => void;
@@ -133,7 +134,11 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const authRef = useRef<HTMLDivElement>(null);
+
+  const handleTurnstileVerify = useCallback((token: string) => setTurnstileToken(token), []);
+  const handleTurnstileExpire = useCallback(() => setTurnstileToken(null), []);
 
   // Close on outside click
   useEffect(() => {
@@ -163,6 +168,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setTurnstileToken(null);
     setShowAuth(true);
   };
 
@@ -209,8 +215,24 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
       setAuthError('Passwords don\u2019t match.');
       return;
     }
+    if (!turnstileToken) {
+      setAuthError('Please complete the verification challenge.');
+      return;
+    }
     setAuthLoading(true);
     try {
+      // Verify Turnstile token server-side first
+      const verifyRes = await fetch('/api/auth/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ turnstileToken }),
+      });
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json().catch(() => ({}));
+        setTurnstileToken(null);
+        throw new Error(data.error || 'Verification failed. Please try again.');
+      }
+
       if (authMode === 'signin') {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
@@ -819,13 +841,13 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             <div className="auth-tabs">
               <button
                 className={`auth-tab${authMode === 'signin' ? ' active' : ''}`}
-                onClick={() => { setAuthMode('signin'); setAuthError(null); setConfirmPassword(''); }}
+                onClick={() => { setAuthMode('signin'); setAuthError(null); setConfirmPassword(''); setTurnstileToken(null); }}
               >
                 Sign In
               </button>
               <button
                 className={`auth-tab${authMode === 'signup' ? ' active' : ''}`}
-                onClick={() => { setAuthMode('signup'); setAuthError(null); }}
+                onClick={() => { setAuthMode('signup'); setAuthError(null); setTurnstileToken(null); }}
               >
                 Sign Up
               </button>
@@ -874,7 +896,12 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
                   />
                 </div>
               )}
-              <button type="submit" className="auth-submit" disabled={authLoading}>
+              <Turnstile
+                onVerify={handleTurnstileVerify}
+                onExpire={handleTurnstileExpire}
+                resetKey={`landing-${authMode}-${showAuth}`}
+              />
+              <button type="submit" className="auth-submit" disabled={authLoading || !turnstileToken}>
                 {authLoading ? 'Loading\u2026' : authMode === 'signin' ? 'Sign In' : 'Create Account'}
               </button>
             </form>
@@ -884,7 +911,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               <button
                 type="button"
                 className="auth-switch-link"
-                onClick={() => { setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); setAuthError(null); }}
+                onClick={() => { setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); setAuthError(null); setTurnstileToken(null); }}
               >
                 {authMode === 'signin' ? 'Sign up' : 'Sign in'}
               </button>
