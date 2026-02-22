@@ -2,6 +2,8 @@
 import React from 'react';
 import { Album } from '../types';
 import { proxyImageUrl } from '../services/imageProxy';
+import { getSpotifySearchUrl } from '../utils/spotify';
+import SpotifyIcon from './SpotifyIcon';
 
 interface AlbumCardProps {
   album: Album;
@@ -64,17 +66,30 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
       <div className="p-4 relative">
         <div className="flex justify-between items-start mb-1">
           <h3 className="font-bold text-th-text truncate w-full" title={album.title}>{album.title}</h3>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(album.id);
-            }}
-            className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500 transition-all ml-2 p-1 rounded-md"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          <div className="flex items-center ml-2 gap-1">
+            <a
+              href={getSpotifySearchUrl(album.artist, album.title)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="opacity-0 group-hover:opacity-100 text-th-text3 hover:text-[#1DB954] transition-all p-1 rounded-md"
+              aria-label="Play on Spotify"
+              title="Play on Spotify"
+            >
+              <SpotifyIcon size={16} />
+            </a>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(album.id);
+              }}
+              className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500 transition-all p-1 rounded-md"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
         <p className="text-[#dd6e42] text-sm font-medium truncate">{album.artist}</p>
         <div className="mt-2 flex items-center justify-between text-[10px] text-th-text3 uppercase tracking-widest">

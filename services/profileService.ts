@@ -14,6 +14,9 @@ export interface Profile {
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
+  discogs_username: string | null;
+  discogs_user_id: number | null;
+  discogs_connected_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -24,13 +27,23 @@ function assertClient() {
   }
 }
 
+// Columns safe to return to the frontend (excludes discogs_oauth_token, discogs_oauth_secret)
+const PROFILE_COLUMNS = [
+  'id', 'display_name', 'favorite_genres', 'listening_setup', 'collecting_goal',
+  'onboarding_completed', 'role', 'subscription_tier',
+  'utm_source', 'utm_medium', 'utm_campaign',
+  'discogs_username', 'discogs_user_id', 'discogs_connected_at',
+  'created_at', 'updated_at',
+].join(', ');
+
 export async function getProfile(userId: string): Promise<Profile | null> {
   assertClient();
 
   try {
+    // Explicit column list — excludes discogs_oauth_token and discogs_oauth_secret
     const { data, error } = await supabase!
       .from('profiles')
-      .select('*')
+      .select(PROFILE_COLUMNS)
       .eq('id', userId)
       .single();
 
@@ -41,7 +54,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
       throw error;
     }
 
-    return data as Profile;
+    return data as unknown as Profile;
   } catch (e) {
     console.error('Error fetching profile:', e);
     return null;

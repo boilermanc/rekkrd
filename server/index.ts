@@ -34,6 +34,7 @@ import onboardingRouter from './routes/onboarding.js';
 import collectionRouter from './routes/collection.js';
 import authRouter from './routes/auth.js';
 import discogsRouter from './routes/discogs.js';
+import discogsAuthRouter from './routes/discogsAuth.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 import { validateDiscogsConfig } from './lib/discogs.js';
 
@@ -46,7 +47,7 @@ const _routerMap: Record<string, unknown> = {
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, supportRouter, sitemapRouter, emailRouter,
-  onboardingRouter, collectionRouter, authRouter, discogsRouter,
+  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -140,6 +141,7 @@ mountRouter('onboardingRouter', onboardingRouter);
 mountRouter('collectionRouter', collectionRouter);
 mountRouter('authRouter', authRouter);
 mountRouter('discogsRouter', discogsRouter);
+mountRouter('discogsAuthRouter', discogsAuthRouter);
 console.log('[boot] All routes registered');
 
 // Ensure gear-photos storage bucket exists
@@ -196,6 +198,36 @@ async function ensureGearManualsBucket() {
 
 ensureGearManualsBucket().catch(err =>
   console.error('gear-manuals bucket check failed:', err)
+);
+
+// Ensure discogs-images storage bucket exists
+async function ensureDiscogsImagesBucket() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+
+  const { createClient } = await import('@supabase/supabase-js');
+  const admin = createClient(url, key);
+
+  const { data: buckets } = await admin.storage.listBuckets();
+  const exists = buckets?.some((b: { name: string }) => b.name === 'discogs-images');
+
+  if (!exists) {
+    const { error } = await admin.storage.createBucket('discogs-images', {
+      public: true,
+      fileSizeLimit: 10 * 1024 * 1024, // 10 MB
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+    });
+    if (error) {
+      console.error('Failed to create discogs-images bucket:', error.message);
+    } else {
+      console.log('Created discogs-images storage bucket');
+    }
+  }
+}
+
+ensureDiscogsImagesBucket().catch(err =>
+  console.error('discogs-images bucket check failed:', err)
 );
 
 // Crawler/bot meta tag pre-rendering — before static files + SPA fallback

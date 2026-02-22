@@ -128,6 +128,19 @@ export interface ManualSearchResult {
   search_url: string;
 }
 
+/** A Discogs release match returned alongside Gemini identification. */
+export interface DiscogsMatch {
+  id: number;
+  title: string;
+  year: string;
+  country: string;
+  format: string;
+  thumb: string;
+  catno: string;
+  label: string;
+  matchType: 'barcode' | 'text';
+}
+
 /** Shape returned by the /api/identify-gear endpoint. */
 export interface IdentifiedGear {
   category: string;

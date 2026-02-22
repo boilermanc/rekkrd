@@ -1,5 +1,5 @@
 
-import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem, IdentifiedGear, ManualSearchResult, SetupGuide } from '../types';
+import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem, IdentifiedGear, ManualSearchResult, SetupGuide, DiscogsMatch } from '../types';
 import { supabase } from './supabaseService';
 
 /**
@@ -79,7 +79,7 @@ async function handleGatingError(response: Response): Promise<void> {
 }
 
 export const geminiService = {
-  async identifyAlbum(base64DataUrl: string): Promise<{ artist: string; title: string } | null> {
+  async identifyAlbum(base64DataUrl: string): Promise<{ artist: string; title: string; barcode?: string; discogsMatches?: DiscogsMatch[] } | null> {
     try {
       const resized = await resizeForAI(base64DataUrl);
       const [header, base64Data] = resized.split(',');
@@ -117,7 +117,17 @@ export const geminiService = {
       if (!data || typeof data.artist !== 'string' || typeof data.title !== 'string') {
         return null;
       }
-      return { artist: data.artist, title: data.title };
+      const result: { artist: string; title: string; barcode?: string; discogsMatches?: DiscogsMatch[] } = {
+        artist: data.artist,
+        title: data.title,
+      };
+      if (typeof data.barcode === 'string' && data.barcode.length > 0) {
+        result.barcode = data.barcode;
+      }
+      if (Array.isArray(data.discogsMatches) && data.discogsMatches.length > 0) {
+        result.discogsMatches = data.discogsMatches;
+      }
+      return result;
     } catch (error) {
       if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Identification Error:', error);

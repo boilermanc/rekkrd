@@ -21,13 +21,24 @@ function assertClient() {
   }
 }
 
+async function requireUserId(): Promise<string> {
+  assertClient();
+  const { data: { session } } = await supabase!.auth.getSession();
+  if (!session?.user?.id) {
+    throw new Error('Not authenticated');
+  }
+  return session.user.id;
+}
+
 export const supabaseService = {
   async getAlbums(): Promise<Album[]> {
     assertClient();
-    
+    const userId = await requireUserId();
+
     const { data, error } = await supabase
       .from('albums')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -84,7 +95,8 @@ export const supabaseService = {
 
   async saveAlbum(album: NewAlbum): Promise<Album> {
     assertClient();
-    
+    const userId = await requireUserId();
+
     let photoUrl: string | undefined = undefined;
 
     if (album.original_photo_url && album.original_photo_url.startsWith('data:image')) {
@@ -102,6 +114,7 @@ export const supabaseService = {
     const { data, error } = await supabase
       .from('albums')
       .insert([{
+        user_id: userId,
         artist: album.artist,
         title: album.title,
         year: album.year,
@@ -153,10 +166,12 @@ export const supabaseService = {
       dbUpdates.is_favorite = updates.isFavorite;
     }
 
+    const userId = await requireUserId();
     const { error } = await supabase
       .from('albums')
       .update(dbUpdates)
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error updating album:', error);
@@ -166,11 +181,13 @@ export const supabaseService = {
 
   async deleteAlbum(id: string): Promise<void> {
     assertClient();
-    
+    const userId = await requireUserId();
+
     const { error } = await supabase
       .from('albums')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error deleting album:', error);
