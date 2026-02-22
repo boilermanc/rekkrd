@@ -33,13 +33,16 @@ import DiscogsReleaseDetail from './components/DiscogsReleaseDetail';
 import DiscogsConnect from './components/DiscogsConnect';
 import DiscogsCollectionBrowser from './components/DiscogsCollectionBrowser';
 import WantlistView from './components/WantlistView';
+import CollectionValueDashboard from './src/components/CollectionValueDashboard';
+import CollectionInsightsCard from './src/components/CollectionInsightsCard';
+import { TrendingUp } from 'lucide-react';
 import { wantlistService } from './services/wantlistService';
 import { WantlistItem } from './types';
 
 const PAGE_SIZE = 40;
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
-type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd' | 'discogs' | 'wantlist';
+type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd' | 'discogs' | 'wantlist' | 'value-dashboard';
 
 interface DuplicatePendingData {
   identity: { artist: string; title: string };
@@ -644,7 +647,7 @@ const App: React.FC = () => {
 
 
   return (
-    <div className={`min-h-screen ${currentView !== 'landing' && currentView !== 'discogs' && currentView !== 'wantlist' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
+    <div className={`min-h-screen ${currentView !== 'landing' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
       <SEO
         title="My Collection"
         description="Browse and manage your vinyl record collection."
@@ -693,7 +696,7 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && <div className="flex-1 max-w-xl flex items-center gap-2">
+          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button
               onClick={() => setShowStats(!showStats)}
               className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
@@ -766,6 +769,13 @@ const App: React.FC = () => {
                   {wantlistCount}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setCurrentView('value-dashboard')}
+              className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'value-dashboard' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
+              title="Collection Value"
+            >
+              <TrendingUp className="w-5 h-5" />
             </button>
             <button
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
@@ -1237,6 +1247,8 @@ const App: React.FC = () => {
             collectionDiscogsIds={collectionDiscogsIds}
           />
         </main>
+      ) : currentView === 'value-dashboard' ? (
+        <CollectionValueDashboard />
       ) : (
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
           {albums.length === 0 ? (
@@ -1257,6 +1269,11 @@ const App: React.FC = () => {
             </div>
           ) : (
             <>
+              {currentView === 'grid' && (
+                <div className="mb-4">
+                  <CollectionInsightsCard onClick={() => setCurrentView('value-dashboard')} />
+                </div>
+              )}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
                 {paginatedAlbums.map(album => (
                   <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} />
@@ -1274,7 +1291,7 @@ const App: React.FC = () => {
         </main>
       )}
 
-      {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && (
+      {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && (
         <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
           <button
             onClick={() => {
