@@ -31,6 +31,7 @@ import SEO from './components/SEO';
 import DiscogsSearch from './components/DiscogsSearch';
 import DiscogsReleaseDetail from './components/DiscogsReleaseDetail';
 import DiscogsConnect from './components/DiscogsConnect';
+import DiscogsCollectionBrowser from './components/DiscogsCollectionBrowser';
 
 const PAGE_SIZE = 40;
 
@@ -64,6 +65,7 @@ const App: React.FC = () => {
   const [heroBg, setHeroBg] = useState(DEFAULT_BG);
   const [duplicatePending, setDuplicatePending] = useState<DuplicatePendingData | null>(null);
   const [discogsReleaseId, setDiscogsReleaseId] = useState<number | null>(null);
+  const [discogsConnected, setDiscogsConnected] = useState(false);
 
   const [yearRange, setYearRange] = useState({ min: '', max: '' });
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -1076,9 +1078,25 @@ const App: React.FC = () => {
               <p className="text-th-text3/60 text-sm mt-1">Search the world's largest music database</p>
             </div>
             <div className="w-full sm:w-72">
-              <DiscogsConnect />
+              <DiscogsConnect onConnectionChange={setDiscogsConnected} />
             </div>
           </div>
+
+          {discogsConnected && (
+            <section className="glass-morphism rounded-xl p-6 space-y-4">
+              <div>
+                <h3 className="text-th-text font-display text-lg">Import Your Discogs Collection</h3>
+                <p className="text-th-text/60 text-sm mt-1">
+                  Select records from your Discogs collection to add them to Rekkrd.
+                </p>
+              </div>
+              <DiscogsCollectionBrowser onImportComplete={async () => {
+                const data = await supabaseService.getAlbums();
+                setAlbums(data);
+              }} />
+            </section>
+          )}
+
           <DiscogsSearch onSelectResult={(result) => setDiscogsReleaseId(result.id)} />
         </main>
       ) : (

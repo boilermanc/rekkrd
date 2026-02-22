@@ -173,7 +173,7 @@ const BlogPost: React.FC = () => {
       <footer className="footer">
         <div className="container">
           <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} Rekkrd. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} <a href="https://www.sweetwater.technology" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>Sweetwater Technology</a></span>
             <span>
               <Link to="/privacy">Privacy</Link>
               {' · '}

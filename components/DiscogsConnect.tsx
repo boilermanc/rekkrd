@@ -17,7 +17,11 @@ async function getAuthHeaders(accessToken: string): Promise<Record<string, strin
   };
 }
 
-const DiscogsConnect: React.FC = () => {
+interface DiscogsConnectProps {
+  onConnectionChange?: (connected: boolean) => void;
+}
+
+const DiscogsConnect: React.FC<DiscogsConnectProps> = ({ onConnectionChange }) => {
   const { user, session } = useAuthContext();
   const { showToast } = useToast();
 
@@ -43,6 +47,13 @@ const DiscogsConnect: React.FC = () => {
   useEffect(() => {
     refreshProfile();
   }, [refreshProfile]);
+
+  // Notify parent when connection status changes
+  useEffect(() => {
+    if (!loading) {
+      onConnectionChange?.(!!profile?.discogs_username);
+    }
+  }, [loading, profile?.discogs_username, onConnectionChange]);
 
   // ── Handle ?discogs=connected callback param ────────────────────
 

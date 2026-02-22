@@ -128,6 +128,48 @@ export interface ManualSearchResult {
   search_url: string;
 }
 
+// ── Discogs Collection ────────────────────────────────────────
+
+export interface DiscogsCollectionArtist {
+  name: string;
+  id: number;
+}
+
+export interface DiscogsBasicInformation {
+  id: number;
+  title: string;
+  year: number;
+  artists: DiscogsCollectionArtist[];
+  genres: string[];
+  styles: string[];
+  cover_image: string;
+  thumb: string;
+}
+
+export interface DiscogsCollectionRelease {
+  id: number;
+  instance_id: number;
+  basic_information: DiscogsBasicInformation;
+}
+
+export interface DiscogsPagination {
+  page: number;
+  pages: number;
+  per_page: number;
+  items: number;
+}
+
+export interface DiscogsCollectionResponse {
+  releases: DiscogsCollectionRelease[];
+  pagination: DiscogsPagination;
+}
+
+export interface DiscogsImportResult {
+  imported: number;
+  skipped: number;
+  errors: string[];
+}
+
 /** A Discogs release match returned alongside Gemini identification. */
 export interface DiscogsMatch {
   id: number;

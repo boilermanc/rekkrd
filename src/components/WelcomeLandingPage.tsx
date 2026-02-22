@@ -493,7 +493,7 @@ export default function WelcomeLandingPage() {
         className="text-center text-xs px-6 py-6"
         style={{ color: C.bodyLight, borderTop: `1px solid ${C.divider}` }}
       >
-        &copy; {new Date().getFullYear()} Rekkrd. All rights reserved.
+        &copy; {new Date().getFullYear()} <a href="https://www.sweetwater.technology" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>Sweetwater Technology</a>
       </footer>
 
       {/* ─── Fade-in animation styles ─── */}

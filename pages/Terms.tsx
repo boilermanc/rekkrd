@@ -182,7 +182,7 @@ const Terms: React.FC = () => {
 
       <footer className="terms-footer">
         <div className="terms-container">
-          <span>&copy; 2025 Rekkrd. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} <a href="https://www.sweetwater.technology" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>Sweetwater Technology</a></span>
           <Link to="/">Back to Rekkrd</Link>
         </div>
       </footer>

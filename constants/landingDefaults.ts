@@ -161,7 +161,7 @@ export const DEFAULT_FINAL_CTA: CmsFinalCta = {
 
 export const DEFAULT_FOOTER: CmsFooter = {
   brand_description: 'The AI-powered vinyl collection manager for serious crate diggers and casual collectors alike.',
-  copyright: '\u00A9 2025 Rekkrd. All rights reserved.',
+  copyright: '\u00A9 2026 Sweetwater Technology',
   tagline: 'Made with \u2665 for vinyl lovers',
 };
 

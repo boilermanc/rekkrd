@@ -821,7 +821,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             </div>
           </div>
           <div className="footer-bottom">
-            <span>&copy; 2026 Rekk<span style={{ color: '#dd6e42' }}>r</span>d. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} <a href="https://www.sweetwater.technology" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>Sweetwater Technology</a></span>
             <span>{content.footer.tagline}</span>
           </div>
         </div>
