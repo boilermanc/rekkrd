@@ -211,6 +211,19 @@ export async function updatePost(id: string, input: UpdatePostInput): Promise<Bl
 
   if (error) throw error;
 
+  // When a post is published, transition any linked blog ideas to "published"
+  if (input.status === 'published') {
+    const { error: ideaError } = await supabase
+      .from('blog_ideas')
+      .update({ status: 'published' })
+      .eq('blog_post_id', id);
+
+    if (ideaError) {
+      console.error('Failed to update linked blog idea status:', ideaError);
+      // Non-fatal — the post itself was saved successfully
+    }
+  }
+
   return data as BlogPost;
 }
 

@@ -101,18 +101,24 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isSupabaseReady) {
+    if (isSupabaseReady && user) {
       const loadAlbums = async () => {
         setLoading(true);
-        const data = await supabaseService.getAlbums();
-        setAlbums(data);
-        setLoading(false);
+        try {
+          const data = await supabaseService.getAlbums();
+          setAlbums(data);
+        } catch (err) {
+          console.error('Failed to load albums:', err);
+          setAlbums([]);
+        } finally {
+          setLoading(false);
+        }
       };
       loadAlbums();
-    } else {
+    } else if (!isSupabaseReady || !authLoading) {
       setLoading(false);
     }
-  }, [isSupabaseReady]);
+  }, [isSupabaseReady, user, authLoading]);
 
   const refreshWantlistCount = useCallback(async () => {
     try {
@@ -1198,8 +1204,12 @@ const App: React.FC = () => {
                 </p>
               </div>
               <DiscogsCollectionBrowser onImportComplete={async () => {
-                const data = await supabaseService.getAlbums();
-                setAlbums(data);
+                try {
+                  const data = await supabaseService.getAlbums();
+                  setAlbums(data);
+                } catch (err) {
+                  console.error('Failed to refresh albums after import:', err);
+                }
               }} />
             </section>
           )}
