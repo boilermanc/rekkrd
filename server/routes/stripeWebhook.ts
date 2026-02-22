@@ -40,7 +40,7 @@ function mapStatus(stripeStatus: string): 'active' | 'trialing' | 'past_due' | '
 /** Map internal plan tier to user-facing display name. */
 const PLAN_DISPLAY_NAMES: Record<string, string> = {
   curator: 'Curator',
-  enthusiast: 'Archivist',
+  enthusiast: 'Enthusiast',
 };
 
 /** Look up a user's profile by their Stripe customer ID. Returns the profile row or null. */

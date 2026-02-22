@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
 import { sendTemplatedEmail } from '../services/emailService.js';
+import { getSubscription, PLAN_LIMITS } from '../lib/subscription.js';
 
 const router = Router();
 
@@ -13,6 +14,59 @@ function getSupabaseAdmin() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 }
+
+// ── POST /api/collection/check-limit ─────────────────────────────────
+// Called before saving an album. Returns 403 if the user's plan has a
+// finite album limit and they've reached it.
+router.post(
+  '/api/collection/check-limit',
+  requireAuthWithUser,
+  async (req, res) => {
+    const { userId } = (req as typeof req & { auth: AuthResult }).auth;
+
+    try {
+      const sub = await getSubscription(userId);
+      const albumLimit = PLAN_LIMITS[sub.plan].albums;
+
+      // Paid tiers have Infinity — skip the count query entirely
+      if (albumLimit === Infinity) {
+        res.status(200).json({ allowed: true });
+        return;
+      }
+
+      const supabase = getSupabaseAdmin();
+      const { count, error } = await supabase
+        .from('albums')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      if (error || count === null) {
+        console.error('[collection] check-limit count error:', error?.message);
+        // Fail open — don't block the save if we can't count
+        res.status(200).json({ allowed: true });
+        return;
+      }
+
+      if (count >= albumLimit) {
+        res.status(403).json({
+          error: 'Album limit reached',
+          code: 'ALBUM_LIMIT_REACHED',
+          limit: albumLimit,
+          used: count,
+          upgradeRequired: 'curator',
+        });
+        return;
+      }
+
+      res.status(200).json({ allowed: true, used: count, limit: albumLimit });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[collection] check-limit error:', message);
+      // Fail open
+      res.status(200).json({ allowed: true });
+    }
+  },
+);
 
 // ── POST /api/collection/milestone-check ─────────────────────────────
 // Called after an album is added. Checks the user's total album count

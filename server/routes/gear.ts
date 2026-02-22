@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
 import { GEAR_CATEGORIES } from '../../types.js';
+import { getSubscription, PLAN_LIMITS } from '../lib/subscription.js';
 
 const router = Router();
 const gearRateLimit = createRateLimit(30, 60);
@@ -23,6 +24,55 @@ const UPDATABLE_FIELDS = [
   'manual_url', 'manual_pdf_url', 'image_url', 'original_photo_url',
   'purchase_price', 'purchase_date', 'notes', 'position',
 ] as const;
+
+// ── POST /api/gear/check-limit ───────────────────────────────────
+// Called before saving a gear item. Returns 403 if the user's plan
+// has a finite gear limit and they've reached it.
+router.post('/api/gear/check-limit', requireAuthWithUser, async (req: Request, res: Response) => {
+  const userId = getAuth(req);
+
+  try {
+    const sub = await getSubscription(userId);
+    const gearLimit = PLAN_LIMITS[sub.plan].gear;
+
+    // Paid tiers have Infinity — skip the count query entirely
+    if (gearLimit === Infinity) {
+      res.status(200).json({ allowed: true });
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { count, error } = await supabase
+      .from('gear')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error || count === null) {
+      console.error('[gear] check-limit count error:', error?.message);
+      // Fail open — don't block the save if we can't count
+      res.status(200).json({ allowed: true });
+      return;
+    }
+
+    if (count >= gearLimit) {
+      res.status(403).json({
+        error: 'Gear limit reached',
+        code: 'GEAR_LIMIT_REACHED',
+        limit: gearLimit,
+        used: count,
+        upgradeRequired: 'curator',
+      });
+      return;
+    }
+
+    res.status(200).json({ allowed: true, used: count, limit: gearLimit });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[gear] check-limit error:', message);
+    // Fail open
+    res.status(200).json({ allowed: true });
+  }
+});
 
 // ── GET /api/gear ─────────────────────────────────────────────────
 

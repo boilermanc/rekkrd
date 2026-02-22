@@ -12,10 +12,10 @@ export interface SubscriptionInfo {
   aiScansResetAt: string;
 }
 
-export const PLAN_LIMITS: Record<Plan, { scans: number; albums: number }> = {
-  collector: { scans: 10, albums: 100 },
-  curator: { scans: Infinity, albums: Infinity },
-  enthusiast: { scans: Infinity, albums: Infinity },
+export const PLAN_LIMITS: Record<Plan, { scans: number; albums: number; gear: number }> = {
+  collector: { scans: 10, albums: 100, gear: 3 },
+  curator: { scans: Infinity, albums: Infinity, gear: Infinity },
+  enthusiast: { scans: Infinity, albums: Infinity, gear: Infinity },
 };
 
 const TIER_LEVELS: Record<Plan, number> = {

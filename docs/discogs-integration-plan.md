@@ -198,7 +198,7 @@ All requests must include a signed Authorization header using HMAC-SHA1 (via `oa
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 25.1 | Define Discogs feature access: Collector (free) = search + 50 import + view pricing; Curator ($4.99) = full import + sync + pricing; Archivist ($9.99) = all + alerts + nightly sync + insights | Critical | Medium |
+| 25.1 | Define Discogs feature access: Collector (free) = search + 50 import + view pricing; Curator ($4.99) = full import + sync + pricing; Enthusiast ($9.99) = all + alerts + nightly sync + insights | Critical | Medium |
 | 25.2 | Implement server-side tier checking middleware — 403 with upgrade prompt for gated features | Critical | Medium |
 | 25.3 | Build contextual upgrade modals when free users hit tier limits | High | Medium |
 | 25.4 | Add usage tracking in `discogs_usage` table — API calls, imports, syncs per month | Medium | Medium |

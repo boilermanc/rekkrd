@@ -20,7 +20,7 @@ const FAQS: FAQItem[] = [
     category: 'Collection',
     question: 'Is there a limit to how many records I can add?',
     answer:
-      'The free Collector tier supports up to 100 albums and 10 AI scans per month. Upgrade to Curator or Archivist for unlimited storage and scans.',
+      'The free Collector tier supports up to 100 albums and 10 AI scans per month. Upgrade to Curator or Enthusiast for unlimited storage and scans.',
   },
   {
     category: 'Stakkd',
@@ -32,7 +32,7 @@ const FAQS: FAQItem[] = [
     category: 'Account',
     question: 'Can I export my collection?',
     answer:
-      'Yes. All tiers can export their collection as CSV. Curator and Archivist tiers also get JSON export with full metadata.',
+      'Yes. All tiers can export their collection as CSV. Curator and Enthusiast tiers also get JSON export with full metadata.',
   },
   {
     category: 'Privacy',

@@ -75,7 +75,7 @@ export const emailPresets: EmailPreset[] = [
       preheader_text: 'Unlock unlimited scanning and cataloging with a Rekkrd upgrade.',
       headline: 'Ready for Unlimited?',
       hero_body: "You're getting close to your free tier limits — 100 albums, 10 scans a month. That's a lot of vinyl, but we both know you're not done.",
-      body_content: "Curator ($4.99/mo) gives you unlimited scans and up to 500 albums. Archivist ($9.99/mo) removes every limit — unlimited albums, priority AI, and early access to new features. Both plans include full Stakkd gear cataloging.",
+      body_content: "Curator ($4.99/mo) gives you unlimited scans and up to 500 albums. Enthusiast ($9.99/mo) removes every limit — unlimited albums, priority AI, and early access to new features. Both plans include full Stakkd gear cataloging.",
       cta_text: 'See Plans',
       cta_url: 'https://rekkrd.com/pricing',
       secondary_content: "No pressure — your existing collection isn't going anywhere.",

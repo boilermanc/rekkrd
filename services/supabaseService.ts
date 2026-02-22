@@ -21,8 +21,22 @@ function assertClient() {
   }
 }
 
+// Module-level user ID set by auth context — avoids getSession() desync
+let _currentUserId: string | null = null;
+
+export function setCurrentUserId(userId: string | null) {
+  _currentUserId = userId;
+}
+
+export function getCurrentUserId(): string | null {
+  return _currentUserId;
+}
+
 async function requireUserId(): Promise<string> {
   assertClient();
+  // Prefer the user ID set by the auth context
+  if (_currentUserId) return _currentUserId;
+  // Fallback to getSession() for edge cases
   const { data: { session } } = await supabase!.auth.getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');

@@ -427,6 +427,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
           isOpen={manualModalOpen}
           onClose={() => setManualModalOpen(false)}
           onGearSaved={handleGearSaved}
+          onUpgradeRequired={onUpgradeRequired}
         />
       </div>
     );
@@ -686,6 +687,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         isOpen={manualModalOpen}
         onClose={() => setManualModalOpen(false)}
         onGearSaved={handleGearSaved}
+        onUpgradeRequired={onUpgradeRequired}
       />
 
       {selectedGear && (

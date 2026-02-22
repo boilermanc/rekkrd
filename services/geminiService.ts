@@ -63,6 +63,20 @@ export class UpgradeRequiredError extends Error {
   }
 }
 
+export class AlbumLimitError extends Error {
+  constructor(public limit: number, public used: number) {
+    super('Album limit reached');
+    this.name = 'AlbumLimitError';
+  }
+}
+
+export class GearLimitError extends Error {
+  constructor(public limit: number, public used: number) {
+    super('Gear limit reached');
+    this.name = 'GearLimitError';
+  }
+}
+
 async function handleGatingError(response: Response): Promise<void> {
   if (response.status !== 403) return;
   try {
@@ -70,11 +84,45 @@ async function handleGatingError(response: Response): Promise<void> {
     if (body.code === 'SCAN_LIMIT_REACHED') {
       throw new ScanLimitError(body.limit, body.used, body.resetsAt);
     }
+    if (body.code === 'ALBUM_LIMIT_REACHED') {
+      throw new AlbumLimitError(body.limit, body.used);
+    }
+    if (body.code === 'GEAR_LIMIT_REACHED') {
+      throw new GearLimitError(body.limit, body.used);
+    }
     if (body.error === 'Upgrade required') {
       throw new UpgradeRequiredError(body.requiredPlan, body.currentPlan);
     }
   } catch (e) {
-    if (e instanceof ScanLimitError || e instanceof UpgradeRequiredError) throw e;
+    if (e instanceof ScanLimitError || e instanceof UpgradeRequiredError || e instanceof AlbumLimitError || e instanceof GearLimitError) throw e;
+  }
+}
+
+/**
+ * Server-side album limit check. Throws AlbumLimitError if the user
+ * has reached their plan's album cap.
+ */
+export async function checkAlbumLimit(): Promise<void> {
+  const response = await fetch('/api/collection/check-limit', {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+  });
+  if (!response.ok) {
+    await handleGatingError(response);
+  }
+}
+
+/**
+ * Server-side gear limit check. Throws GearLimitError if the user
+ * has reached their plan's gear cap.
+ */
+export async function checkGearLimit(): Promise<void> {
+  const response = await fetch('/api/gear/check-limit', {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+  });
+  if (!response.ok) {
+    await handleGatingError(response);
   }
 }
 

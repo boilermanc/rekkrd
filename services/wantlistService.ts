@@ -1,5 +1,5 @@
 
-import { supabase } from './supabaseService';
+import { supabase, getCurrentUserId } from './supabaseService';
 import { WantlistItem, NewWantlistItem } from '../types';
 
 function assertClient() {
@@ -10,6 +10,10 @@ function assertClient() {
 
 async function requireUserId(): Promise<string> {
   assertClient();
+  // Prefer the user ID set by the auth context (shared via supabaseService)
+  const cached = getCurrentUserId();
+  if (cached) return cached;
+  // Fallback to getSession()
   const { data: { session } } = await supabase!.auth.getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');

@@ -2,6 +2,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Gear, NewGear, GEAR_CATEGORIES, GearCategory } from '../types';
 import { gearService } from '../services/gearService';
+import { GearLimitError, checkGearLimit } from '../services/geminiService';
 import { useToast } from '../contexts/ToastContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -26,12 +27,14 @@ interface AddGearManualModalProps {
   isOpen: boolean;
   onClose: () => void;
   onGearSaved: (gear: Gear) => void;
+  onUpgradeRequired?: (feature: string) => void;
 }
 
 const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
   isOpen,
   onClose,
   onGearSaved,
+  onUpgradeRequired,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const stableOnClose = useCallback(onClose, [onClose]);
@@ -65,6 +68,9 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
     if (!canSave) return;
     setSaving(true);
     try {
+      // Server-side gear limit enforcement
+      await checkGearLimit();
+
       const gear: NewGear = {
         category,
         brand: brand.trim(),
@@ -77,8 +83,13 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
       onGearSaved(saved);
       onClose();
     } catch (err) {
-      console.error('Failed to save gear:', err);
-      showToast('Failed to save gear. Please try again.', 'error');
+      if (err instanceof GearLimitError) {
+        onUpgradeRequired?.('gear_limit');
+        onClose();
+      } else {
+        console.error('Failed to save gear:', err);
+        showToast('Failed to save gear. Please try again.', 'error');
+      }
       setSaving(false);
     }
   };

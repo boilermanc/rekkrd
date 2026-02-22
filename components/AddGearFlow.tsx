@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { NewGear, Gear, IdentifiedGear } from '../types';
-import { geminiService, ScanLimitError, UpgradeRequiredError } from '../services/geminiService';
+import { geminiService, ScanLimitError, UpgradeRequiredError, GearLimitError, checkGearLimit } from '../services/geminiService';
 import { gearService } from '../services/gearService';
 import { useToast } from '../contexts/ToastContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
@@ -85,15 +85,23 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
 
   const handleSave = useCallback(async (gear: NewGear) => {
     try {
+      // Server-side gear limit enforcement
+      await checkGearLimit();
+
       const saved = await gearService.saveGear(gear);
       showToast(`${gear.brand} ${gear.model} added to Stakkd!`, 'success');
       onGearSaved(saved);
       resetFlow();
     } catch (err) {
-      console.error('Failed to save gear:', err);
-      showToast('Failed to save gear. Please try again.', 'error');
+      if (err instanceof GearLimitError) {
+        onUpgradeRequired?.('gear_limit');
+        resetFlow();
+      } else {
+        console.error('Failed to save gear:', err);
+        showToast('Failed to save gear. Please try again.', 'error');
+      }
     }
-  }, [showToast, onGearSaved, resetFlow]);
+  }, [showToast, onGearSaved, resetFlow, onUpgradeRequired]);
 
   const handleConfirmClose = useCallback(() => {
     // Go back to capture for rescan/re-upload

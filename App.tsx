@@ -20,7 +20,7 @@ import { useAuthContext } from './contexts/AuthContext';
 import { useSubscription } from './contexts/SubscriptionContext';
 import { useTheme } from './contexts/ThemeContext';
 import { getProfile, createProfile, hasCompletedOnboarding } from './services/profileService';
-import { ScanLimitError, UpgradeRequiredError } from './services/geminiService';
+import { ScanLimitError, UpgradeRequiredError, AlbumLimitError, checkAlbumLimit } from './services/geminiService';
 import OnboardingWizard from './components/OnboardingWizard';
 import UpgradeModal from './components/UpgradeModal';
 import DuplicateAlbumModal from './components/DuplicateAlbumModal';
@@ -166,6 +166,9 @@ const App: React.FC = () => {
 
     const mapped = mapWantlistItemToNewAlbum(item);
     try {
+      // Server-side album limit enforcement
+      await checkAlbumLimit();
+
       const saved = await supabaseService.saveAlbum({
         artist: item.artist,
         title: item.title,
@@ -197,8 +200,12 @@ const App: React.FC = () => {
       refreshWantlistCount();
       showToast('Added to your collection and removed from wantlist', 'success');
     } catch (err) {
-      console.error('Failed to add album:', err);
-      showToast('Failed to add album to collection.', 'error');
+      if (err instanceof AlbumLimitError) {
+        setUpgradeFeature('album_limit');
+      } else {
+        console.error('Failed to add album:', err);
+        showToast('Failed to add album to collection.', 'error');
+      }
       setPrefilledWantlistItem(null);
     }
   }, [refreshWantlistCount, showToast]);
@@ -309,6 +316,9 @@ const App: React.FC = () => {
   ) => {
     setProcessingStatus(`Appraising ${identity.title}...`);
     try {
+      // Server-side album limit enforcement
+      await checkAlbumLimit();
+
       const metadata = await geminiService.fetchAlbumMetadata(identity.artist, identity.title);
       const { artist: mArtist, title: mTitle, cover_url: mCover, ...rest } = metadata;
       const saved = await supabaseService.saveAlbum({
@@ -341,7 +351,9 @@ const App: React.FC = () => {
         } catch { /* milestone email is best-effort */ }
       })();
     } catch (err) {
-      if (err instanceof ScanLimitError) {
+      if (err instanceof AlbumLimitError) {
+        setUpgradeFeature('album_limit');
+      } else if (err instanceof ScanLimitError) {
         setUpgradeFeature('scan');
       } else if (err instanceof UpgradeRequiredError) {
         setUpgradeFeature(err.requiredPlan === 'curator' ? 'scan' : 'scan');

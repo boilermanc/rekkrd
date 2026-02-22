@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../services/supabaseService';
+import { supabase, setCurrentUserId } from '../services/supabaseService';
 
 export interface UseAuthReturn {
   user: User | null;
@@ -24,6 +24,7 @@ export function useAuth(): UseAuthReturn {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
+      setCurrentUserId(currentSession?.user?.id ?? null);
       setLoading(false);
     });
 
@@ -32,6 +33,7 @@ export function useAuth(): UseAuthReturn {
       (_event, newSession) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        setCurrentUserId(newSession?.user?.id ?? null);
       },
     );
 
