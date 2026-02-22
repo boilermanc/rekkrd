@@ -66,13 +66,13 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
       <div className="p-4 relative">
         <div className="flex justify-between items-start mb-1">
           <h3 className="font-bold text-th-text truncate w-full" title={album.title}>{album.title}</h3>
-          <div className="flex items-center ml-2 gap-1">
+          <div className="flex items-center ml-2 gap-1 shrink-0">
             <a
               href={getSpotifySearchUrl(album.artist, album.title)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="opacity-0 group-hover:opacity-100 text-th-text3 hover:text-[#1DB954] transition-all p-1 rounded-md"
+              className="text-th-text3 hover:text-[#1DB954] transition-all p-1 rounded-md"
               aria-label="Play on Spotify"
               title="Play on Spotify"
             >
