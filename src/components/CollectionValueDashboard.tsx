@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { BarChart2, RefreshCw } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BarChart2, Info, RefreshCw } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line,
@@ -63,11 +63,39 @@ function formatShortDate(dateStr: string): string {
 }
 
 const PEACH = '#dd6e42';
+const PEACH_DARK = '#c4714a';
 const BATCH_SIZE = 50;
 const BATCH_DELAY_MS = 500;
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function useCountUp(target: number, duration = 1200): number {
+  const [value, setValue] = useState(0);
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    if (target <= 0 || hasRun.current) return;
+    hasRun.current = true;
+
+    let rafId: number;
+    const start = performance.now();
+
+    function tick(now: number) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setValue(Math.round(eased * target));
+      if (t < 1) {
+        rafId = requestAnimationFrame(tick);
+      }
+    }
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [target, duration]);
+
+  return value;
 }
 
 const CollectionValueDashboard: React.FC = () => {
@@ -76,7 +104,21 @@ const CollectionValueDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const infoRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
+
+  // Close info panel on outside click
+  useEffect(() => {
+    if (!infoOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+        setInfoOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [infoOpen]);
 
   const fetchAll = useCallback(async () => {
     const session = await supabase?.auth.getSession();
@@ -230,18 +272,63 @@ const CollectionValueDashboard: React.FC = () => {
     <div className="max-w-5xl mx-auto px-4 md:px-6 mt-6 pb-12 space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-th-text tracking-tight">Collection Value</h2>
-        <button
-          type="button"
-          onClick={handleRefreshPrices}
-          disabled={refreshing || (data.valuedCount === 0 && data.totalCount === 0)}
-          aria-label="Refresh collection prices"
-          className="text-xs font-medium px-4 py-2 rounded-lg border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:bg-th-surface/[0.06] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5"
+      <div ref={infoRef}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-th-text tracking-tight">Collection Value</h2>
+            <button
+              type="button"
+              onClick={() => setInfoOpen(prev => !prev)}
+              aria-label="How we calculate collection value"
+              className="text-th-text3 hover:text-th-text transition-colors"
+            >
+              <Info className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={handleRefreshPrices}
+            disabled={refreshing || (data.valuedCount === 0 && data.totalCount === 0)}
+            aria-label="Refresh collection prices"
+            className="text-xs font-medium px-4 py-2 rounded-lg border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:bg-th-surface/[0.06] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh Prices</span>
+          </button>
+        </div>
+
+        {/* Info panel */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ${infoOpen ? 'max-h-[600px] mt-4' : 'max-h-0'}`}
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">Refresh Prices</span>
-        </button>
+          <div className="glass-morphism rounded-xl p-4 border border-white/10 text-sm text-th-text3 space-y-3">
+            <p className="text-th-text font-semibold text-sm">How we calculate your collection value</p>
+            <p>
+              Prices come from the Discogs marketplace &mdash; the world&rsquo;s largest vinyl
+              database with millions of real sales records.
+            </p>
+            <p>
+              <span className="text-th-text font-medium">Conservative ({formatCurrency(data.totalLow)})</span> &mdash; the
+              lowest recent asking price for your condition grade. A realistic floor if you sold everything today.
+            </p>
+            <p>
+              <span className="text-[#dd6e42] font-medium">Estimated ({formatCurrency(data.totalMedian)})</span> &mdash; the
+              median price across all current listings. This is the most realistic valuation for your collection.
+            </p>
+            <p>
+              <span className="text-th-text font-medium">Optimistic ({formatCurrency(data.totalHigh)})</span> &mdash; the
+              highest recent asking price. Reflects what top-condition copies can fetch from the right buyer.
+            </p>
+            <p>
+              Only records matched to a Discogs release ID are included in the
+              calculation. {data.valuedCount} of your {data.totalCount} records have pricing data.
+            </p>
+            <p className="text-th-text3/70 text-xs">
+              Prices are point-in-time snapshots from the Discogs marketplace and
+              fluctuate with supply and demand. We are not affiliated with Discogs.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Hero value row */}
@@ -257,7 +344,7 @@ const CollectionValueDashboard: React.FC = () => {
       {/* Value Over Time */}
       {history.length >= 2 && (
         <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4">
+          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
             Collection Value Over Time
           </h2>
           <ResponsiveContainer width="100%" height={220}>
@@ -293,15 +380,16 @@ const CollectionValueDashboard: React.FC = () => {
       {/* Top 10 Most Valuable */}
       {data.topRecords.length > 0 && (
         <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4">
+          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
             Top {data.topRecords.length} Most Valuable
           </h2>
           <ol className="space-y-2">
             {data.topRecords.map((rec, i) => {
               const price = rec.price_median ?? rec.price_high ?? 0;
+              const rankColor = i === 0 ? 'text-[#dd6e42]' : i <= 2 ? 'text-[#f0a882]' : 'text-th-text3';
               return (
-                <li key={`${rec.artist}-${rec.title}-${i}`} className="flex items-baseline gap-3">
-                  <span className="text-th-text3 text-sm font-mono w-6 text-right shrink-0">
+                <li key={`${rec.artist}-${rec.title}-${i}`} className="flex items-baseline gap-3 border-l-2 border-transparent hover:border-[#dd6e42] pl-2 -ml-2 transition-colors">
+                  <span className={`${rankColor} text-sm font-mono w-6 text-right shrink-0 font-semibold`}>
                     {i + 1}
                   </span>
                   <span className="text-th-text text-sm truncate">
@@ -322,7 +410,7 @@ const CollectionValueDashboard: React.FC = () => {
         {/* By Genre — horizontal bar */}
         {data.byGenre.length > 0 && (
           <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4">
+            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
               Value by Genre
             </h2>
             <ResponsiveContainer width="100%" height={data.byGenre.length * 40 + 20}>
@@ -360,7 +448,7 @@ const CollectionValueDashboard: React.FC = () => {
         {/* By Decade — vertical bar */}
         {data.byDecade.length > 0 && (
           <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4">
+            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
               Value by Decade
             </h2>
             <ResponsiveContainer width="100%" height={260}>
@@ -383,7 +471,7 @@ const CollectionValueDashboard: React.FC = () => {
                 <Tooltip content={<DecadeTooltip />} cursor={false} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                   {data.byDecade.map((_, idx) => (
-                    <Cell key={idx} fill={PEACH} />
+                    <Cell key={idx} fill={idx % 2 === 0 ? PEACH : PEACH_DARK} />
                   ))}
                 </Bar>
               </BarChart>
@@ -404,6 +492,8 @@ interface ValueCardProps {
 }
 
 function ValueCard({ label, value, highlighted }: ValueCardProps) {
+  const animatedValue = useCountUp(value);
+
   return (
     <div
       className={`glass-morphism rounded-3xl p-5 md:p-6 border text-center ${
@@ -411,6 +501,7 @@ function ValueCard({ label, value, highlighted }: ValueCardProps) {
           ? 'border-[#dd6e42]/40 ring-1 ring-[#dd6e42]/20'
           : 'border-th-surface/[0.10]'
       }`}
+      style={highlighted ? { boxShadow: '0 0 20px rgba(221,110,66,0.15)' } : undefined}
     >
       <p className="font-label text-[9px] tracking-widest text-th-text3 uppercase mb-1">
         {label}
@@ -420,7 +511,7 @@ function ValueCard({ label, value, highlighted }: ValueCardProps) {
           highlighted ? 'text-[#dd6e42]' : 'text-th-text'
         }`}
       >
-        {formatCurrency(value)}
+        {formatCurrency(animatedValue)}
       </p>
     </div>
   );
