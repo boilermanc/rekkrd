@@ -72,7 +72,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect }) => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="text-th-text3 hover:text-[#1DB954] transition-all p-1 rounded-md"
+              className="inline-flex items-center text-th-text3 hover:text-[#1DB954] transition-all p-1 rounded-md"
               aria-label="Play on Spotify"
               title="Play on Spotify"
             >
