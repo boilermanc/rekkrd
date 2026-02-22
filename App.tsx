@@ -28,11 +28,14 @@ import SubscriptionBanner from './components/SubscriptionBanner';
 import PlanBadge from './components/PlanBadge';
 import ErrorPage from './components/ErrorPage';
 import SEO from './components/SEO';
+import DiscogsSearch from './components/DiscogsSearch';
+import DiscogsReleaseDetail from './components/DiscogsReleaseDetail';
+import DiscogsConnect from './components/DiscogsConnect';
 
 const PAGE_SIZE = 40;
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
-type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd';
+type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd' | 'discogs';
 
 interface DuplicatePendingData {
   identity: { artist: string; title: string };
@@ -60,6 +63,7 @@ const App: React.FC = () => {
   const [showStats, setShowStats] = useState(false);
   const [heroBg, setHeroBg] = useState(DEFAULT_BG);
   const [duplicatePending, setDuplicatePending] = useState<DuplicatePendingData | null>(null);
+  const [discogsReleaseId, setDiscogsReleaseId] = useState<number | null>(null);
 
   const [yearRange, setYearRange] = useState({ min: '', max: '' });
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -527,7 +531,7 @@ const App: React.FC = () => {
 
 
   return (
-    <div className={`min-h-screen ${currentView !== 'landing' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
+    <div className={`min-h-screen ${currentView !== 'landing' && currentView !== 'discogs' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
       <SEO
         title="My Collection"
         description="Browse and manage your vinyl record collection."
@@ -576,7 +580,7 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {currentView !== 'landing' && currentView !== 'stakkd' && <div className="flex-1 max-w-xl flex items-center gap-2">
+          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button
               onClick={() => setShowStats(!showStats)}
               className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
@@ -622,6 +626,18 @@ const App: React.FC = () => {
                 <rect x="5" y="2" width="14" height="20" rx="2" />
                 <circle cx="12" cy="14" r="4" />
                 <circle cx="12" cy="6" r="2" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setCurrentView('discogs')}
+              className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'discogs' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
+              title="Browse Discogs"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 2a10 10 0 0 1 7.07 2.93" />
+                <path d="M12 6a6 6 0 0 1 4.24 1.76" />
               </svg>
             </button>
             <button
@@ -878,6 +894,23 @@ const App: React.FC = () => {
               <p className="text-th-text3/70 text-xs leading-relaxed">Snap a cover photo to identify and catalog a new album.</p>
             </button>
 
+            {/* Browse Discogs */}
+            <button
+              onClick={() => setCurrentView('discogs')}
+              className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-[#4f6d7a]/30 hover:bg-[#4f6d7a]/5 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-[#4f6d7a]/10 flex items-center justify-center mb-5 group-hover:bg-[#4f6d7a]/20 transition-colors">
+                <svg className="w-6 h-6 text-[#4f6d7a]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2a10 10 0 0 1 7.07 2.93" />
+                  <path d="M12 6a6 6 0 0 1 4.24 1.76" />
+                </svg>
+              </div>
+              <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Browse Discogs</h3>
+              <p className="text-th-text3/70 text-xs leading-relaxed">Search the Discogs database for releases, labels, and artists.</p>
+            </button>
+
             {/* Upload a Cover — shown when crate is empty */}
             {albums.length === 0 && (
               <button
@@ -1035,6 +1068,19 @@ const App: React.FC = () => {
         />
       ) : currentView === 'stakkd' ? (
         <StakkdPage onUpgradeRequired={(feature: string) => setUpgradeFeature(feature)} />
+      ) : currentView === 'discogs' ? (
+        <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8 space-y-8 pb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="font-label text-lg md:text-xl tracking-widest uppercase font-bold text-th-text">Browse Discogs</h2>
+              <p className="text-th-text3/60 text-sm mt-1">Search the world's largest music database</p>
+            </div>
+            <div className="w-full sm:w-72">
+              <DiscogsConnect />
+            </div>
+          </div>
+          <DiscogsSearch onSelectResult={(result) => setDiscogsReleaseId(result.id)} />
+        </main>
       ) : (
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
           {albums.length === 0 ? (
@@ -1072,7 +1118,7 @@ const App: React.FC = () => {
         </main>
       )}
 
-      {currentView !== 'landing' && currentView !== 'stakkd' && (
+      {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && (
         <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
           <button
             onClick={() => {
@@ -1159,6 +1205,12 @@ const App: React.FC = () => {
           existingAlbum={duplicatePending.existingAlbum}
           onAddAnyway={handleDuplicateAddAnyway}
           onCancel={handleDuplicateCancel}
+        />
+      )}
+      {discogsReleaseId !== null && (
+        <DiscogsReleaseDetail
+          releaseId={discogsReleaseId}
+          onClose={() => setDiscogsReleaseId(null)}
         />
       )}
     </div>

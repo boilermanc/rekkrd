@@ -8,7 +8,11 @@ import type { DiscogsSearchResponse, DiscogsSearchResult } from '../types/discog
 const FORMAT_OPTIONS = ['All', 'Vinyl', 'CD', 'Cassette'] as const;
 const PER_PAGE = 20;
 
-const DiscogsSearch: React.FC = () => {
+interface DiscogsSearchProps {
+  onSelectResult?: (result: DiscogsSearchResult) => void;
+}
+
+const DiscogsSearch: React.FC<DiscogsSearchProps> = ({ onSelectResult }) => {
   const { showToast } = useToast();
 
   const [query, setQuery] = useState('');
@@ -143,7 +147,7 @@ const DiscogsSearch: React.FC = () => {
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {results.map((result) => (
-              <ResultCard key={`${result.type}-${result.id}`} result={result} />
+              <ResultCard key={`${result.type}-${result.id}`} result={result} onSelect={onSelectResult} />
             ))}
           </div>
 
@@ -170,12 +174,19 @@ const PLACEHOLDER_SVG = (
   </svg>
 );
 
-const ResultCard: React.FC<{ result: DiscogsSearchResult }> = ({ result }) => {
+const ResultCard: React.FC<{ result: DiscogsSearchResult; onSelect?: (result: DiscogsSearchResult) => void }> = ({ result, onSelect }) => {
   const [imgFailed, setImgFailed] = useState(false);
   const hasImage = result.cover_image && !result.cover_image.includes('spacer.gif') && !imgFailed;
 
   return (
-    <div className="group rounded-2xl border border-th-surface/[0.10] bg-th-surface/[0.04] overflow-hidden hover:border-[#dd6e42]/30 hover:bg-th-surface/[0.08] transition-all">
+    <div
+      role={onSelect ? 'button' : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={() => onSelect?.(result)}
+      onKeyDown={(e) => { if (onSelect && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelect(result); } }}
+      aria-label={onSelect ? `View details for ${result.title}` : undefined}
+      className={`group rounded-2xl border border-th-surface/[0.10] bg-th-surface/[0.04] overflow-hidden hover:border-[#dd6e42]/30 hover:bg-th-surface/[0.08] transition-all ${onSelect ? 'cursor-pointer' : ''}`}
+    >
       {/* Cover image */}
       <div className="aspect-square bg-th-surface/[0.06] flex items-center justify-center overflow-hidden">
         {hasImage ? (
