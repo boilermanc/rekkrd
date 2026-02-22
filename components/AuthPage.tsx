@@ -97,23 +97,23 @@ const AuthPage: React.FC = () => {
     <button
       type="button"
       onClick={onClick}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-th-text3 hover:text-th-text2 transition-colors"
+      className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-80"
       aria-label={visible ? 'Hide password' : 'Show password'}
       tabIndex={-1}
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
         {/* Outer rim */}
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <circle cx="12" cy="12" r="10" stroke="#dd6e42" strokeWidth="1.5" fill="none" />
         {/* Grooves */}
-        <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="0.75" opacity="0.5" fill="none" />
-        <circle cx="12" cy="12" r="5.5" stroke="currentColor" strokeWidth="0.75" opacity="0.4" fill="none" />
+        <circle cx="12" cy="12" r="7.5" stroke="#dd6e42" strokeWidth="0.75" opacity="0.5" fill="none" />
+        <circle cx="12" cy="12" r="5.5" stroke="#dd6e42" strokeWidth="0.75" opacity="0.4" fill="none" />
         {/* Label area */}
-        <circle cx="12" cy="12" r="3.5" fill="currentColor" opacity="0.3" />
+        <circle cx="12" cy="12" r="3.5" fill="#c45a30" opacity="0.4" />
         {/* Spindle hole */}
-        <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.2" fill="#f0a882" />
         {/* Slash when password is visible (showing "off" state) */}
         {visible && (
-          <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <line x1="4" y1="4" x2="20" y2="20" stroke="#c45a30" strokeWidth="2" strokeLinecap="round" />
         )}
       </svg>
     </button>

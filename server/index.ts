@@ -33,17 +33,20 @@ import emailRouter from './routes/email.js';
 import onboardingRouter from './routes/onboarding.js';
 import collectionRouter from './routes/collection.js';
 import authRouter from './routes/auth.js';
+import discogsRouter from './routes/discogs.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
+import { validateDiscogsConfig } from './lib/discogs.js';
 
 // ── Boot diagnostics: verify all imports resolved ────────────────────
 console.log('[boot] All static imports loaded');
+validateDiscogsConfig();
 const _routerMap: Record<string, unknown> = {
   identifyRouter, metadataRouter, playlistRouter, coversRouter,
   lyricsRouter, uploadCoverRouter, imageProxyRouter, subscriptionRouter,
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, supportRouter, sitemapRouter, emailRouter,
-  onboardingRouter, collectionRouter, authRouter,
+  onboardingRouter, collectionRouter, authRouter, discogsRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -136,6 +139,7 @@ mountRouter('emailRouter', emailRouter);
 mountRouter('onboardingRouter', onboardingRouter);
 mountRouter('collectionRouter', collectionRouter);
 mountRouter('authRouter', authRouter);
+mountRouter('discogsRouter', discogsRouter);
 console.log('[boot] All routes registered');
 
 // Ensure gear-photos storage bucket exists
