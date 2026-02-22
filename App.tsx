@@ -1248,7 +1248,10 @@ const App: React.FC = () => {
           />
         </main>
       ) : currentView === 'value-dashboard' ? (
-        <CollectionValueDashboard />
+        <div style={{ background: 'red', padding: '20px', color: 'white' }}>
+          VALUE DASHBOARD VIEW ACTIVE
+          <CollectionValueDashboard />
+        </div>
       ) : (
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
           {albums.length === 0 ? (
