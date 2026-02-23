@@ -1854,10 +1854,10 @@
 }
 
 /* Sellr tab */
-.sellr-tab {
+.landing-page .sellr-tab {
   position:fixed;
   top:var(--nav-h);
-  right:100px;
+  right:200px;
   z-index:99;
   background:#2C4A6E;
   color:#fff;
@@ -1869,8 +1869,8 @@
   box-shadow:0 2px 8px rgba(0,0,0,.12);
   transition:background .2s;
 }
-.sellr-tab:hover { background:#1e3a5a; color:#fff; }
-.sellr-tab span {
+.landing-page .sellr-tab:hover { background:#1e3a5a; color:#fff; }
+.landing-page .sellr-tab span {
   color:#E8A838;
   font-weight:600;
 }
