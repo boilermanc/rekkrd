@@ -159,21 +159,66 @@ All API routes apply middleware in this order:
 ## Environment Variables
 
 ### Frontend (Vite — use `import.meta.env.VITE_*`)
-| Variable | Purpose |
-|----------|---------|
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `VITE_API_SECRET` | Bearer token for API calls |
+| Variable | Purpose | Sellr? |
+|----------|---------|--------|
+| `VITE_SUPABASE_URL` | Supabase project URL | |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | |
+| `VITE_API_SECRET` | Bearer token for Rekkrd API calls | |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key — shared by Rekkrd subscriptions + Sellr payments | Shared |
+| `VITE_API_URL` | API base URL override for blog routes (default: `''`) | |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key | |
+| `VITE_SELLR_ADMIN_TOKEN` | Token for Sellr admin panel API calls | Sellr |
 
 ### Backend (Node.js — use `process.env.*`)
+
+**Core / Shared:**
+
 | Variable | Purpose |
 |----------|---------|
-| `SUPABASE_URL` | Supabase project URL |
+| `PORT` | Server listen port (default: `3001`) |
+| `NODE_ENV` | `production` or `development` — controls cookie secure flag, admin health display |
+| `SUPABASE_URL` | Supabase project URL (e.g. `https://xxxx.supabase.co`) |
 | `SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
-| `API_SECRET` | Bearer token for auth |
-| `GEMINI_API_KEY` | Google Gemini API key |
-| `ALLOWED_ORIGINS` | Comma-separated CORS origins |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (admin access) |
+| `API_SECRET` | Bearer token for Rekkrd auth middleware |
+| `ALLOWED_ORIGINS` | Comma-separated CORS origins (e.g. `https://rekkrd.com,https://www.rekkrd.com`) |
+| `GEMINI_API_KEY` | Google Gemini API key — used by Rekkrd identify + Sellr scan/copy |
+| `RESEND_API_KEY` | Resend email API key (`re_...`) — onboarding, Sellr order emails |
+| `BASE_URL` | Public site URL (`https://rekkrd.com`) — used in email links |
+| `APP_URL` | Public app URL (fallback: `https://rekkrd.com`) — Stripe checkout/portal return URLs |
+| `SITE_URL` | Site URL for sitemap generation (fallback: `https://rekkrd.com`) |
+| `ADMIN_EMAIL` | Admin notification recipient for Sellr order alerts |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile server-side verification secret |
+| `BLOG_API_KEY` | Secret for blog admin write endpoints |
+| `INTERNAL_ALERTS_SECRET` | Secret for internal alerts-check cron endpoint |
+
+**Stripe:**
+
+| Variable | Purpose |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | Stripe secret API key (`sk_live_...`) — shared by subscriptions + Sellr |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret — Rekkrd subscriptions (`whsec_...`) |
+| `STRIPE_SELLR_WEBHOOK_SECRET` | Stripe webhook signing secret — Sellr one-time payments (`whsec_...`) |
+| `STRIPE_PRICE_CURATOR_MONTHLY` | Stripe Price ID for Curator monthly plan |
+| `STRIPE_PRICE_CURATOR_ANNUAL` | Stripe Price ID for Curator annual plan |
+| `STRIPE_PRICE_ENTHUSIAST_MONTHLY` | Stripe Price ID for Enthusiast monthly plan |
+| `STRIPE_PRICE_ENTHUSIAST_ANNUAL` | Stripe Price ID for Enthusiast annual plan |
+
+**Discogs:**
+
+| Variable | Purpose |
+|----------|---------|
+| `DISCOGS_CONSUMER_KEY` | Discogs OAuth consumer key |
+| `DISCOGS_CONSUMER_SECRET` | Discogs OAuth consumer secret |
+| `DISCOGS_PERSONAL_TOKEN` | Discogs personal access token for API calls |
+| `DISCOGS_USER_AGENT` | User-Agent string for Discogs API (e.g. `Rekkrd/1.0`) |
+| `DISCOGS_CALLBACK_URL` | OAuth callback URL for Discogs auth flow |
+
+**Sellr-specific:**
+
+| Variable | Purpose |
+|----------|---------|
+| `SELLR_ADMIN_TOKEN` | Bearer token for Sellr admin endpoints (cron-status, health, etc.) |
 
 **⚠️ Never use `process.env` in frontend code.** Vite uses `import.meta.env.VITE_*`. The old `define` block pattern was removed.
 
@@ -278,6 +323,45 @@ location /sellr {
   try_files $uri /index.html;
 }
 ```
+
+---
+
+## Sellr — Stripe Setup
+
+Step-by-step checklist for creating Stripe products before Sellr launch:
+
+1. **Create 3 Products in Stripe Dashboard**
+   Sellr uses `PaymentIntent` (one-time payments), not `Price` objects. Products are for dashboard organization only:
+   - "Sellr Starter Appraisal" — $4.99
+   - "Sellr Standard Appraisal" — $14.99
+   - "Sellr Full Collection Appraisal" — $29.99
+
+2. **Create a Webhook endpoint** in Stripe pointing to:
+   ```
+   https://rekkrd.com/api/sellr/checkout/webhook
+   ```
+   Events to subscribe:
+   - `payment_intent.succeeded`
+   - `payment_intent.payment_failed`
+
+3. **Copy the webhook signing secret** to `STRIPE_SELLR_WEBHOOK_SECRET` in your env.
+
+4. **Important:** Sellr uses a **separate** webhook secret from the Rekkrd subscription webhook. Do not mix `STRIPE_WEBHOOK_SECRET` (subscriptions) with `STRIPE_SELLR_WEBHOOK_SECRET` (Sellr payments).
+
+---
+
+## Sellr — Resend Setup
+
+1. **Verify `rekkrd.com` domain** in [Resend](https://resend.com) (likely already done for onboarding emails).
+
+2. **Confirm sending address** — Sellr emails send from `appraisals@rekkrd.com`. Verify that the existing domain verification covers all `@rekkrd.com` addresses, or add `appraisals@rekkrd.com` as a specific sending address.
+
+3. **Test all 5 email templates** before launch by triggering them via the admin Tools panel:
+   - Welcome / onboarding
+   - Order confirmation (payment received)
+   - Report ready (appraisal complete)
+   - Admin new-order alert
+   - Report share link
 
 ---
 

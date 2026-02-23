@@ -6,6 +6,7 @@ export interface SellrSession {
   tier: 'starter' | 'standard' | 'full' | null;
   status: 'active' | 'paid' | 'expired';
   record_count: number;
+  collection_ad_copy: string | null;
   created_at: string;
   expires_at: string;
 }
@@ -44,6 +45,29 @@ export interface SellrTier {
   record_limit: number;
   price_cents: number;
   price_display: string;
+}
+
+export interface SellrEmailLog {
+  id: string;
+  session_id: string;
+  order_id: string | null;
+  email_type: 'session_created' | 'payment_confirmed' | 'abandoned_session' | 'rekkrd_conversion' | 'admin_alert';
+  recipient_email: string | null;
+  success: boolean;
+  error_message: string | null;
+  sent_at: string;
+}
+
+export interface AdminOrder {
+  id: string;
+  session_id: string;
+  email: string;
+  tier: string;
+  amount_cents: number;
+  status: 'pending' | 'complete' | 'failed';
+  report_token: string;
+  record_count: number;
+  created_at: string;
 }
 
 export const SELLR_TIERS: SellrTier[] = [

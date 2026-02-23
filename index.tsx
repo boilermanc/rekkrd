@@ -21,6 +21,13 @@ import ErrorPage from './components/ErrorPage';
 import SupportPage from './components/SupportPage';
 import WelcomeLandingPage from './src/components/WelcomeLandingPage';
 import SellrLandingPage from './src/sellr/pages/LandingPage';
+import SellrScanPage from './src/sellr/pages/ScanPage';
+import SellrReviewPage from './src/sellr/pages/ReviewPage';
+import SellrCheckoutPage from './src/sellr/pages/CheckoutPage';
+import SellrSuccessPage from './src/sellr/pages/SuccessPage';
+import SellrReportPage from './src/sellr/pages/ReportPage';
+import SellrImportPage from './src/sellr/pages/ImportPage';
+import SellrNotFoundPage from './src/sellr/pages/NotFoundPage';
 
 
 function NotFoundPage() {
@@ -56,6 +63,13 @@ root.render(
                   <Route path="/support" element={<SupportPage />} />
                   <Route path="/welcome" element={<WelcomeLandingPage />} />
                   <Route path="/sellr" element={<SellrLandingPage />} />
+                  <Route path="/sellr/scan" element={<SellrScanPage />} />
+                  <Route path="/sellr/review" element={<SellrReviewPage />} />
+                  <Route path="/sellr/checkout" element={<SellrCheckoutPage />} />
+                  <Route path="/sellr/success" element={<SellrSuccessPage />} />
+                  <Route path="/sellr/report" element={<SellrReportPage />} />
+                  <Route path="/sellr/import" element={<SellrImportPage />} />
+                  <Route path="/sellr/*" element={<SellrNotFoundPage />} />
                   <Route path="/" element={<App />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>

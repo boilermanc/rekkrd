@@ -111,6 +111,17 @@ body {
   --tw-enter-scale: scale(0.95);
 }
 
+/* Sellr import highlight — ring fades out over 3s */
+@keyframes import-highlight {
+  0% { box-shadow: 0 0 0 2px rgba(107, 143, 113, 0.4); }
+  70% { box-shadow: 0 0 0 2px rgba(107, 143, 113, 0.4); }
+  100% { box-shadow: 0 0 0 2px rgba(107, 143, 113, 0); }
+}
+
+.animate-import-highlight {
+  animation: import-highlight 3s ease-out forwards;
+}
+
 /* Print styles */
 @media print {
   body { background: white !important; color: black !important; }
@@ -159,3 +170,12 @@ body {
 .admin-root ::-webkit-scrollbar-track { background: rgb(var(--admin-bg-muted)); }
 .admin-root ::-webkit-scrollbar-thumb { background: rgb(var(--admin-border-strong)); border-radius: 10px; }
 .admin-root ::-webkit-scrollbar-thumb:hover { background: rgb(var(--admin-text-subtle)); }
+
+/* ── Sellr mobile: eliminate 300ms tap delay ────────────────────── */
+.bg-sellr-bg a,
+.bg-sellr-bg button,
+.bg-sellr-bg select,
+.bg-sellr-bg [role="tab"],
+.bg-sellr-bg input {
+  touch-action: manipulation;
+}

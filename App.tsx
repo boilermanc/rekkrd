@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Album, NewAlbum } from './types';
 import { supabaseService, supabase } from './services/supabaseService';
 import { geminiService } from './services/geminiService';
@@ -60,6 +60,7 @@ const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuthContext();
   const { canUse, scansRemaining, albumLimitReached, plan, refresh: refreshSubscription } = useSubscription();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
@@ -89,6 +90,37 @@ const App: React.FC = () => {
   useEffect(() => {
     sessionStorage.setItem('rekkrd-view', currentView);
   }, [currentView]);
+
+  // Sellr import highlighting
+  const [importedAlbumIds, setImportedAlbumIds] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem('rekkrd_imported_album_ids');
+      if (raw) {
+        localStorage.removeItem('rekkrd_imported_album_ids');
+        const ids: string[] = JSON.parse(raw);
+        if (Array.isArray(ids) && ids.length > 0) return new Set(ids);
+      }
+    } catch { /* ignore */ }
+    return new Set();
+  });
+  const [showImportBanner, setShowImportBanner] = useState(importedAlbumIds.size > 0);
+  const [showImportedOnly, setShowImportedOnly] = useState(false);
+
+  // Auto-clear highlight rings after 3 seconds
+  useEffect(() => {
+    if (importedAlbumIds.size === 0) return;
+    const timer = setTimeout(() => setImportedAlbumIds(new Set()), 3000);
+    return () => clearTimeout(timer);
+  }, [importedAlbumIds.size]);
+
+  // Switch to grid view when arriving with import highlights
+  useEffect(() => {
+    if (showImportBanner && currentView === 'public-landing') {
+      setCurrentView('grid');
+    } else if (showImportBanner && currentView === 'landing') {
+      setCurrentView('grid');
+    }
+  }, [showImportBanner]);
 
   const [gridPage, setGridPage] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -274,11 +306,17 @@ const App: React.FC = () => {
   }, [user]);
 
   // After login, redirect from public landing to in-app landing
+  // (or to Sellr import page if a pending import session exists)
   useEffect(() => {
     if (user && currentView === 'public-landing') {
+      const importSession = localStorage.getItem('sellr_import_session_id');
+      if (importSession) {
+        navigate(`/sellr/import?session=${encodeURIComponent(importSession)}`);
+        return;
+      }
       setCurrentView('landing');
     }
-  }, [user, currentView]);
+  }, [user, currentView, navigate]);
 
   // Handle Stripe checkout / portal return / downgrade
   useEffect(() => {
@@ -565,8 +603,18 @@ const App: React.FC = () => {
     [albums]
   );
 
+  // Set of imported IDs that persists for the "View imported" filter
+  // (separate from importedAlbumIds which clears after 3s for the ring animation)
+  const [importedIdSet] = useState<Set<string>>(() => {
+    // Snapshot the initial imported IDs before the 3s timer clears them
+    return new Set(importedAlbumIds);
+  });
+
   const filteredAlbums = useMemo(() => {
     let result = albums.filter(a => {
+      // Sellr import filter — takes priority, skips other filters
+      if (showImportedOnly) return importedIdSet.has(a.id);
+
       const query = searchQuery.toLowerCase();
       const matchesSearch =
         a.title.toLowerCase().includes(query) ||
@@ -591,12 +639,12 @@ const App: React.FC = () => {
     });
 
     return result;
-  }, [albums, searchQuery, yearRange, favoritesOnly, sortBy]);
+  }, [albums, searchQuery, yearRange, favoritesOnly, sortBy, showImportedOnly, importedIdSet]);
 
   // Reset grid page when filters change
   useEffect(() => {
     setGridPage(1);
-  }, [searchQuery, yearRange, favoritesOnly, sortBy]);
+  }, [searchQuery, yearRange, favoritesOnly, sortBy, showImportedOnly]);
 
   const gridTotalPages = Math.ceil(filteredAlbums.length / PAGE_SIZE);
   const paginatedAlbums = filteredAlbums.slice((gridPage - 1) * PAGE_SIZE, gridPage * PAGE_SIZE);
@@ -1229,6 +1277,7 @@ const App: React.FC = () => {
           favoritesOnly={favoritesOnly}
           onToggleFavoritesFilter={() => setFavoritesOnly(prev => !prev)}
           searchQuery={searchQuery}
+          importedAlbumIds={importedAlbumIds}
         />
       ) : currentView === 'stakkd' ? (
         <StakkdPage onUpgradeRequired={(feature: string) => setUpgradeFeature(feature)} />
@@ -1284,6 +1333,55 @@ const App: React.FC = () => {
         <ProfilePage userId={user.id} albumCount={albums.length} onClose={() => setCurrentView('landing')} />
       ) : (
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
+          {/* Sellr import banner */}
+          {showImportBanner && importedIdSet.size > 0 && (
+            <div className="mb-4 flex items-center gap-3 rounded-lg bg-[#6B8F71] text-white px-4 py-3 text-sm">
+              <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="3" />
+                <line x1="12" y1="2" x2="12" y2="5" />
+              </svg>
+              <span className="flex-1">
+                {importedIdSet.size} record{importedIdSet.size !== 1 ? 's' : ''} imported from your Sellr appraisal.
+              </span>
+              <button
+                onClick={() => { setShowImportedOnly(true); }}
+                className="underline underline-offset-2 font-medium hover:text-white/80 transition-colors whitespace-nowrap"
+              >
+                View imported
+              </button>
+              <button
+                onClick={() => { setShowImportBanner(false); setShowImportedOnly(false); }}
+                className="p-1 hover:text-white/80 transition-colors flex-shrink-0"
+                aria-label="Dismiss"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* "Showing imported" filter pill */}
+          {showImportedOnly && (
+            <div className="mb-4">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-[#6B8F71]/20 text-[#6B8F71]">
+                Showing imported records
+                <button
+                  onClick={() => setShowImportedOnly(false)}
+                  className="hover:text-[#6B8F71]/70 transition-colors"
+                  aria-label="Clear filter"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          )}
+
           {albums.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center px-6">
               <div className="w-20 h-20 mb-6 opacity-20 text-th-text">
@@ -1309,7 +1407,7 @@ const App: React.FC = () => {
               )}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
                 {paginatedAlbums.map(album => (
-                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} />
+                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} isImported={importedAlbumIds.has(album.id)} />
                 ))}
               </div>
               <Pagination

@@ -181,16 +181,28 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
     const params = new URLSearchParams(window.location.search);
     const wantSignup = params.get('signup') === 'true';
     const tier = params.get('tier');
+    const importSession = params.get('import');
+    const reportToken = params.get('token');
 
     if (tier && ['collector', 'curator', 'enthusiast'].includes(tier)) {
       sessionStorage.setItem('selected_tier', tier);
     }
 
+    // Preserve Sellr import params through OAuth redirect cycle
+    if (importSession) {
+      localStorage.setItem('sellr_import_session_id', importSession);
+    }
+    if (reportToken) {
+      localStorage.setItem('sellr_import_report_token', reportToken);
+    }
+
     // Clean query params from URL
-    if (wantSignup || tier) {
+    if (wantSignup || tier || importSession || reportToken) {
       const url = new URL(window.location.href);
       url.searchParams.delete('signup');
       url.searchParams.delete('tier');
+      url.searchParams.delete('import');
+      url.searchParams.delete('token');
       const clean = url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : '');
       window.history.replaceState({}, '', clean);
     }

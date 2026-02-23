@@ -418,4 +418,40 @@ export const adminService = {
     }
     return resp.json();
   },
+
+  // ── Integrations ────────────────────────────────────────────────
+
+  async getIntegrationSettings(): Promise<Record<string, any>> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/admin/integrations', { headers });
+    if (!resp.ok) throw new Error(`Failed to fetch integration settings: ${resp.status}`);
+    return resp.json();
+  },
+
+  async saveIntegrationSettings(settings: Record<string, { value: any; dataType: string }>): Promise<void> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/admin/integrations', {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ settings }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Save failed' }));
+      throw new Error(err.error || `Failed to save integration settings: ${resp.status}`);
+    }
+  },
+
+  async testIntegration(integration: string, config: Record<string, string>): Promise<{ success: boolean; message: string }> {
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/admin/integrations/test', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ integration, config }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Test failed' }));
+      throw new Error(err.error || `Integration test failed: ${resp.status}`);
+    }
+    return resp.json();
+  },
 };

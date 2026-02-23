@@ -1,0 +1,15 @@
+-- ── Sellr: document 'refunded' as a valid order status ──────────────
+-- Migration: 012_sellr_refunded_status.sql
+--
+-- The sellr_orders.status column is type TEXT, so no schema change is
+-- needed. This migration documents that 'refunded' is now a valid value
+-- alongside the existing 'pending', 'complete', and 'failed' statuses.
+--
+-- Valid sellr_orders.status values:
+--   'pending'   — order created, awaiting payment
+--   'complete'  — payment confirmed via Stripe webhook
+--   'failed'    — payment failed via Stripe webhook
+--   'refunded'  — full refund issued via admin tools
+--
+-- No-op migration (documentation only).
+SELECT 1;

@@ -15,6 +15,7 @@ interface CollectionListProps {
   favoritesOnly?: boolean;
   onToggleFavoritesFilter?: () => void;
   searchQuery: string;
+  importedAlbumIds?: Set<string>;
 }
 
 type SortField = 'favorite' | 'title' | 'artist' | 'year' | 'genre' | 'value' | 'added' | 'condition' | 'plays';
@@ -38,7 +39,7 @@ const SortArrow: React.FC<SortArrowProps> = ({ field, currentSortField, sortDir 
   );
 };
 
-const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, favoritesOnly, onToggleFavoritesFilter, searchQuery }) => {
+const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, favoritesOnly, onToggleFavoritesFilter, searchQuery, importedAlbumIds }) => {
   const [sortField, setSortField] = useState<SortField>('title');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -194,7 +195,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
               <div
                 key={album.id}
                 onClick={() => onSelect(album)}
-                className="group grid grid-cols-[48px_28px_1fr_1fr] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_90px_100px_72px] gap-x-3 px-4 py-2 items-center cursor-pointer list-row-hover transition-colors"
+                className={`group grid grid-cols-[48px_28px_1fr_1fr] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_90px_100px_72px] gap-x-3 px-4 py-2 items-center cursor-pointer list-row-hover transition-colors${importedAlbumIds?.has(album.id) ? ' animate-import-highlight bg-[#6B8F71]/10' : ''}`}
                 role="row"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -205,7 +206,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                 }}
               >
                 {/* Thumbnail */}
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-th-bg/40 flex-shrink-0" role="cell">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-th-bg/40 flex-shrink-0 relative" role="cell">
                   <img
                     src={proxyImageUrl(album.cover_url) || `https://picsum.photos/seed/${album.id}/96/96`}
                     alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'}
@@ -215,6 +216,11 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                       (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/vinyl/96/96';
                     }}
                   />
+                  {importedAlbumIds?.has(album.id) && (
+                    <div className="absolute -top-1 -right-1 bg-[#6B8F71] text-white text-[7px] font-bold uppercase tracking-wider px-1 py-px rounded shadow z-10">
+                      New
+                    </div>
+                  )}
                 </div>
 
                 {/* Favorite heart */}

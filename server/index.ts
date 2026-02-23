@@ -39,8 +39,18 @@ import collectionValueRouter from './routes/collectionValue.js';
 import accountRouter from './routes/account.js';
 import priceAlertsRouter from './routes/priceAlerts.js';
 import alertsCheckRouter from './routes/alertsCheck.js';
+import sellrSessionsRouter from './routes/sellrSessions.js';
+import sellrRecordsRouter from './routes/sellrRecords.js';
+import sellrScanRouter from './routes/sellrScan.js';
+import sellrCheckoutRouter from './routes/sellrCheckout.js';
+import sellrReportRouter from './routes/sellrReport.js';
+import sellrCopyRouter from './routes/sellrCopy.js';
+import integrationsRouter from './routes/integrations.js';
+import sellrAdminRouter from './routes/sellrAdmin.js';
+import sellrImportRouter from './routes/sellrImport.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 import { validateDiscogsConfig } from './lib/discogs.js';
+import { startSellrCron } from './sellrCron.js';
 
 // ── Boot diagnostics: verify all imports resolved ────────────────────
 console.log('[boot] All static imports loaded');
@@ -53,6 +63,8 @@ const _routerMap: Record<string, unknown> = {
   findManualRouter, setupGuideRouter, supportRouter, sitemapRouter, emailRouter,
   onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
+  sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
+  sellrAdminRouter, sellrImportRouter, integrationsRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -98,9 +110,10 @@ app.use(cors({
   allowedHeaders: ['Authorization', 'Content-Type'],
 }));
 
-// Stripe webhook needs raw body for signature verification — mount BEFORE json parser
+// Stripe webhooks need raw body for signature verification — mount BEFORE json parser
 app.use('/api/stripe-webhook', express.raw({ type: 'application/json' }));
 try { app.use(stripeWebhookRouter); } catch (err) { console.error('[boot] FAILED to mount stripeWebhookRouter:', err); }
+app.use('/api/sellr/checkout/webhook', express.raw({ type: 'application/json' }));
 
 // Parse JSON bodies (10mb limit for base64 image payloads) — after webhook route
 app.use(express.json({ limit: '10mb' }));
@@ -151,7 +164,19 @@ mountRouter('collectionValueRouter', collectionValueRouter);
 mountRouter('accountRouter', accountRouter);
 mountRouter('priceAlertsRouter', priceAlertsRouter);
 mountRouter('alertsCheckRouter', alertsCheckRouter);
+mountRouter('sellrSessionsRouter', sellrSessionsRouter);
+mountRouter('sellrRecordsRouter', sellrRecordsRouter);
+mountRouter('sellrScanRouter', sellrScanRouter);
+mountRouter('sellrCheckoutRouter', sellrCheckoutRouter);
+mountRouter('sellrReportRouter', sellrReportRouter);
+mountRouter('sellrCopyRouter', sellrCopyRouter);
+mountRouter('sellrAdminRouter', sellrAdminRouter);
+mountRouter('sellrImportRouter', sellrImportRouter);
+mountRouter('integrationsRouter', integrationsRouter);
 console.log('[boot] All routes registered');
+
+// Start Sellr cron jobs
+startSellrCron();
 
 // Ensure gear-photos storage bucket exists
 async function ensureGearPhotosBucket() {

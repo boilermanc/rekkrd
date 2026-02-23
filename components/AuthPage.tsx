@@ -1,4 +1,4 @@
-import React, { useState, useCallback, FormEvent } from 'react';
+import React, { useState, useCallback, useEffect, FormEvent } from 'react';
 import { supabase } from '../services/supabaseService';
 import Turnstile from './Turnstile';
 
@@ -6,6 +6,22 @@ type AuthMode = 'signin' | 'signup';
 
 const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('signin');
+
+  // Preserve Sellr import params through the auth flow
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const importSession = params.get('import');
+    const reportToken = params.get('token');
+    if (importSession) localStorage.setItem('sellr_import_session_id', importSession);
+    if (reportToken) localStorage.setItem('sellr_import_report_token', reportToken);
+    if (importSession || reportToken) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('import');
+      url.searchParams.delete('token');
+      const clean = url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : '');
+      window.history.replaceState({}, '', clean);
+    }
+  }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

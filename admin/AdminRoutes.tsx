@@ -9,6 +9,10 @@ import ContentPage from './pages/ContentPage';
 import BlogPage from './pages/BlogPage';
 import CardAnalytics from '../src/components/admin/CardAnalytics';
 import OnboardingPreviewPage from './pages/OnboardingPreviewPage';
+import IntegrationsPage from './pages/IntegrationsPage';
+import SellrAdminPanel from '../src/sellr/pages/AdminPanel';
+
+const sellrAdminToken = import.meta.env.VITE_SELLR_ADMIN_TOKEN || '';
 
 const AdminRoutes: React.FC = () => (
   <Routes>
@@ -20,7 +24,9 @@ const AdminRoutes: React.FC = () => (
       <Route path="content" element={<ContentPage />} />
       <Route path="blog" element={<BlogPage />} />
       <Route path="analytics" element={<CardAnalytics />} />
+      <Route path="integrations" element={<IntegrationsPage />} />
       <Route path="onboarding-preview" element={<OnboardingPreviewPage />} />
+      <Route path="sellr" element={<SellrAdminPanel authToken={sellrAdminToken} />} />
     </Route>
   </Routes>
 );
