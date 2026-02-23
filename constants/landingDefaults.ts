@@ -38,7 +38,7 @@ export const DEFAULT_FEATURES_HEADER: CmsSectionHeader = {
 };
 
 export const DEFAULT_FEATURES: CmsFeature[] = [
-  { icon: '\uD83D\uDCF7', cls: 'fi-1', title: 'AI Camera Scan', desc: 'Point, snap, done. Our Gemini-powered AI identifies artist and album from cover art instantly. Upload a photo or use your camera.' },
+  { icon: '\uD83D\uDCF7', cls: 'fi-1', title: 'AI Camera Scan', desc: 'Photograph the cover or scan the barcode. Rekkrd cross-references Discogs\u2019 40M+ release database to identify the exact pressing, pull the tracklist, and price it \u2014 in seconds.' },
   { icon: '\u26A1', cls: 'fi-2', title: 'Auto Enrichment', desc: 'Every album gets filled in automatically: tracklist, genre, year, cover art, market pricing, AI description, and streaming links.' },
   { icon: '\uD83D\uDCB0', cls: 'fi-3', title: 'Collection Valuation', desc: 'See low, median, and high market prices pulled from Discogs. Know what your crate is worth at a glance with portfolio stats.' },
   { icon: '\uD83C\uDFB5', cls: 'fi-4', title: 'Playlist Studio', desc: 'Type a mood. Get a curated playlist from your own collection. Choose albums, sides, or individual songs. Print to PDF.' },
@@ -46,6 +46,8 @@ export const DEFAULT_FEATURES: CmsFeature[] = [
   { icon: '\uD83C\uDFB6', cls: 'fi-6', title: 'Lyrics & Liner Notes', desc: 'Look up lyrics for any track in your collection. Add personal notes, tags, and condition grades to every album.' },
   { icon: '\uD83D\uDD27', cls: 'fi-stakkd', title: 'Stakkd Gear Catalog', desc: 'Document your audio equipment with AI. Get instant identification, specs, history, manuals, and custom setup guides for your entire signal chain.' },
   { icon: '\uD83D\uDCC8', cls: 'fi-analytics', title: 'Collection Analytics', desc: 'Track your collection\u2019s value over time, see genre breakdowns, and discover insights about your listening habits.' },
+  { icon: '\u25A6', cls: 'fi-barcode', title: 'Instant Barcode Recognition', desc: 'Point your camera at the barcode and you\u2019re done. No typing, no searching, no guessing the pressing.' },
+  { icon: '\u266B', cls: 'fi-spotify', title: 'Spotify Integration', desc: 'Pull up any album on Spotify directly from your collection. Your records, your listening \u2014 connected.' },
 ];
 
 export const DEFAULT_HOW_IT_WORKS_HEADER: CmsSectionHeader = {
@@ -127,6 +129,7 @@ export const DEFAULT_STATS_BAND: CmsStatItem[] = [
   { heading: '6 Sources', description: 'Enrichment from iTunes, MusicBrainz, Discogs, Gemini AI, and more' },
   { heading: '<3s', description: 'Average time from scan to fully enriched album entry' },
   { heading: '100%', description: 'Your data. Your collection. No ads, no tracking, no lock-in.' },
+  { heading: '40M+', description: 'Discogs releases in our database' },
 ];
 
 export const DEFAULT_TESTIMONIAL: CmsTestimonial = {
@@ -142,6 +145,7 @@ export const DEFAULT_FAQ_HEADER: { label: string; title: string } = {
 
 export const DEFAULT_FAQS: CmsFaq[] = [
   { q: 'How does the AI scan work?', a: 'Point your phone camera at any vinyl record cover and snap a photo. Our Google Gemini-powered AI analyzes the image, identifies the artist and album, then pulls in tracklist, genre, cover art, pricing data, and more automatically. It works with most commercially released records and typically takes under 3 seconds.' },
+  { q: 'Does Rekkrd connect to my Discogs account?', a: 'Yes. You can import your entire Discogs collection with one click, sync your wantlist with live pricing, and set price alerts for records you\u2019re hunting. Rekkrd uses Discogs as its primary pricing and release database.' },
   { q: 'Where does pricing data come from?', a: "Market valuations (low, median, and high) are sourced from Discogs, the world's largest music database and marketplace. This gives you real-world pricing based on actual recent sales, not guesswork." },
   { q: 'How do AI playlists work?', a: 'Type a mood or vibe like "Late Night Jazz" or "Sunday Morning Chill." The AI analyzes your actual collection and picks albums, sides, or individual songs that match. No hallucinated recommendations \u2014 every pick is something you own.' },
   { q: 'Can I try it before paying?', a: "Absolutely. Every new account gets a free 14-day trial of the Curator plan with full access to AI playlists, lyrics, and unlimited scans. After the trial, you can continue on the free Collector tier or upgrade to keep premium features." },

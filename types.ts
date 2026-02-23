@@ -15,6 +15,7 @@ export interface NewAlbum {
   discogs_release_id?: number;
   musicbrainz_url?: string;
   sample_url?: string;
+  barcode?: string;
   // Collector fields
   condition?: string;
   personal_notes?: string;
@@ -182,6 +183,15 @@ export interface DiscogsMatch {
   catno: string;
   label: string;
   matchType: 'barcode' | 'text';
+}
+
+/** Pending scan result awaiting user confirmation before save. */
+export interface ScanConfirmation {
+  artist: string;
+  title: string;
+  barcode?: string;
+  discogsMatches?: DiscogsMatch[];
+  scanMode?: 'cover' | 'barcode';
 }
 
 /** Shape returned by the /api/identify-gear endpoint. */

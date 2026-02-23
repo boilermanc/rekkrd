@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, Copy } from 'lucide-react';
+import SellrLogo from './SellrLogo';
 import type { SellrRecord } from '../types';
 
 type Tone = 'casual' | 'collector' | 'quicksale';
@@ -243,10 +244,7 @@ const AdCopyPanel: React.FC<AdCopyPanelProps> = ({ record, sessionId, onCopyUpda
                     />
                   ) : (
                     <div className="w-24 h-24 rounded bg-gray-100 flex items-center justify-center">
-                      <svg className="w-10 h-10 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" fill="none" />
-                        <circle cx="12" cy="12" r="3" fill="currentColor" />
-                      </svg>
+                      <SellrLogo className="w-10 h-10" color="#d1d5db" />
                     </div>
                   )}
                 </div>

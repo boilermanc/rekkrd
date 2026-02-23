@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { useAuthContext } from '../contexts/AuthContext';
 import './Blog.css';
 
 interface BlogPost {
@@ -37,6 +38,7 @@ function truncate(text: string, max: number): string {
 }
 
 const BlogList: React.FC = () => {
+  const { user } = useAuthContext();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -86,7 +88,7 @@ const BlogList: React.FC = () => {
             <span>Rekk<span>r</span>d</span>
           </Link>
           <div className="nav-links">
-            <Link to="/">Home</Link>
+            <Link to="/">{user ? 'My Collection' : 'Home'}</Link>
             <Link to="/blog">Blog</Link>
           </div>
         </div>

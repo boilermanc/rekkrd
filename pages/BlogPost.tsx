@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Markdown from 'react-markdown';
 import { Helmet } from 'react-helmet-async';
 import SEO from '../components/SEO';
+import { useAuthContext } from '../contexts/AuthContext';
 import './Blog.css';
 
 interface BlogPostData {
@@ -29,6 +30,7 @@ function formatDate(iso: string): string {
 }
 
 const BlogPost: React.FC = () => {
+  const { user } = useAuthContext();
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ const BlogPost: React.FC = () => {
             <span>Rekk<span>r</span>d</span>
           </Link>
           <div className="nav-links">
-            <Link to="/">Home</Link>
+            <Link to="/">{user ? 'My Collection' : 'Home'}</Link>
             <Link to="/blog">Blog</Link>
           </div>
         </div>

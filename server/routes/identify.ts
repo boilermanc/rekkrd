@@ -79,7 +79,7 @@ router.post(
     }
 
     try {
-      const { base64Data, mimeType } = req.body;
+      const { base64Data, mimeType, scanMode } = req.body;
       if (!base64Data || typeof base64Data !== 'string') {
         res.status(400).json({ error: 'Missing base64Data' });
         return;
@@ -94,13 +94,18 @@ router.post(
         return;
       }
 
+      const barcodeHint = scanMode === 'barcode'
+        ? 'This image is a close-up of a barcode. Focus on extracting the barcode number accurately. Also attempt to identify the album if any text or artwork is visible. '
+        : '';
+
       const response = await withTimeout(ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: {
           parts: [
             { inlineData: { mimeType, data: base64Data } },
             {
-              text: 'Identify this vinyl record album. Return the Artist and Album Title. '
+              text: barcodeHint
+                + 'Identify this vinyl record album. Return the Artist and Album Title. '
                 + 'Also look for any barcode numbers visible on the sleeve, label, or sticker. '
                 + 'Return JSON with keys "artist", "title", and "barcodes" (an array of barcode number strings found, or empty array if none visible). '
                 + 'If you cannot identify the album, return null.',

@@ -127,7 +127,7 @@ export async function checkGearLimit(): Promise<void> {
 }
 
 export const geminiService = {
-  async identifyAlbum(base64DataUrl: string): Promise<{ artist: string; title: string; barcode?: string; discogsMatches?: DiscogsMatch[] } | null> {
+  async identifyAlbum(base64DataUrl: string, scanMode?: 'cover' | 'barcode'): Promise<{ artist: string; title: string; barcode?: string; discogsMatches?: DiscogsMatch[] } | null> {
     try {
       const resized = await resizeForAI(base64DataUrl);
       const [header, base64Data] = resized.split(',');
@@ -136,7 +136,7 @@ export const geminiService = {
       const response = await fetch('/api/identify', {
         method: 'POST',
         headers: await getAuthHeaders(),
-        body: JSON.stringify({ base64Data, mimeType })
+        body: JSON.stringify({ base64Data, mimeType, ...(scanMode === 'barcode' ? { scanMode } : {}) })
       });
 
       if (!response.ok) {

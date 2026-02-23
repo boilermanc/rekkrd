@@ -280,6 +280,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                     <p className="text-th-text3/50 text-[9px] uppercase mb-1">Added</p>
                     <p className="text-sm font-bold text-th-text">{formatDate(album.created_at)}</p>
                   </div>
+                  {album.barcode && (
+                    <div>
+                      <p className="text-th-text3/50 text-[9px] uppercase mb-1">Barcode</p>
+                      <p className="text-sm font-bold text-th-text font-mono">{album.barcode}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="glass-morphism p-6 rounded-2xl border border-th-surface/[0.06] space-y-6">

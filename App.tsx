@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Album, NewAlbum } from './types';
+import { Album, NewAlbum, ScanConfirmation, DiscogsMatch } from './types';
 import { supabaseService, supabase } from './services/supabaseService';
 import { geminiService } from './services/geminiService';
 import AlbumCard from './components/AlbumCard';
-import CameraModal from './components/CameraModal';
+import CameraModal, { type ScanMode } from './components/CameraModal';
 import SpinningRecord from './components/SpinningRecord';
 import AlbumDetailModal from './components/AlbumDetailModal';
 import PlaylistStudio from './components/PlaylistStudio';
@@ -24,6 +24,7 @@ import { ScanLimitError, UpgradeRequiredError, AlbumLimitError, checkAlbumLimit 
 import OnboardingWizard from './components/OnboardingWizard';
 import UpgradeModal from './components/UpgradeModal';
 import DuplicateAlbumModal from './components/DuplicateAlbumModal';
+import ScanConfirmModal from './components/ScanConfirmModal';
 import SubscriptionBanner from './components/SubscriptionBanner';
 import PlanBadge from './components/PlanBadge';
 import ErrorPage from './components/ErrorPage';
@@ -48,7 +49,7 @@ type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
 type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd' | 'discogs' | 'wantlist' | 'value-dashboard' | 'profile' | 'price-alerts';
 
 interface DuplicatePendingData {
-  identity: { artist: string; title: string };
+  identity: { artist: string; title: string; barcode?: string; discogsMatches?: DiscogsMatch[]; scanMode?: ScanMode };
   base64: string;
   existingAlbum: Album;
 }
@@ -74,6 +75,7 @@ const App: React.FC = () => {
   const [showStats, setShowStats] = useState(false);
   const [heroBg, setHeroBg] = useState(DEFAULT_BG);
   const [duplicatePending, setDuplicatePending] = useState<DuplicatePendingData | null>(null);
+  const [pendingScan, setPendingScan] = useState<{ scan: ScanConfirmation; base64: string } | null>(null);
   const [discogsReleaseId, setDiscogsReleaseId] = useState<number | null>(null);
   const [discogsConnected, setDiscogsConnected] = useState(false);
   const [wantlistCount, setWantlistCount] = useState(0);
@@ -379,7 +381,9 @@ const App: React.FC = () => {
 
   const saveIdentifiedAlbum = async (
     identity: { artist: string; title: string },
-    base64: string
+    base64: string,
+    discogsReleaseIdParam?: number,
+    barcodeParam?: string,
   ) => {
     setProcessingStatus(`Appraising ${identity.title}...`);
     try {
@@ -397,7 +401,12 @@ const App: React.FC = () => {
         tags: metadata.tags || [],
         isFavorite: false,
         condition: 'Near Mint',
-        play_count: 0
+        play_count: 0,
+        ...(discogsReleaseIdParam !== undefined && {
+          discogs_release_id: discogsReleaseIdParam,
+          discogs_url: `https://www.discogs.com/release/${discogsReleaseIdParam}`,
+        }),
+        ...(barcodeParam ? { barcode: barcodeParam } : {}),
       });
 
       setAlbums(prev => [saved, ...prev]);
@@ -433,7 +442,7 @@ const App: React.FC = () => {
     }
   };
 
-  const processImage = async (base64: string) => {
+  const processImage = async (base64: string, scanMode?: ScanMode) => {
     if (!isSupabaseReady) {
       showToast("Database not configured. Check your Supabase environment variables.", "error");
       return;
@@ -451,9 +460,9 @@ const App: React.FC = () => {
       return;
     }
 
-    setProcessingStatus("Identifying Record...");
+    setProcessingStatus(scanMode === 'barcode' ? "Reading Barcode..." : "Identifying Record...");
     try {
-      const identity = await geminiService.identifyAlbum(base64);
+      const identity = await geminiService.identifyAlbum(base64, scanMode);
       if (!identity) {
         showToast("Couldn't identify that album. Try a clearer photo or different angle!", "error");
         setProcessingStatus(null);
@@ -474,7 +483,18 @@ const App: React.FC = () => {
         return;
       }
 
-      await saveIdentifiedAlbum(identity, base64);
+      // Show confirmation modal instead of auto-saving
+      setProcessingStatus(null);
+      setPendingScan({
+        scan: {
+          artist: identity.artist,
+          title: identity.title,
+          barcode: identity.barcode,
+          discogsMatches: identity.discogsMatches,
+          scanMode,
+        },
+        base64,
+      });
     } catch (err) {
       if (err instanceof ScanLimitError) {
         setUpgradeFeature('scan');
@@ -510,9 +530,9 @@ const App: React.FC = () => {
     }
   };
 
-  const handleCapture = (base64: string) => {
+  const handleCapture = (base64: string, scanMode?: ScanMode) => {
     setIsCameraOpen(false);
-    processImage(base64);
+    processImage(base64, scanMode);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -559,11 +579,20 @@ const App: React.FC = () => {
     });
   }, [showToast]);
 
-  const handleDuplicateAddAnyway = async () => {
+  const handleDuplicateAddAnyway = () => {
     if (!duplicatePending) return;
     const { identity, base64 } = duplicatePending;
     setDuplicatePending(null);
-    await saveIdentifiedAlbum(identity, base64);
+    setPendingScan({
+      scan: {
+        artist: identity.artist,
+        title: identity.title,
+        barcode: identity.barcode,
+        discogsMatches: identity.discogsMatches,
+        scanMode: identity.scanMode,
+      },
+      base64,
+    });
   };
 
   const handleDuplicateCancel = () => {
@@ -572,6 +601,22 @@ const App: React.FC = () => {
     setDuplicatePending(null);
     setSelectedAlbum(existingAlbum);
     if (existingAlbum.cover_url) setHeroBg(existingAlbum.cover_url);
+  };
+
+  const handleScanConfirm = async (
+    artist: string,
+    title: string,
+    confirmedDiscogsReleaseId?: number,
+    barcode?: string,
+  ) => {
+    if (!pendingScan) return;
+    const { base64 } = pendingScan;
+    setPendingScan(null);
+    await saveIdentifiedAlbum({ artist, title }, base64, confirmedDiscogsReleaseId, barcode);
+  };
+
+  const handleScanCancel = () => {
+    setPendingScan(null);
   };
 
   const stats = useMemo(() => {
@@ -1538,6 +1583,13 @@ const App: React.FC = () => {
           existingAlbum={duplicatePending.existingAlbum}
           onAddAnyway={handleDuplicateAddAnyway}
           onCancel={handleDuplicateCancel}
+        />
+      )}
+      {pendingScan && (
+        <ScanConfirmModal
+          scan={pendingScan.scan}
+          onConfirm={handleScanConfirm}
+          onCancel={handleScanCancel}
         />
       )}
       {discogsReleaseId !== null && (

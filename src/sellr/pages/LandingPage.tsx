@@ -13,15 +13,36 @@ const VinylRecord: React.FC = () => (
     aria-hidden="true"
     role="img"
   >
+    {/* Outer disc */}
     <circle cx="160" cy="160" r="156" fill="#2C4A6E" opacity="0.08" />
+
+    {/* Grooves */}
     <circle cx="160" cy="160" r="140" fill="none" stroke="#2C4A6E" strokeWidth="0.5" opacity="0.15" />
     <circle cx="160" cy="160" r="120" fill="none" stroke="#2C4A6E" strokeWidth="0.5" opacity="0.18" />
     <circle cx="160" cy="160" r="100" fill="none" stroke="#2C4A6E" strokeWidth="0.5" opacity="0.22" />
     <circle cx="160" cy="160" r="80" fill="none" stroke="#2C4A6E" strokeWidth="0.5" opacity="0.25" />
     <circle cx="160" cy="160" r="60" fill="none" stroke="#2C4A6E" strokeWidth="0.5" opacity="0.28" />
-    <circle cx="160" cy="160" r="40" fill="#2C4A6E" opacity="0.06" />
-    <circle cx="160" cy="160" r="18" fill="#2C4A6E" opacity="0.12" />
-    <circle cx="160" cy="160" r="6" fill="#2C4A6E" opacity="0.2" />
+
+    {/* Center label */}
+    <circle cx="160" cy="160" r="40" fill="#2C4A6E" opacity="0.1" />
+
+    {/* Dollar sign */}
+    <text
+      x="160"
+      y="160"
+      textAnchor="middle"
+      dominantBaseline="central"
+      fill="#2C4A6E"
+      fontSize="44"
+      fontWeight="700"
+      fontFamily="system-ui, -apple-system, sans-serif"
+      opacity="0.25"
+    >
+      $
+    </text>
+
+    {/* Spindle hole */}
+    <circle cx="160" cy="160" r="6" fill="#2C4A6E" opacity="0.15" />
   </svg>
 );
 
@@ -84,7 +105,7 @@ const LandingPage: React.FC = () => {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
               <Link
-                to="/sellr/scan"
+                to="/sellr/start"
                 className="px-7 py-3 min-h-[44px] bg-sellr-amber text-white font-medium rounded hover:bg-sellr-amber-light transition-colors text-base"
               >
                 Start Your Appraisal

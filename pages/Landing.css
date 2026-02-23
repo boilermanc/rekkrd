@@ -343,38 +343,6 @@
   letter-spacing:.08em;
 }
 
-/* —— Proof Bar —— */
-.landing-page .proof-bar {
-  padding:48px 0;
-  border-top:2px solid var(--beige);
-  border-bottom:2px solid var(--beige);
-  background:var(--bg2);
-}
-
-.landing-page .proof-bar .container {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:32px;
-  text-align:center;
-}
-
-.landing-page .proof-stat .num {
-  font-family:'Playfair Display',serif;
-  font-size:2.25rem;
-  font-weight:700;
-  color:var(--peach);
-  margin-bottom:4px;
-}
-
-.landing-page .proof-stat .label {
-  font-family:'Space Mono',monospace;
-  font-size:.7rem;
-  color:var(--text3);
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-}
-
 /* —— Sections —— */
 .landing-page .section {
   padding:100px 0;
@@ -1618,12 +1586,16 @@
   .landing-page .hero-actions{justify-content:center}
   .landing-page .features-grid{grid-template-columns:repeat(2,1fr)}
   .landing-page .showcase .container,
+  .landing-page .discogs-section .container,
+  .landing-page .value-section .container,
   .landing-page .playlist-section .container,
   .landing-page .stakkd-section .container{grid-template-columns:1fr;gap:48px}
   .landing-page .playlist-visual{order:2}
   .landing-page .playlist-text{order:1}
   .landing-page .stakkd-visual{order:1}
   .landing-page .stakkd-text{order:2}
+  .landing-page .value-visual{order:1}
+  .landing-page .value-text{order:2}
   .landing-page .pricing-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto}
   .landing-page .price-card.featured{order:-1}
   .landing-page .footer-grid{grid-template-columns:1fr 1fr}
@@ -1633,7 +1605,6 @@
   .landing-page .hero-vinyl{width:350px;height:350px;right:50%;transform:translate(50%,-50%);opacity:.03}
   .landing-page .nav-links{display:none}
   .landing-page .nav-mobile{display:block}
-  .landing-page .proof-bar .container{grid-template-columns:repeat(2,1fr)}
   .landing-page .features-grid{grid-template-columns:1fr}
   .landing-page .steps{grid-template-columns:1fr;gap:48px}
   .landing-page .steps::before{display:none}
@@ -1880,4 +1851,281 @@
 
 .landing-page .auth-switch-link:hover {
   color:var(--peach-dark);
+}
+
+/* Sellr sub-nav banner */
+.sellr-subnav {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#2C4A6E;
+  color:#fff;
+  padding:8px 24px;
+  font-size:13px;
+  gap:12px;
+}
+.sellr-subnav a { color:#fff; text-decoration:none; }
+.sellr-subnav a:hover { text-decoration:underline; }
+.sellr-subnav-dismiss {
+  background:none;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  padding:0 4px;
+  opacity:0.7;
+  flex-shrink:0;
+}
+.sellr-subnav-dismiss:hover { opacity:1; }
+
+@media (max-width:600px) {
+  .sellr-subnav {
+    flex-direction:column;
+    text-align:center;
+    padding:10px 16px;
+  }
+  .sellr-subnav-dismiss { display:none; }
+}
+
+/* Sellr callout section */
+.sellr-callout .container {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:64px;
+  align-items:center;
+}
+@media (max-width:768px) {
+  .sellr-callout .container {
+    grid-template-columns:1fr;
+    gap:40px;
+  }
+}
+
+/* —— Discogs Section —— */
+.landing-page .discogs-section .container {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  align-items:center;
+}
+
+.landing-page .discogs-mock {
+  background:var(--bg2);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+
+.landing-page .discogs-mock-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.landing-page .discogs-mock-label {
+  font-weight:700;
+  font-size:.85rem;
+  color:var(--text);
+}
+
+.landing-page .discogs-mock-count {
+  font-family:'Space Mono',monospace;
+  font-size:.75rem;
+  color:var(--text3);
+}
+
+.landing-page .discogs-mock-progress {
+  height:6px;
+  background:var(--bg3);
+  border-radius:3px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+
+.landing-page .discogs-mock-bar {
+  width:100%;
+  height:100%;
+  background:var(--peach);
+  border-radius:3px;
+}
+
+.landing-page .discogs-mock-items {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.landing-page .discogs-mock-item {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 10px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+}
+
+.landing-page .discogs-mock-disc {
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:var(--slate);
+  flex-shrink:0;
+  position:relative;
+}
+.landing-page .discogs-mock-disc::after {
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--bg);
+  transform:translate(-50%,-50%);
+}
+
+.landing-page .discogs-mock-info {
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  flex:1;
+}
+
+.landing-page .discogs-mock-artist {
+  font-weight:600;
+  font-size:.8rem;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.landing-page .discogs-mock-title {
+  font-size:.75rem;
+  color:var(--text3);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.landing-page .discogs-mock-price {
+  font-family:'Space Mono',monospace;
+  font-size:.8rem;
+  font-weight:600;
+  color:var(--peach);
+  flex-shrink:0;
+}
+
+.landing-page .discogs-mock-footer {
+  margin-top:16px;
+  text-align:center;
+  font-size:.8rem;
+  color:var(--peach);
+  font-weight:600;
+}
+
+/* —— Value Section —— */
+.landing-page .value-section .container {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  align-items:center;
+}
+
+.landing-page .value-mock {
+  background:var(--bg2);
+  border-radius:var(--radius);
+  padding:28px;
+  box-shadow:var(--shadow);
+}
+
+.landing-page .value-mock-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+
+.landing-page .value-mock-label {
+  font-weight:700;
+  font-size:.85rem;
+  color:var(--text);
+}
+
+.landing-page .value-mock-updated {
+  font-size:.7rem;
+  color:var(--text3);
+}
+
+.landing-page .value-mock-total {
+  font-family:'Playfair Display',serif;
+  font-size:2.5rem;
+  font-weight:700;
+  color:var(--peach);
+  line-height:1.1;
+}
+
+.landing-page .value-mock-subtitle {
+  font-size:.8rem;
+  color:var(--text3);
+  margin-bottom:20px;
+}
+
+.landing-page .value-mock-range {
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.landing-page .value-range-item {
+  flex:1;
+  text-align:center;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  padding:10px 8px;
+}
+
+.landing-page .value-range-item.highlight {
+  background:var(--peach);
+}
+
+.landing-page .value-range-item .range-label {
+  display:block;
+  font-size:.65rem;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:2px;
+}
+
+.landing-page .value-range-item.highlight .range-label {
+  color:rgba(255,255,255,.8);
+}
+
+.landing-page .value-range-item .range-value {
+  font-family:'Space Mono',monospace;
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--text);
+}
+
+.landing-page .value-range-item.highlight .range-value {
+  color:#fff;
+}
+
+.landing-page .value-mock-breakdown {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.landing-page .value-breakdown-row {
+  display:flex;
+  justify-content:space-between;
+  font-size:.8rem;
+  color:var(--text2);
+  padding:6px 0;
+  border-bottom:1px solid var(--bg3);
+}
+
+.landing-page .value-breakdown-row:last-child {
+  border-bottom:none;
 }

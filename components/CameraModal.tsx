@@ -2,9 +2,12 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { Disc3, ScanBarcode } from 'lucide-react';
+
+export type ScanMode = 'cover' | 'barcode';
 
 interface CameraModalProps {
-  onCapture: (base64: string) => void;
+  onCapture: (base64: string, scanMode: ScanMode) => void;
   onClose: () => void;
 }
 
@@ -17,6 +20,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [scanMode, setScanMode] = useState<ScanMode>('cover');
 
   useEffect(() => {
     let activeStream: MediaStream | null = null;
@@ -57,7 +61,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
       if (ctx) {
         ctx.drawImage(video, 0, 0);
         const base64 = canvas.toDataURL('image/jpeg', 0.8);
-        onCapture(base64);
+        onCapture(base64, scanMode);
       }
     }
   };
@@ -83,18 +87,77 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
           />
           {!isStreaming && <div className="animate-pulse text-th-text3">Initializing Lens...</div>}
 
-          {/* Overlay grid for aiming */}
-          <div className="absolute inset-0 pointer-events-none border-[40px] border-th-bg/20 flex items-center justify-center">
-             <div className="w-48 h-48 sm:w-64 sm:h-64 border-2 border-[#dd6e42]/50 rounded-xl relative">
-                <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-[#dd6e42]"></div>
-                <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-[#dd6e42]"></div>
-                <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-[#dd6e42]"></div>
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-[#dd6e42]"></div>
-             </div>
-          </div>
+          {/* Cover Art overlay */}
+          {scanMode === 'cover' && (
+            <div className="absolute inset-0 pointer-events-none border-[40px] border-th-bg/20 flex items-center justify-center">
+               <div className="w-48 h-48 sm:w-64 sm:h-64 border-2 border-[#dd6e42]/50 rounded-xl relative">
+                  <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-[#dd6e42]"></div>
+                  <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-[#dd6e42]"></div>
+                  <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-[#dd6e42]"></div>
+                  <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-[#dd6e42]"></div>
+               </div>
+            </div>
+          )}
+
+          {/* Barcode overlay */}
+          {scanMode === 'barcode' && (
+            <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
+              {/* Dim top and bottom */}
+              <div className="absolute inset-0 bg-th-bg/40" />
+              {/* Targeting box */}
+              <div className="relative w-[80%] h-[80px] border-2 border-[#dd6e42]/50 rounded-lg bg-transparent z-10">
+                {/* Clear the targeting area */}
+                <div className="absolute inset-0 bg-th-bg/0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
+                {/* Corner highlights */}
+                <div className="absolute -top-1.5 -left-1.5 w-5 h-5 border-t-[3px] border-l-[3px] border-[#dd6e42] rounded-tl-sm"></div>
+                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 border-t-[3px] border-r-[3px] border-[#dd6e42] rounded-tr-sm"></div>
+                <div className="absolute -bottom-1.5 -left-1.5 w-5 h-5 border-b-[3px] border-l-[3px] border-[#dd6e42] rounded-bl-sm"></div>
+                <div className="absolute -bottom-1.5 -right-1.5 w-5 h-5 border-b-[3px] border-r-[3px] border-[#dd6e42] rounded-br-sm"></div>
+                {/* Animated scan line */}
+                <div className="absolute left-2 right-2 h-0.5 bg-[#dd6e42] rounded-full opacity-80 animate-barcode-scan" />
+              </div>
+              {/* Label below targeting box */}
+              <p className="relative z-10 mt-4 text-th-text text-[10px] font-label tracking-widest uppercase">
+                Align barcode within the frame
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="p-8 flex justify-center">
+        {/* Mode toggle + instruction */}
+        <div className="px-4 pt-4 flex flex-col items-center gap-3">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setScanMode('cover')}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-label tracking-widest uppercase transition-all ${
+                scanMode === 'cover'
+                  ? 'bg-[#dd6e42] text-th-text font-bold'
+                  : 'glass-morphism text-th-text2 hover:text-th-text border border-th-surface/[0.10]'
+              }`}
+            >
+              <Disc3 className="w-3.5 h-3.5" />
+              Cover Art
+            </button>
+            <button
+              type="button"
+              onClick={() => setScanMode('barcode')}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-label tracking-widest uppercase transition-all ${
+                scanMode === 'barcode'
+                  ? 'bg-[#dd6e42] text-th-text font-bold'
+                  : 'glass-morphism text-th-text2 hover:text-th-text border border-th-surface/[0.10]'
+              }`}
+            >
+              <ScanBarcode className="w-3.5 h-3.5" />
+              Barcode
+            </button>
+          </div>
+          <p className="text-th-text3 text-[10px] tracking-wider">
+            {scanMode === 'cover' ? 'Point at the album cover' : 'Point at the barcode on the sleeve or label'}
+          </p>
+        </div>
+
+        <div className="p-6 flex justify-center">
           <button
             onClick={captureImage}
             className="w-20 h-20 rounded-full border-4 border-th-text flex items-center justify-center active:scale-95 transition-transform hover:border-[#dd6e42]"
@@ -105,6 +168,17 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
 
         <canvas ref={canvasRef} className="hidden" />
       </div>
+
+      {/* Scan line animation */}
+      <style>{`
+        @keyframes barcode-scan {
+          0%, 100% { top: 4px; }
+          50% { top: calc(100% - 6px); }
+        }
+        .animate-barcode-scan {
+          animation: barcode-scan 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

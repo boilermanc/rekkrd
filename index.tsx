@@ -27,6 +27,7 @@ import SellrCheckoutPage from './src/sellr/pages/CheckoutPage';
 import SellrSuccessPage from './src/sellr/pages/SuccessPage';
 import SellrReportPage from './src/sellr/pages/ReportPage';
 import SellrImportPage from './src/sellr/pages/ImportPage';
+import SellrOnboardingPage from './src/sellr/pages/OnboardingPage';
 import SellrNotFoundPage from './src/sellr/pages/NotFoundPage';
 
 
@@ -63,6 +64,7 @@ root.render(
                   <Route path="/support" element={<SupportPage />} />
                   <Route path="/welcome" element={<WelcomeLandingPage />} />
                   <Route path="/sellr" element={<SellrLandingPage />} />
+                  <Route path="/sellr/start" element={<SellrOnboardingPage />} />
                   <Route path="/sellr/scan" element={<SellrScanPage />} />
                   <Route path="/sellr/review" element={<SellrReviewPage />} />
                   <Route path="/sellr/checkout" element={<SellrCheckoutPage />} />

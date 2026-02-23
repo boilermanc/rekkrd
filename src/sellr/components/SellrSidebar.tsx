@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Disc3, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import SellrLogo from './SellrLogo';
 import { SELLR_TIERS } from '../types';
 import type { SellrSession, SellrRecord } from '../types';
 
@@ -179,7 +180,7 @@ const SellrSidebar: React.FC<SellrSidebarProps> = ({ session, records, onRecordD
                     />
                   ) : (
                     <div className="w-10 h-10 rounded bg-sellr-charcoal/5 flex items-center justify-center flex-shrink-0">
-                      <Disc3 className="w-5 h-5 text-sellr-charcoal/15" strokeWidth={1.2} />
+                      <SellrLogo className="w-5 h-5" color="#1a1a1a" />
                     </div>
                   )}
 

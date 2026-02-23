@@ -73,6 +73,9 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   const { user, signOut } = useAuthContext();
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [sellrBannerDismissed, setSellrBannerDismissed] = useState(() =>
+    localStorage.getItem('sellr_subnav_dismissed') === 'true'
+  );
 
   // Latest blog post
   interface LatestPost { id: string; title: string; slug: string; excerpt: string | null; featured_image: string | null; author: string; published_at: string; }
@@ -334,8 +337,11 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
+            <a href="#discogs">Discogs</a>
+            <a href="#value">Value</a>
             <a href="#playlist">Playlists</a>
             <a href="#stakkd">Stakkd</a>
+            <a href="/sellr">Sellr</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
             <a href="/blog">Blog</a>
@@ -359,6 +365,33 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
           )}
         </div>
       </nav>
+
+      {!sellrBannerDismissed && (
+        <div className="sellr-subnav">
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" style={{ width: 16, height: 16, flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            Selling your crate?
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <a href="/sellr/start">
+              Try Sellr — know your value before you sell →
+            </a>
+            <button
+              aria-label="Dismiss Sellr banner"
+              onClick={() => { localStorage.setItem('sellr_subnav_dismissed', 'true'); setSellrBannerDismissed(true); }}
+              className="sellr-subnav-dismiss"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 16, height: 16 }}>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </span>
+        </div>
+      )}
 
       <section className="hero">
         <div className="hero-vinyl" aria-hidden="true">
@@ -405,17 +438,6 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               </video>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="proof-bar">
-        <div className="container">
-          {content.proof_stats.map(stat => (
-            <div className="proof-stat" key={stat.label}>
-              <div className="num">{stat.value}</div>
-              <div className="label">{stat.label}</div>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -478,6 +500,120 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section discogs-section" id="discogs">
+        <div className="container">
+          <div className="discogs-text">
+            <div className="section-label">DISCOGS</div>
+            <h2 className="section-title">Your Discogs collection,<br />
+              <em style={{ color: 'var(--peach)', fontWeight: 400 }}>
+                finally at home.
+              </em>
+            </h2>
+            <p className="section-sub">
+              Rekkrd connects directly to Discogs — the world's largest
+              vinyl database — so your collection, wantlist, and pricing
+              are always in sync.
+            </p>
+            <ul className="showcase-list" style={{ marginTop: 28 }}>
+              {checkItem('Import your entire Discogs collection in one click')}
+              {checkItem('Wantlist synced with live marketplace pricing')}
+              {checkItem('Price alerts when records hit your target')}
+              {checkItem('Every scan cross-referenced against 40 million releases')}
+            </ul>
+          </div>
+          <div className="discogs-visual">
+            <div className="discogs-mock">
+              <div className="discogs-mock-header">
+                <span className="discogs-mock-label">Discogs Import</span>
+                <span className="discogs-mock-count">847 records</span>
+              </div>
+              <div className="discogs-mock-progress">
+                <div className="discogs-mock-bar" />
+              </div>
+              <div className="discogs-mock-items">
+                {[
+                  { artist: 'Miles Davis', title: 'Kind of Blue', price: '$42.00' },
+                  { artist: 'Pink Floyd', title: 'The Wall', price: '$28.50' },
+                  { artist: 'John Coltrane', title: 'A Love Supreme', price: '$67.00' },
+                  { artist: 'Radiohead', title: 'OK Computer', price: '$35.00' },
+                ].map(item => (
+                  <div className="discogs-mock-item" key={item.title}>
+                    <div className="discogs-mock-disc" />
+                    <div className="discogs-mock-info">
+                      <span className="discogs-mock-artist">{item.artist}</span>
+                      <span className="discogs-mock-title">{item.title}</span>
+                    </div>
+                    <span className="discogs-mock-price">{item.price}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="discogs-mock-footer">
+                ✓ Import complete — 847 records added
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section value-section" id="value">
+        <div className="container">
+          <div className="value-visual">
+            <div className="value-mock">
+              <div className="value-mock-header">
+                <span className="value-mock-label">Collection Value</span>
+                <span className="value-mock-updated">Updated today</span>
+              </div>
+              <div className="value-mock-total">$4,280</div>
+              <div className="value-mock-subtitle">Estimated market value</div>
+              <div className="value-mock-range">
+                <div className="value-range-item">
+                  <span className="range-label">Conservative</span>
+                  <span className="range-value">$3,100</span>
+                </div>
+                <div className="value-range-item highlight">
+                  <span className="range-label">Estimated</span>
+                  <span className="range-value">$4,280</span>
+                </div>
+                <div className="value-range-item">
+                  <span className="range-label">Optimistic</span>
+                  <span className="range-value">$5,940</span>
+                </div>
+              </div>
+              <div className="value-mock-breakdown">
+                <div className="value-breakdown-row">
+                  <span>Jazz</span><span>$1,240</span>
+                </div>
+                <div className="value-breakdown-row">
+                  <span>Rock</span><span>$980</span>
+                </div>
+                <div className="value-breakdown-row">
+                  <span>Electronic</span><span>$760</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="value-text">
+            <div className="section-label">COLLECTION VALUE</div>
+            <h2 className="section-title">Know what your<br />
+              <em style={{ color: 'var(--peach)', fontWeight: 400 }}>
+                collection is worth.
+              </em>
+            </h2>
+            <p className="section-sub">
+              Stop guessing. Rekkrd pulls live Discogs sales data and gives
+              you three valuations — conservative, estimated, and optimistic
+              — so you always know where you stand.
+            </p>
+            <ul className="showcase-list" style={{ marginTop: 28 }}>
+              {checkItem('Total collection value updated with every scan')}
+              {checkItem('Conservative, estimated, and optimistic price ranges')}
+              {checkItem('Value breakdown by genre, decade, and condition')}
+              {checkItem('Track how your collection grows over time')}
+            </ul>
           </div>
         </div>
       </section>
@@ -593,6 +729,78 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             <ul className="showcase-list" style={{ marginTop: 28 }}>
               {content.stakkd.checklist.map(checkItem)}
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="section sellr-callout" id="sellr">
+        <div className="container">
+          <div className="sellr-callout-text">
+            <div className="section-label">Sellr</div>
+            <h2 className="section-title">Ready to sell<br />
+              <em style={{ color: '#E8A838', fontWeight: 400 }}>your collection?</em>
+            </h2>
+            <p className="section-sub">
+              Sellr appraises every record, pulls live Discogs market pricing,
+              and writes your Facebook Marketplace ads — so you know exactly
+              what you have before you sell.
+            </p>
+            <ul className="showcase-list" style={{ marginTop: 28 }}>
+              {checkItem('Live Discogs pricing for every record you own')}
+              {checkItem('AI-written Facebook Marketplace ad copy')}
+              {checkItem('One-time payment — no subscription required')}
+            </ul>
+            <div style={{ marginTop: 36, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <a href="/sellr/start" className="btn-primary">
+                Start Your Appraisal <Arrow />
+              </a>
+              <a href="/sellr" className="btn-secondary">
+                Learn More
+              </a>
+            </div>
+          </div>
+          <div className="sellr-callout-visual">
+            <div style={{ background: '#EDE8DF', borderRadius: 16, padding: 24, maxWidth: 380, boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <svg viewBox="0 0 64 64" style={{ width: 64, height: 64, flexShrink: 0 }}>
+                  <circle cx="32" cy="32" r="30" fill="#2C4A6E" />
+                  <circle cx="32" cy="32" r="24" stroke="#1a3552" strokeWidth="0.6" fill="none" />
+                  <circle cx="32" cy="32" r="18" stroke="#1a3552" strokeWidth="0.5" fill="none" />
+                  <circle cx="32" cy="32" r="12" stroke="#1a3552" strokeWidth="0.4" fill="none" />
+                  <circle cx="32" cy="32" r="4" fill="#EDE8DF" />
+                </svg>
+                <div>
+                  <div style={{ fontWeight: 700 }}>Fleetwood Mac</div>
+                  <div style={{ fontFamily: 'Georgia,serif', fontSize: 18 }}>Rumours</div>
+                  <div style={{ fontSize: 13, color: '#666' }}>1977 · Warner Bros.</div>
+                  <span style={{ display: 'inline-block', background: '#E8A838', color: '#fff', borderRadius: 4, padding: '2px 8px', fontSize: 12, marginTop: 4 }}>VG+</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-around', background: '#F5F0E8', borderRadius: 8, padding: '8px 0', margin: '16px 0', textAlign: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 16 }}>$18</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>Low</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 16, color: '#E8A838', fontWeight: 700 }}>~$27.50</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>Est.</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 16 }}>$45</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>High</div>
+                </div>
+              </div>
+              <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '16px 0' }} />
+              <div style={{ fontSize: 11, color: '#1877F2', fontWeight: 600, marginBottom: 8 }}>▦ Marketplace · AI-Generated</div>
+              <div style={{ fontSize: 13, color: '#333', fontStyle: 'italic', background: '#F5F0E8', borderRadius: 8, padding: 12, lineHeight: 1.6 }}>
+                "Classic Fleetwood Mac — Rumours (1977). VG+ condition,
+                plays perfectly. Discogs median $27–$45. Asking $30
+                for a fast sale. DM me!"
+              </div>
+              <div style={{ marginTop: 16, fontSize: 12, color: '#888', textAlign: 'center' }}>
+                Sample output — your records, your prices
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -807,8 +1015,9 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               <p>{brandify(content.footer.brand_description)}</p>
             </div>
             <div className="footer-col">
-              <h4>Product</h4>
+              <h4>Products</h4>
               <ul>
+                <li><a href="/sellr">Sellr</a></li>
                 <li><a href="#features">Features</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#playlist">Playlists</a></li>

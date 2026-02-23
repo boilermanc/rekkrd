@@ -144,7 +144,10 @@ export const supabaseService = {
         price_low: album.price_low,
         price_median: album.price_median,
         price_high: album.price_high,
-        play_count: album.play_count || 0
+        play_count: album.play_count || 0,
+        discogs_release_id: album.discogs_release_id,
+        discogs_url: album.discogs_url,
+        barcode: album.barcode,
       }])
       .select()
       .single();
@@ -167,7 +170,7 @@ export const supabaseService = {
       'title', 'artist', 'year', 'genre', 'cover_url', 'original_photo_url',
       'description', 'tracklist', 'tags', 'condition', 'personal_notes',
       'price_low', 'price_median', 'price_high', 'play_count',
-      'discogs_url', 'musicbrainz_url', 'sample_url',
+      'discogs_url', 'discogs_release_id', 'musicbrainz_url', 'sample_url', 'barcode',
     ];
 
     const dbUpdates: Record<string, unknown> = {};

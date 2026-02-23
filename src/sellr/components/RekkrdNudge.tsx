@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Disc3 } from 'lucide-react';
+import SellrLogo from './SellrLogo';
 
 interface RekkrdNudgeProps {
   sessionId: string;
@@ -31,7 +31,7 @@ const RekkrdNudge: React.FC<RekkrdNudgeProps> = ({ sessionId, recordCount, repor
       <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {/* Left — message */}
         <div className="flex items-center gap-2 min-w-0">
-          <Disc3 className="w-5 h-5 flex-shrink-0 opacity-80" />
+          <SellrLogo className="w-5 h-5 flex-shrink-0 opacity-80" color="white" />
           <span className="text-sm font-medium truncate">
             Save {recordCount > 0 ? `these ${recordCount} records` : 'this collection'} to Rekkrd — track value over time.
           </span>
