@@ -1857,7 +1857,7 @@
 .landing-page a.sellr-tab {
   position:fixed;
   top:var(--nav-h);
-  right:200px;
+  right:360px;
   z-index:99;
   background:#2C4A6E;
   color:#fff !important;
