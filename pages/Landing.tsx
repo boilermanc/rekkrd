@@ -358,7 +358,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
         </div>
       </nav>
 
-      <a href="/sellr/start" className="sellr-tab">
+      <a href="/sellr" className="sellr-tab">
         Looking to sell your crate? <span>Try Sellr →</span>
       </a>
 
