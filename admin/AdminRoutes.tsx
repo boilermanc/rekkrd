@@ -20,8 +20,8 @@ const AdminRoutes: React.FC = () => (
       <Route path="content" element={<ContentPage />} />
       <Route path="blog" element={<BlogPage />} />
       <Route path="analytics" element={<CardAnalytics />} />
+      <Route path="onboarding-preview" element={<OnboardingPreviewPage />} />
     </Route>
-    <Route path="onboarding-preview" element={<OnboardingPreviewPage />} />
   </Routes>
 );
 
