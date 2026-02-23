@@ -1,300 +1,157 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { updateProfile } from '../services/profileService';
-import { supabase } from '../services/supabaseService';
-import '../pages/Landing.css';
+import { useAuthContext } from '../contexts/AuthContext';
+import { Headphones, Music, Disc3, Tv, Sparkles, Heart, Trophy, TrendingUp, Mail, Archive, Crown, Gem, Camera, Compass } from 'lucide-react';
+import AlbumCard from './AlbumCard';
+import WantlistCard from './WantlistCard';
+import { useCheckout } from '../hooks/useCheckout';
+import type { Album, WantlistItem } from '../types';
 
-type SelectedTier = 'collector' | 'curator' | 'enthusiast' | null;
-const VALID_TIERS = ['collector', 'curator', 'enthusiast'];
+const TOTAL_STEPS = 9;
 
 interface OnboardingWizardProps {
-  userId: string;
-  onComplete: (action: 'add' | 'explore', tier: SelectedTier) => void;
+  onComplete: (startAction?: 'scan' | 'explore') => void;
+  previewMode?: boolean;
 }
 
-const STEPS = ['Welcome', 'Your Habits', 'Feature Tour', 'Get Started'] as const;
+interface ProfileData {
+  displayName: string;
+  favoriteGenres: string[];
+  listeningSetup: string;
+  collectingGoal: string;
+  emailDigestOptin: boolean;
+  selectedTier: 'collector' | 'curator' | 'enthusiast';
+  startAction: 'scan' | 'explore';
+}
 
-const GENRE_OPTIONS = [
-  'Rock', 'Jazz', 'Hip-Hop', 'Electronic', 'Classical', 'Blues',
-  'R&B/Soul', 'Country', 'Folk', 'Punk', 'Metal', 'Pop',
-  'Reggae', 'Latin', 'Funk', 'World',
-] as const;
+/* ─── Step 1: Welcome ─── */
+interface StepWelcomeProps {
+  displayName: string;
+  onDisplayNameChange: (value: string) => void;
+}
 
-const SETUP_OPTIONS = [
-  { id: 'dedicated', emoji: '\uD83C\uDF9B\uFE0F', label: 'Dedicated Setup', desc: 'Turntable, receiver, speakers' },
-  { id: 'casual', emoji: '\uD83C\uDFA7', label: 'Casual Listener', desc: 'Portable / bluetooth' },
-  { id: 'new', emoji: '\uD83C\uDD95', label: 'Just Getting Started', desc: 'No setup yet' },
-] as const;
+const StepWelcome: React.FC<StepWelcomeProps> = ({ displayName, onDisplayNameChange }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
 
-const GOAL_OPTIONS = [
-  { id: 'listener', emoji: '\uD83C\uDFB5', label: 'Casual Listener', desc: 'I just play what I like' },
-  { id: 'completionist', emoji: '\uD83D\uDCC0', label: 'Completionist', desc: 'Gotta have every pressing' },
-  { id: 'investor', emoji: '\uD83D\uDCB0', label: 'Investor', desc: 'Tracking value and rare finds' },
-  { id: 'curator', emoji: '\uD83C\uDFA8', label: 'Curator', desc: "It's about the art and experience" },
-] as const;
-
-type SetupId = typeof SETUP_OPTIONS[number]['id'];
-type GoalId = typeof GOAL_OPTIONS[number]['id'];
-
-/* ─── Landing design tokens ─── */
-const t = {
-  peach: '#dd6e42',
-  peachDark: '#c45a30',
-  beige: '#e8dab2',
-  slate: '#4f6d7a',
-  slateDark: '#3a525d',
-  slateLight: '#6a8c9a',
-  sky: '#c0d6df',
-  alabaster: '#eaeaea',
-  bg: '#f7f4ef',
-  bg2: '#efe9dd',
-  bg3: '#e8dab2',
-  text: '#2d3a3e',
-  text2: '#4f6d7a',
-  text3: '#7d9199',
-  white: '#ffffff',
-  radius: 12,
-  radiusSm: 8,
-  radiusXs: 6,
-} as const;
-
-const labelStyle: React.CSSProperties = {
-  fontFamily: "'Space Mono',monospace",
-  fontSize: '.7rem',
-  fontWeight: 700,
-  textTransform: 'uppercase',
-  letterSpacing: '.1em',
-  color: t.peach,
-  marginBottom: 12,
-};
-
-const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ userId, onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
-  const [animKey, setAnimKey] = useState(0);
-
-  const [selectedGenres, setSelectedGenres] = useState<Set<string>>(new Set());
-  const [selectedSetup, setSelectedSetup] = useState<SetupId | null>(null);
-  const [selectedGoal, setSelectedGoal] = useState<GoalId | null>(null);
-
-  // Read pre-selected tier from /welcome CTA
-  const [selectedTier, setSelectedTier] = useState<SelectedTier>(null);
   useEffect(() => {
-    const tier = sessionStorage.getItem('selected_tier');
-    if (tier && VALID_TIERS.includes(tier)) {
-      setSelectedTier(tier as SelectedTier);
-    }
+    // Small delay so the fade-in transition doesn't fight with focus
+    const timer = setTimeout(() => inputRef.current?.focus(), 200);
+    return () => clearTimeout(timer);
   }, []);
 
-  const isFirst = currentStep === 0;
-  const isLast = currentStep === STEPS.length - 1;
-
-  const isStep2Valid = selectedGenres.size > 0 && selectedSetup !== null && selectedGoal !== null;
-  const canAdvance = currentStep !== 1 || isStep2Valid;
-
-  const goNext = () => {
-    if (!canAdvance || isLast) return;
-    setDirection('forward');
-    setAnimKey(k => k + 1);
-    setCurrentStep(s => s + 1);
-  };
-
-  const goBack = () => {
-    if (isFirst) return;
-    setDirection('back');
-    setAnimKey(k => k + 1);
-    setCurrentStep(s => s - 1);
-  };
-
-  const toggleGenre = (genre: string) => {
-    setSelectedGenres(prev => {
-      const next = new Set(prev);
-      if (next.has(genre)) next.delete(genre);
-      else next.add(genre);
-      return next;
-    });
-  };
+  const initials = displayName.trim()
+    ? displayName
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(w => w[0].toUpperCase())
+        .join('')
+    : '?';
 
   return (
-    <div className="landing-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', overflowX: 'visible' }}>
-      {/* Decorative vinyl */}
-      <div style={{ position: 'fixed', top: '50%', right: -100, transform: 'translateY(-50%)', width: 500, height: 500, pointerEvents: 'none', opacity: 0.04, zIndex: 0 }} aria-hidden="true">
-        <svg viewBox="0 0 400 400" fill="none" style={{ width: '100%', height: '100%' }}>
-          <circle cx="200" cy="200" r="195" fill={t.slate} />
-          {[175, 155, 135, 115, 95].map(r => (
-            <circle key={r} cx="200" cy="200" r={r} stroke={t.slateDark} strokeWidth="0.8" />
-          ))}
-          <circle cx="200" cy="200" r="60" fill={t.peach} opacity="0.6" />
-          <circle cx="200" cy="200" r="8" fill={t.bg} />
-        </svg>
+    <div className="w-full flex flex-col items-center text-center">
+      <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3">
+        Welcome to Rekkrd
+      </h2>
+      <p className="text-th-text3 text-lg mb-10">
+        Let's set up your collector profile. It only takes a minute.
+      </p>
+
+      {/* Avatar preview */}
+      <div className="w-20 h-20 rounded-full glass-morphism flex items-center justify-center mb-8">
+        <span className="text-[#dd6e42] font-bold text-2xl select-none">
+          {initials}
+        </span>
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 520, boxSizing: 'border-box' }}>
-        {/* Progress */}
-        <div
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 32 }}
-          role="progressbar"
-          aria-label={`Onboarding progress, step ${currentStep + 1} of ${STEPS.length}`}
-          aria-valuenow={currentStep + 1}
-          aria-valuemin={1}
-          aria-valuemax={STEPS.length}
+      {/* Display name input */}
+      <div className="w-full max-w-sm">
+        <label
+          htmlFor="onboarding-display-name"
+          className="block font-label text-[10px] tracking-widest text-th-text3 uppercase mb-2"
         >
-          {STEPS.map((label, i) => (
-            <div
-              key={label}
-              title={label}
-              style={{
-                height: 6, borderRadius: 3, transition: 'all 0.5s',
-                width: i === currentStep ? 32 : 16,
-                background: i <= currentStep ? t.peach : t.alabaster,
-                opacity: i < currentStep ? 0.5 : 1,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Card */}
-        <div style={{
-          background: t.white, borderRadius: t.radius, border: `2px solid ${t.beige}`,
-          padding: 'clamp(24px, 4vw, 40px) clamp(16px, 3vw, 36px)', minHeight: 400, display: 'flex', flexDirection: 'column',
-          boxShadow: '0 12px 36px rgba(79,109,122,.12)', animation: 'auth-slide-up .3s ease-out',
-          width: '100%',
-        }}>
-          <div
-            key={animKey}
-            style={{
-              flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0,
-              animation: direction === 'forward' ? 'auth-slide-up .35s ease-out' : 'auth-fade-in .3s ease-out',
-            }}
-          >
-            {currentStep === 0 && <StepWelcome />}
-            {currentStep === 1 && (
-              <StepHabits
-                selectedGenres={selectedGenres} selectedSetup={selectedSetup} selectedGoal={selectedGoal}
-                onToggleGenre={toggleGenre} onSelectSetup={setSelectedSetup} onSelectGoal={setSelectedGoal}
-              />
-            )}
-            {currentStep === 2 && <StepFeatureTour />}
-            {currentStep === 3 && (
-              <StepGetStarted userId={userId} selectedGenres={selectedGenres} selectedSetup={selectedSetup} selectedGoal={selectedGoal} selectedTier={selectedTier} onComplete={onComplete} />
-            )}
-          </div>
-
-          {/* Nav — hidden on last step */}
-          {!isLast && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 32, paddingTop: 24, borderTop: `2px solid ${t.alabaster}` }}>
-              {!isFirst ? (
-                <button type="button" onClick={goBack} className="nav-sign-in" style={{ padding: '10px 20px' }} aria-label={`Back to ${STEPS[currentStep - 1]}`}>
-                  Back
-                </button>
-              ) : <div />}
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                {currentStep === 1 && !canAdvance && (
-                  <span style={{ color: t.text3, fontSize: '.7rem', fontFamily: "'Space Mono',monospace", letterSpacing: '.03em' }}>
-                    Complete all sections
-                  </span>
-                )}
-                <button
-                  type="button" onClick={goNext} disabled={!canAdvance}
-                  className={canAdvance ? 'btn-primary' : ''}
-                  style={{
-                    ...(canAdvance ? {} : { background: t.alabaster, color: t.text3, cursor: 'not-allowed', boxShadow: 'none', border: 'none', padding: '12px 28px', borderRadius: t.radiusSm, fontSize: '.9rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.03em' }),
-                    padding: '12px 28px',
-                  }}
-                  aria-label={`Next: ${STEPS[currentStep + 1]}`}
-                  aria-disabled={!canAdvance}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
-
-          {isLast && (
-            <div style={{ marginTop: 24, paddingTop: 16, borderTop: `2px solid ${t.alabaster}` }}>
-              <button type="button" onClick={goBack} className="nav-sign-in" style={{ padding: '10px 20px' }} aria-label={`Back to ${STEPS[currentStep - 1]}`}>
-                Back
-              </button>
-            </div>
-          )}
-        </div>
+          What should we call you?
+        </label>
+        <input
+          ref={inputRef}
+          id="onboarding-display-name"
+          type="text"
+          value={displayName}
+          onChange={e => onDisplayNameChange(e.target.value)}
+          maxLength={50}
+          placeholder="Your name or collector handle"
+          className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all"
+        />
       </div>
+
+      <p className="text-th-text3 text-sm italic mt-8">
+        You're joining a community of serious collectors.
+      </p>
     </div>
   );
 };
 
-/* ─── Step 1: Welcome ─── */
-const StepWelcome: React.FC = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', flex: 1 }}>
-    <div style={{ marginBottom: 24 }} aria-hidden="true">
-      <svg viewBox="0 0 400 400" fill="none" style={{ width: 80, height: 80, opacity: 0.12 }}>
-        <circle cx="200" cy="200" r="195" fill={t.slate} />
-        {[175, 155, 135, 115, 95].map(r => (
-          <circle key={r} cx="200" cy="200" r={r} stroke={t.slateDark} strokeWidth="0.8" />
-        ))}
-        <circle cx="200" cy="200" r="60" fill={t.peach} opacity="0.6" />
-        <circle cx="200" cy="200" r="8" fill={t.bg} />
-      </svg>
-    </div>
-
-    <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(2rem,4vw,2.75rem)', fontWeight: 700, color: t.slateDark, marginBottom: 12, letterSpacing: '-.02em' }}>
-      Rekk<span style={{ color: t.peach }}>r</span>d
-    </h2>
-    <p style={{ color: t.text2, fontSize: '1.05rem', marginBottom: 16 }}>
-      Your vinyl collection, organized.
-    </p>
-    <p style={{ color: t.text3, fontSize: '.9rem', maxWidth: 340, lineHeight: 1.65 }}>
-      Scan album covers with AI, build your digital crate, and generate playlists from what you actually own.
-    </p>
-
-    <div style={{ marginTop: 32, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: t.radiusSm, background: 'rgba(221,110,66,.08)', border: '1.5px solid rgba(221,110,66,.2)' }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: t.peach, animation: 'landing-pulse 2s ease-in-out infinite' }} />
-      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '.7rem', fontWeight: 700, color: t.peach, letterSpacing: '.08em', textTransform: 'uppercase' }}>
-        Let's get started
-      </span>
-    </div>
-  </div>
-);
-
 /* ─── Step 2: Your Habits ─── */
+
+const GENRE_OPTIONS = [
+  'Rock', 'Jazz', 'Blues', 'Soul', 'Funk', 'Hip-Hop', 'Electronic', 'Classical',
+  'Country', 'Pop', 'R&B', 'Reggae', 'Metal', 'Folk', 'Latin', 'Punk', 'Indie',
+  'Soundtrack', 'World', 'Gospel',
+] as const;
+
+const SETUP_OPTIONS = [
+  { id: 'audiophile', label: 'Audiophile', Icon: Headphones },
+  { id: 'casual', label: 'Casual', Icon: Music },
+  { id: 'dj', label: 'DJ / Mixer', Icon: Disc3 },
+  { id: 'home-theater', label: 'Home Theater', Icon: Tv },
+  { id: 'all', label: 'All of the above', Icon: Sparkles },
+] as const;
+
+const GOAL_OPTIONS = [
+  { id: 'enjoyment', label: 'Pure Enjoyment', Icon: Heart },
+  { id: 'completionist', label: 'Completionist', Icon: Trophy },
+  { id: 'investment', label: 'Investment', Icon: TrendingUp },
+] as const;
+
 interface StepHabitsProps {
-  selectedGenres: Set<string>;
-  selectedSetup: SetupId | null;
-  selectedGoal: GoalId | null;
+  favoriteGenres: string[];
+  listeningSetup: string;
+  collectingGoal: string;
   onToggleGenre: (genre: string) => void;
-  onSelectSetup: (id: SetupId) => void;
-  onSelectGoal: (id: GoalId) => void;
+  onSetListeningSetup: (id: string) => void;
+  onSetCollectingGoal: (id: string) => void;
 }
 
 const StepHabits: React.FC<StepHabitsProps> = ({
-  selectedGenres, selectedSetup, selectedGoal, onToggleGenre, onSelectSetup, onSelectGoal,
+  favoriteGenres, listeningSetup, collectingGoal,
+  onToggleGenre, onSetListeningSetup, onSetCollectingGoal,
 }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 24, flex: 1, overflowY: 'auto', minWidth: 0, maxWidth: '100%' }}>
-    <div style={{ textAlign: 'center' }}>
-      <div style={labelStyle}>// Your Habits</div>
-      <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.5rem', fontWeight: 700, color: t.slateDark }}>
-        Tell Us About You
-      </h3>
-    </div>
+  <div className="w-full flex flex-col items-center">
+    <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3 text-center">
+      Tell us about your taste
+    </h2>
+    <p className="text-th-text3 text-lg mb-10 text-center">
+      We'll use this to personalize your experience.
+    </p>
 
-    {/* Genres */}
-    <div>
-      <p style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 8 }}>
-        Favorite Genres
-        {selectedGenres.size > 0 && <span style={{ color: t.text3, fontWeight: 400 }}>({selectedGenres.size})</span>}
-      </p>
-      <div role="group" aria-label="Select your favorite genres" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+    {/* Favorite Genres */}
+    <div className="w-full mb-8">
+      <label className="block font-label text-[10px] tracking-widest text-th-text3 uppercase mb-3">
+        What genres do you collect?
+      </label>
+      <div className="flex flex-wrap gap-2">
         {GENRE_OPTIONS.map(genre => {
-          const sel = selectedGenres.has(genre);
+          const selected = favoriteGenres.includes(genre);
           return (
-            <button key={genre} type="button" role="switch" aria-checked={sel} onClick={() => onToggleGenre(genre)}
-              style={{
-                padding: '6px 14px', borderRadius: t.radiusSm, fontSize: '.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all .2s',
-                border: sel ? `2px solid ${t.peach}` : `1.5px solid ${t.alabaster}`,
-                background: sel ? 'rgba(221,110,66,.08)' : 'transparent',
-                color: sel ? t.peach : t.text2,
-                transform: sel ? 'scale(1.04)' : 'scale(1)',
-              }}
+            <button
+              key={genre}
+              type="button"
+              onClick={() => onToggleGenre(genre)}
+              className={`rounded-full px-4 py-2 text-sm transition-all cursor-pointer border ${
+                selected
+                  ? 'bg-[#dd6e42]/20 border-[#dd6e42] text-[#dd6e42]'
+                  : 'glass-morphism text-th-text3 border-white/10'
+              }`}
             >
               {genre}
             </button>
@@ -303,54 +160,54 @@ const StepHabits: React.FC<StepHabitsProps> = ({
       </div>
     </div>
 
-    {/* Setup */}
-    <div>
-      <p style={labelStyle}>Listening Setup</p>
-      <div role="radiogroup" aria-label="Select your listening setup" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(120px, 100%), 1fr))', gap: 8 }}>
-        {SETUP_OPTIONS.map(opt => {
-          const sel = selectedSetup === opt.id;
+    {/* Listening Setup */}
+    <div className="w-full mb-8">
+      <label className="block font-label text-[10px] tracking-widest text-th-text3 uppercase mb-3">
+        How do you listen?
+      </label>
+      <div className="grid grid-cols-2 gap-3">
+        {SETUP_OPTIONS.map(({ id, label, Icon }) => {
+          const selected = listeningSetup === id;
           return (
-            <button key={opt.id} type="button" role="radio" aria-checked={sel} onClick={() => onSelectSetup(opt.id)}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 12,
-                borderRadius: t.radius, cursor: 'pointer', transition: 'all .2s',
-                border: sel ? `2px solid ${t.peach}` : `2px solid ${t.alabaster}`,
-                background: sel ? 'rgba(221,110,66,.06)' : t.white,
-                transform: sel ? 'scale(1.03)' : 'scale(1)',
-                boxShadow: sel ? '0 4px 16px rgba(221,110,66,.12)' : 'none',
-              }}
+            <button
+              key={id}
+              type="button"
+              onClick={() => onSetListeningSetup(id)}
+              className={`glass-morphism rounded-xl p-4 flex flex-col items-center gap-2 transition-all cursor-pointer border ${
+                selected
+                  ? 'border-[#dd6e42] bg-[#dd6e42]/10'
+                  : 'border-white/10'
+              }`}
             >
-              <span style={{ fontSize: '1.3rem' }} aria-hidden="true">{opt.emoji}</span>
-              <span style={{ fontSize: '.7rem', fontWeight: 700, color: sel ? t.peach : t.text2, letterSpacing: '.02em' }}>{opt.label}</span>
-              <span style={{ fontSize: '.65rem', color: t.text3, lineHeight: 1.3, textAlign: 'center' }}>{opt.desc}</span>
+              <Icon size={28} className={selected ? 'text-[#dd6e42]' : 'text-th-text3'} />
+              <span className={`text-sm ${selected ? 'text-th-text' : 'text-th-text3'}`}>{label}</span>
             </button>
           );
         })}
       </div>
     </div>
 
-    {/* Goals */}
-    <div>
-      <p style={labelStyle}>Collecting Goal</p>
-      <div role="radiogroup" aria-label="Select your collecting goal" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 100%), 1fr))', gap: 8 }}>
-        {GOAL_OPTIONS.map(opt => {
-          const sel = selectedGoal === opt.id;
+    {/* Collecting Goal */}
+    <div className="w-full">
+      <label className="block font-label text-[10px] tracking-widest text-th-text3 uppercase mb-3">
+        What drives your collecting?
+      </label>
+      <div className="grid grid-cols-3 gap-3">
+        {GOAL_OPTIONS.map(({ id, label, Icon }) => {
+          const selected = collectingGoal === id;
           return (
-            <button key={opt.id} type="button" role="radio" aria-checked={sel} onClick={() => onSelectGoal(opt.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: 12,
-                borderRadius: t.radius, cursor: 'pointer', transition: 'all .2s', textAlign: 'left',
-                border: sel ? `2px solid ${t.peach}` : `2px solid ${t.alabaster}`,
-                background: sel ? 'rgba(221,110,66,.06)' : t.white,
-                transform: sel ? 'scale(1.02)' : 'scale(1)',
-                boxShadow: sel ? '0 4px 16px rgba(221,110,66,.12)' : 'none',
-              }}
+            <button
+              key={id}
+              type="button"
+              onClick={() => onSetCollectingGoal(id)}
+              className={`glass-morphism rounded-xl p-4 flex flex-col items-center gap-2 transition-all cursor-pointer border ${
+                selected
+                  ? 'border-[#dd6e42] bg-[#dd6e42]/10'
+                  : 'border-white/10'
+              }`}
             >
-              <span style={{ fontSize: '1.3rem', flexShrink: 0 }} aria-hidden="true">{opt.emoji}</span>
-              <div>
-                <span style={{ display: 'block', fontSize: '.75rem', fontWeight: 700, color: sel ? t.peach : t.text2 }}>{opt.label}</span>
-                <span style={{ fontSize: '.65rem', color: t.text3, lineHeight: 1.3 }}>{opt.desc}</span>
-              </div>
+              <Icon size={28} className={selected ? 'text-[#dd6e42]' : 'text-th-text3'} />
+              <span className={`text-sm ${selected ? 'text-th-text' : 'text-th-text3'}`}>{label}</span>
             </button>
           );
         })}
@@ -359,305 +216,799 @@ const StepHabits: React.FC<StepHabitsProps> = ({
   </div>
 );
 
-/* ─── Step 3: Feature Tour ─── */
-const FEATURES = [
-  { title: 'Add Albums', desc: 'Scan, search, or manually add albums to your collection', preview: 'album-card' },
-  { title: 'AI-Powered Details', desc: 'Get descriptions, tracklists, and price estimates powered by AI', preview: 'album-detail' },
-  { title: 'Playlist Studio', desc: 'Create and organize playlists from your collection', preview: 'playlist' },
-  { title: 'Track & Explore', desc: 'Filter by genre, condition, favorites \u2014 know your collection', preview: 'filters' },
-] as const;
+/* ─── Step 3: Plan Selection ─── */
 
-type FeaturePreview = typeof FEATURES[number]['preview'];
+const PLAN_OPTIONS: {
+  id: ProfileData['selectedTier'];
+  name: string;
+  price: string;
+  Icon: typeof Archive;
+  badge?: string;
+  features: string[];
+}[] = [
+  {
+    id: 'collector',
+    name: 'Collector',
+    price: 'Free',
+    Icon: Archive,
+    features: ['Up to 50 albums', 'AI identification', 'Basic collection stats'],
+  },
+  {
+    id: 'curator',
+    name: 'Curator',
+    price: '$4.99/mo',
+    Icon: Crown,
+    badge: 'Most Popular',
+    features: ['Up to 500 albums', 'Playlist Studio', 'Advanced analytics', 'Priority AI'],
+  },
+  {
+    id: 'enthusiast',
+    name: 'Enthusiast',
+    price: '$9.99/mo',
+    Icon: Gem,
+    features: ['Unlimited albums', 'Everything in Curator', 'Discogs sync', 'Early access features'],
+  },
+];
 
-const FeaturePreviewCard: React.FC<{ type: FeaturePreview }> = ({ type }) => {
-  if (type === 'album-card') {
-    return (
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <div style={{ width: 72, height: 72, borderRadius: t.radiusSm, background: `linear-gradient(135deg,${t.beige},${t.peach})`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-          {'\uD83C\uDFB6'}
-        </div>
-        <div>
-          <p style={{ fontSize: '.85rem', fontWeight: 700, color: t.slateDark }}>Kind of Blue</p>
-          <p style={{ fontSize: '.8rem', color: t.text2 }}>Miles Davis</p>
-          <p style={{ fontSize: '.7rem', color: t.text3, marginTop: 2 }}>1959 &middot; Jazz</p>
-          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-            <span style={{ padding: '3px 10px', borderRadius: t.radiusXs, background: 'rgba(221,110,66,.08)', border: '1px solid rgba(221,110,66,.15)', fontSize: '.65rem', fontWeight: 700, color: t.peach, fontFamily: "'Space Mono',monospace" }}>Near Mint</span>
-            <span style={{ padding: '3px 10px', borderRadius: t.radiusXs, background: t.bg2, fontSize: '.65rem', fontWeight: 700, color: t.text3, fontFamily: "'Space Mono',monospace" }}>$38</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (type === 'album-detail') {
-    return (
-      <div>
-        <p style={{ fontSize: '.8rem', color: t.text2, lineHeight: 1.65, fontStyle: 'italic', fontFamily: "'Playfair Display',serif", marginBottom: 12 }}>
-          "A landmark modal jazz recording that redefined improvisation. Davis assembled an iconic sextet to create music of extraordinary beauty."
-        </p>
-        <div style={{ borderTop: `1.5px solid ${t.alabaster}`, paddingTop: 10, marginBottom: 10 }}>
-          <p style={{ ...labelStyle, marginBottom: 8 }}>Tracklist</p>
-          {['So What', 'Freddie Freeloader', 'Blue in Green', 'All Blues'].map((tr, i) => (
-            <div key={tr} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
-              <span style={{ fontSize: '.75rem', color: t.text2 }}><span style={{ color: t.text3, marginRight: 6 }}>{i + 1}.</span>{tr}</span>
-              <span style={{ fontSize: '.7rem', color: t.text3, fontFamily: "'Space Mono',monospace" }}>{['9:22', '9:46', '5:27', '11:33'][i]}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 16, paddingTop: 8, borderTop: `1.5px solid ${t.alabaster}` }}>
-          <div><p style={{ fontSize: '.65rem', color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: 'uppercase' }}>Low</p><p style={{ fontSize: '.8rem', color: t.text2 }}>$22</p></div>
-          <div><p style={{ fontSize: '.65rem', color: t.peach, fontFamily: "'Space Mono',monospace", textTransform: 'uppercase' }}>Median</p><p style={{ fontSize: '.8rem', color: t.peach, fontWeight: 700 }}>$38</p></div>
-          <div><p style={{ fontSize: '.65rem', color: t.text3, fontFamily: "'Space Mono',monospace", textTransform: 'uppercase' }}>High</p><p style={{ fontSize: '.8rem', color: t.text2 }}>$65</p></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (type === 'playlist') {
-    return (
-      <div>
-        <div style={{ marginBottom: 12 }}>
-          <span className="mood-badge">Late Night Jazz</span>
-        </div>
-        {[
-          { n: '01', title: 'So What', artist: 'Miles Davis' },
-          { n: '02', title: 'Take Five', artist: 'Dave Brubeck' },
-          { n: '03', title: "'Round Midnight", artist: 'Thelonious Monk' },
-          { n: '04', title: 'A Love Supreme Pt. I', artist: 'John Coltrane' },
-        ].map(tr => (
-          <div key={tr.n} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: t.radiusXs, background: t.bg, border: `1.5px solid ${t.alabaster}`, marginBottom: 6 }}>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '.7rem', color: t.text3, width: 20, fontWeight: 700 }}>{tr.n}</span>
-            <div style={{ width: 32, height: 32, borderRadius: t.radiusXs, background: `linear-gradient(135deg,${t.bg2},${t.bg3})`, flexShrink: 0 }} />
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontSize: '.8rem', fontWeight: 600, color: t.slateDark, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tr.title}</p>
-              <p style={{ fontSize: '.7rem', color: t.text3 }}>{tr.artist}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // filters
-  return (
-    <div>
-      <div style={{ marginBottom: 12 }}>
-        <p style={{ ...labelStyle, marginBottom: 8 }}>Genre</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {['Jazz', 'Rock', 'Soul', 'Electronic'].map((g, i) => (
-            <span key={g} style={{
-              padding: '5px 12px', borderRadius: t.radiusSm, fontSize: '.75rem', fontWeight: 600,
-              border: i < 2 ? `2px solid ${t.peach}` : `1.5px solid ${t.alabaster}`,
-              background: i < 2 ? 'rgba(221,110,66,.08)' : 'transparent',
-              color: i < 2 ? t.peach : t.text3,
-            }}>{g}</span>
-          ))}
-        </div>
-      </div>
-      <div style={{ marginBottom: 12 }}>
-        <p style={{ ...labelStyle, marginBottom: 8 }}>Condition</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {['Mint', 'Near Mint', 'Very Good+'].map((cond, i) => (
-            <span key={cond} style={{
-              padding: '5px 12px', borderRadius: t.radiusSm, fontSize: '.75rem', fontWeight: 600,
-              border: i === 1 ? `2px solid ${t.peach}` : `1.5px solid ${t.alabaster}`,
-              background: i === 1 ? 'rgba(221,110,66,.08)' : 'transparent',
-              color: i === 1 ? t.peach : t.text3,
-            }}>{cond}</span>
-          ))}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 4 }}>
-        <div style={{ width: 36, height: 20, borderRadius: t.radiusSm, background: t.peach, position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 3, left: 18, width: 14, height: 14, borderRadius: 6, background: t.white, boxShadow: '0 2px 4px rgba(0,0,0,.1)' }} />
-        </div>
-        <span style={{ fontSize: '.75rem', color: t.text2 }}>Favorites only</span>
-      </div>
-    </div>
-  );
-};
-
-const StepFeatureTour: React.FC = () => {
-  const [featureIdx, setFeatureIdx] = useState(0);
-  const feature = FEATURES[featureIdx];
-
-  const goPrev = () => setFeatureIdx(i => (i - 1 + FEATURES.length) % FEATURES.length);
-  const goFeatureNext = () => setFeatureIdx(i => (i + 1) % FEATURES.length);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        <div style={labelStyle}>// Feature Tour</div>
-        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.5rem', fontWeight: 700, color: t.slateDark }}>What You Can Do</h3>
-      </div>
-
-      {/* Dots */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16 }} role="tablist" aria-label="Feature tour navigation">
-        {FEATURES.map((f, i) => (
-          <button key={f.title} type="button" role="tab" aria-selected={i === featureIdx} aria-label={f.title} onClick={() => setFeatureIdx(i)}
-            style={{ height: 6, borderRadius: 3, transition: 'all 0.3s', width: i === featureIdx ? 24 : 12, background: i === featureIdx ? t.peach : t.alabaster, border: 'none', cursor: 'pointer', padding: 0 }}
-          />
-        ))}
-      </div>
-
-      <div role="tabpanel" aria-label={feature.title} aria-live="polite" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <p style={{ fontSize: '1rem', fontWeight: 700, color: t.slateDark, fontFamily: "'Playfair Display',serif" }}>{feature.title}</p>
-          <p style={{ fontSize: '.85rem', color: t.text3, marginTop: 4 }}>{feature.desc}</p>
-        </div>
-
-        <div style={{ flex: 1, borderRadius: t.radius, border: `2px solid ${t.alabaster}`, background: t.bg, overflow: 'hidden', padding: 16 }}>
-          <div style={{ transform: 'scale(0.88)', transformOrigin: 'top left' }}>
-            <FeaturePreviewCard type={feature.preview} />
-          </div>
-        </div>
-      </div>
-
-      {/* Arrows */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-        <button type="button" onClick={goPrev} aria-label="Previous feature"
-          style={{ background: 'none', border: `1.5px solid ${t.alabaster}`, borderRadius: t.radiusSm, padding: 8, cursor: 'pointer', color: t.text3, display: 'flex', transition: 'all .2s' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '.7rem', color: t.text3, fontWeight: 700 }}>
-          {featureIdx + 1} / {FEATURES.length}
-        </span>
-        <button type="button" onClick={goFeatureNext} aria-label="Next feature"
-          style={{ background: 'none', border: `1.5px solid ${t.alabaster}`, borderRadius: t.radiusSm, padding: 8, cursor: 'pointer', color: t.text3, display: 'flex', transition: 'all .2s' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 5l7 7-7 7" /></svg>
-        </button>
-      </div>
-    </div>
-  );
-};
-
-/* ─── Step 4: Get Started ─── */
-interface StepGetStartedProps {
-  userId: string;
-  selectedGenres: Set<string>;
-  selectedSetup: SetupId | null;
-  selectedGoal: GoalId | null;
-  selectedTier: SelectedTier;
-  onComplete: (action: 'add' | 'explore', tier: SelectedTier) => void;
+interface StepPlanSelectionProps {
+  emailDigestOptin: boolean;
+  selectedTier: ProfileData['selectedTier'];
+  onToggleEmailDigest: () => void;
+  onSelectTier: (tier: ProfileData['selectedTier']) => void;
 }
 
-const StepGetStarted: React.FC<StepGetStartedProps> = ({ userId, selectedGenres, selectedSetup, selectedGoal, selectedTier, onComplete }) => {
-  const [saving, setSaving] = useState<'add' | 'explore' | null>(null);
-  const [error, setError] = useState<string | null>(null);
+const StepPlanSelection: React.FC<StepPlanSelectionProps> = ({
+  emailDigestOptin, selectedTier, onToggleEmailDigest, onSelectTier,
+}) => (
+  <div className="w-full flex flex-col items-center">
+    <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3 text-center">
+      Choose your plan
+    </h2>
+    <p className="text-th-text3 text-lg mb-10 text-center">
+      Start free, upgrade anytime. All paid plans include a 14-day free trial.
+    </p>
 
-  const setupLabel = SETUP_OPTIONS.find(o => o.id === selectedSetup)?.label ?? '';
-  const goalOption = GOAL_OPTIONS.find(o => o.id === selectedGoal);
+    {/* Email digest toggle */}
+    <div className="w-full max-w-md flex items-center justify-between glass-morphism rounded-xl px-5 py-4 mb-8 border border-white/10">
+      <div className="flex items-center gap-3">
+        <Mail size={20} className="text-[#dd6e42]" />
+        <div>
+          <p className="text-sm text-th-text">Monthly collection digest</p>
+          <p className="text-xs text-th-text3">Stats, new features &amp; collecting tips</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={emailDigestOptin}
+        onClick={onToggleEmailDigest}
+        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer border-none shrink-0 ${
+          emailDigestOptin ? 'bg-[#dd6e42]' : 'bg-th-surface/20'
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+            emailDigestOptin ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+    </div>
 
-  const handleFinish = async (action: 'add' | 'explore') => {
-    setSaving(action);
-    setError(null);
+    {/* Divider */}
+    <div className="w-full flex items-center gap-3 mb-8">
+      <div className="flex-1 h-px bg-th-surface/10" />
+      <span className="font-label text-[10px] tracking-widest text-th-text3 uppercase">
+        Select a plan
+      </span>
+      <div className="flex-1 h-px bg-th-surface/10" />
+    </div>
+
+    {/* Plan cards */}
+    <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+      {PLAN_OPTIONS.map(({ id, name, price, Icon, badge, features }) => {
+        const selected = selectedTier === id;
+        const isCurator = id === 'curator';
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onSelectTier(id)}
+            className={`relative glass-morphism rounded-xl p-5 flex flex-col items-center text-center transition-all cursor-pointer border ${
+              selected
+                ? 'border-[#dd6e42] bg-[#dd6e42]/10'
+                : 'border-white/10'
+            } ${isCurator && selected ? 'shadow-[0_0_20px_rgba(221,110,66,0.15)]' : ''}`}
+          >
+            {badge && (
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#dd6e42] text-white text-[10px] font-label tracking-wider uppercase px-3 py-0.5 rounded-full">
+                {badge}
+              </span>
+            )}
+            <Icon size={28} className={selected ? 'text-[#dd6e42]' : 'text-th-text3'} />
+            <h3 className={`font-display text-lg font-bold mt-3 mb-1 ${selected ? 'text-th-text' : 'text-th-text2'}`}>
+              {name}
+            </h3>
+            <p className={`text-sm font-label mb-4 ${selected ? 'text-[#dd6e42]' : 'text-th-text3'}`}>
+              {price}
+            </p>
+            <ul className="text-xs text-th-text3 space-y-1.5 text-left w-full">
+              {features.map(f => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className={`mt-0.5 shrink-0 ${selected ? 'text-[#dd6e42]' : 'text-th-text3'}`}>&bull;</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </button>
+        );
+      })}
+    </div>
+
+    <p className="text-th-text3 text-xs text-center mt-6 max-w-md">
+      Paid plans start with a 14-day free trial. Cancel anytime. You won't be charged during onboarding.
+    </p>
+  </div>
+);
+
+/* ─── Tour Step Layout ─── */
+
+interface TourStepLayoutProps {
+  heading: string;
+  description: string;
+  bullets: string[];
+  children: React.ReactNode;
+}
+
+const TourStepLayout: React.FC<TourStepLayoutProps> = ({ heading, description, bullets, children }) => (
+  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+    {/* Left: copy */}
+    <div className="flex flex-col">
+      <span className="font-label text-[10px] tracking-widest text-[#dd6e42] uppercase mb-3">
+        Feature Tour
+      </span>
+      <h2 className="font-display text-3xl md:text-4xl font-bold text-th-text mb-3">
+        {heading}
+      </h2>
+      <p className="text-th-text3 text-sm leading-relaxed mb-6">
+        {description}
+      </p>
+      <ul className="space-y-2.5">
+        {bullets.map(b => (
+          <li key={b} className="flex items-start gap-2.5 text-sm text-th-text2">
+            <span className="text-[#dd6e42] mt-0.5 shrink-0">&bull;</span>
+            {b}
+          </li>
+        ))}
+      </ul>
+    </div>
+    {/* Right: live preview */}
+    <div className="pointer-events-none select-none scale-90 origin-top transform">
+      {children}
+    </div>
+  </div>
+);
+
+/* ─── Step 4: AI Scanning Tour ─── */
+
+const ScanDemoPreview: React.FC = () => (
+  <div className="flex flex-col gap-3">
+    {/* Fake camera viewport */}
+    <div className="relative aspect-video rounded-xl glass-morphism border border-white/10 flex items-center justify-center overflow-hidden">
+      {/* Static vinyl disc SVG */}
+      <svg className="w-28 h-28 opacity-60" viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="58" stroke="#dd6e42" strokeWidth="1" opacity="0.3" />
+        <circle cx="60" cy="60" r="50" fill="#1a1a1a" />
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#333" strokeWidth="0.5" />
+        <circle cx="60" cy="60" r="40" fill="none" stroke="#333" strokeWidth="0.3" />
+        <circle cx="60" cy="60" r="32" fill="none" stroke="#333" strokeWidth="0.3" />
+        <circle cx="60" cy="60" r="20" fill="#c45a30" />
+        <circle cx="60" cy="60" r="4" fill="#1a1a1a" />
+      </svg>
+      {/* Pulsing overlay text */}
+      <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[#dd6e42] font-label text-xs tracking-widest uppercase animate-pulse">
+        Identifying...
+      </span>
+    </div>
+    {/* Fake result card */}
+    <div className="glass-morphism rounded-xl border border-white/10 p-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-th-text font-display font-bold text-sm">Rumours</p>
+          <p className="text-th-text3 text-xs">Fleetwood Mac</p>
+        </div>
+        <span className="text-th-text3 text-xs font-label">1977</span>
+      </div>
+      <div className="flex items-center justify-between pt-1 border-t border-white/5">
+        <span className="text-[#dd6e42] font-label text-sm">$23 estimated value</span>
+        <span className="text-green-400 text-[10px] font-label tracking-wide">&#10003; Match found via Discogs</span>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── Step 5: Collection Tour — Dummy Data ─── */
+
+const noop = () => {};
+
+const DUMMY_ALBUMS: Album[] = [
+  {
+    id: 'demo-1',
+    created_at: '2024-01-01T00:00:00Z',
+    artist: 'Fleetwood Mac',
+    title: 'Rumours',
+    year: '1977',
+    genre: 'Rock',
+    cover_url: '',
+    price_median: 23,
+    isFavorite: true,
+  },
+  {
+    id: 'demo-2',
+    created_at: '2024-01-02T00:00:00Z',
+    artist: 'Miles Davis',
+    title: 'Kind of Blue',
+    year: '1959',
+    genre: 'Jazz',
+    cover_url: '',
+    price_median: 45,
+  },
+  {
+    id: 'demo-3',
+    created_at: '2024-01-03T00:00:00Z',
+    artist: 'Prince',
+    title: 'Purple Rain',
+    year: '1984',
+    genre: 'Pop',
+    cover_url: '',
+    price_median: 18,
+  },
+];
+
+/* ─── Step 6: Wantlist Tour — Dummy Data ─── */
+
+const DUMMY_WANTLIST: WantlistItem[] = [
+  {
+    id: 'wl-demo-1',
+    user_id: 'demo',
+    artist: 'David Bowie',
+    title: 'Ziggy Stardust',
+    year: '1972',
+    genre: 'Rock',
+    cover_url: null,
+    discogs_release_id: null,
+    discogs_url: null,
+    price_low: 18,
+    price_median: 34,
+    price_high: 67,
+    prices_updated_at: new Date().toISOString(),
+    created_at: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: 'wl-demo-2',
+    user_id: 'demo',
+    artist: 'Aretha Franklin',
+    title: 'I Never Loved a Man',
+    year: '1967',
+    genre: 'Soul',
+    cover_url: null,
+    discogs_release_id: null,
+    discogs_url: null,
+    price_low: null,
+    price_median: 28,
+    price_high: null,
+    prices_updated_at: null,
+    created_at: '2024-01-02T00:00:00Z',
+  },
+];
+
+/* ─── Step 7: Discogs Integration ─── */
+
+const DiscogsPreview: React.FC = () => (
+  <div className="glass-morphism rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
+    <span className="text-white font-bold text-2xl tracking-tight mb-1">discogs</span>
+    <p className="text-th-text3 text-xs mb-5">16 million+ releases. 60 million+ listings.</p>
+    <div className="w-full px-4 py-2.5 rounded-lg bg-[#dd6e42] text-white font-label text-xs tracking-wider uppercase text-center mb-5">
+      Connect Discogs
+    </div>
+    <div className="flex flex-wrap gap-2 justify-center">
+      {['Collection Import', 'Wantlist Sync', 'Price Data'].map(label => (
+        <span
+          key={label}
+          className="glass-morphism rounded-full text-xs text-th-text3 px-3 py-1 border border-white/10"
+        >
+          {label}
+        </span>
+      ))}
+    </div>
+  </div>
+);
+
+/* ─── Step 8: Stakkd Gear Catalog ─── */
+
+const StakkdGearPreview: React.FC = () => (
+  <div className="glass-morphism rounded-xl border border-white/10 p-4 flex flex-col gap-3">
+    <span className="text-[#dd6e42] text-xs font-label uppercase tracking-widest">
+      Turntable
+    </span>
+    <div>
+      <p className="text-th-text3 text-xs">Technics</p>
+      <p className="text-th-text font-bold text-lg font-display">SL-1200MK2</p>
+    </div>
+    <p className="text-th-text3 text-xs">1978 – 2010</p>
+    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs pt-2 border-t border-white/5">
+      <span className="text-th-text3">Drive Type</span>
+      <span className="text-th-text2">Direct Drive</span>
+      <span className="text-th-text3">Speed</span>
+      <span className="text-th-text2">33&#8531; / 45 RPM</span>
+      <span className="text-th-text3">Wow &amp; Flutter</span>
+      <span className="text-th-text2">0.025%</span>
+      <span className="text-th-text3">Signal-to-Noise</span>
+      <span className="text-th-text2">78 dB</span>
+    </div>
+    <div className="flex items-center justify-between pt-2 border-t border-white/5">
+      <span className="text-th-text3 text-[10px] font-label tracking-wider uppercase">Collector</span>
+      <span className="text-[#dd6e42] text-xs font-label tracking-wider">Stakkd</span>
+    </div>
+  </div>
+);
+
+/* ─── Step 9: Get Started ─── */
+
+interface StepGetStartedProps {
+  displayName: string;
+  startAction: ProfileData['startAction'];
+  selectedTier: ProfileData['selectedTier'];
+  onSelectStartAction: (action: ProfileData['startAction']) => void;
+}
+
+const StepGetStarted: React.FC<StepGetStartedProps> = ({
+  displayName, startAction, selectedTier, onSelectStartAction,
+}) => {
+  const tierLabel = selectedTier === 'curator' ? 'Curator' : selectedTier === 'enthusiast' ? 'Enthusiast' : '';
+
+  return (
+    <div className="w-full flex flex-col items-center text-center">
+      {/* Vinyl SVG */}
+      <svg className="w-24 h-24 mb-8" viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="58" stroke="#dd6e42" strokeWidth="1" opacity="0.3" />
+        <circle cx="60" cy="60" r="50" fill="#1a1a1a" />
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#333" strokeWidth="0.5" />
+        <circle cx="60" cy="60" r="40" fill="none" stroke="#333" strokeWidth="0.3" />
+        <circle cx="60" cy="60" r="32" fill="none" stroke="#333" strokeWidth="0.3" />
+        <circle cx="60" cy="60" r="20" fill="#c45a30" />
+        <circle cx="60" cy="60" r="4" fill="#1a1a1a" />
+      </svg>
+
+      <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3">
+        You're all set{displayName ? `, ${displayName}` : ''}!
+      </h2>
+      <p className="text-th-text3 text-lg mb-10">
+        Your collection is waiting. Let's go.
+      </p>
+
+      {/* CTA cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+        <button
+          type="button"
+          onClick={() => onSelectStartAction('scan')}
+          className={`glass-morphism rounded-xl p-5 flex flex-col items-center gap-3 transition-all cursor-pointer border ${
+            startAction === 'scan'
+              ? 'border-[#dd6e42] bg-[#dd6e42]/10'
+              : 'border-white/10'
+          }`}
+        >
+          <Camera size={28} className={startAction === 'scan' ? 'text-[#dd6e42]' : 'text-th-text3'} />
+          <span className={`font-display font-bold text-sm ${startAction === 'scan' ? 'text-th-text' : 'text-th-text2'}`}>
+            Scan Your First Record
+          </span>
+          <span className="text-th-text3 text-xs">Point your camera at any album cover</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectStartAction('explore')}
+          className={`glass-morphism rounded-xl p-5 flex flex-col items-center gap-3 transition-all cursor-pointer border ${
+            startAction === 'explore'
+              ? 'border-[#dd6e42] bg-[#dd6e42]/10'
+              : 'border-white/10'
+          }`}
+        >
+          <Compass size={28} className={startAction === 'explore' ? 'text-[#dd6e42]' : 'text-th-text3'} />
+          <span className={`font-display font-bold text-sm ${startAction === 'explore' ? 'text-th-text' : 'text-th-text2'}`}>
+            Explore the App
+          </span>
+          <span className="text-th-text3 text-xs">Browse your collection and features</span>
+        </button>
+      </div>
+
+      {tierLabel && (
+        <p className="text-th-text3 text-sm mt-6">
+          We'll set up your {tierLabel} plan after you explore the app.
+        </p>
+      )}
+    </div>
+  );
+};
+
+/* ─── Main Wizard ─── */
+
+const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, previewMode }) => {
+  const { user, session } = useAuthContext();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [profileData, setProfileData] = useState<ProfileData>({
+    displayName: '',
+    favoriteGenres: [],
+    listeningSetup: '',
+    collectingGoal: '',
+    emailDigestOptin: true,
+    selectedTier: 'collector',
+    startAction: 'explore',
+  });
+  const [fadeState, setFadeState] = useState<'in' | 'out'>('in');
+  const [saving, setSaving] = useState(false);
+  const pendingStepRef = useRef<number | null>(null);
+  const [pricing, setPricing] = useState<Record<string, { monthly?: { priceId: string } }> | null>(null);
+  const { checkout } = useCheckout();
+
+  // Fetch Stripe prices on mount (for paid tier checkout on final step)
+  useEffect(() => {
+    if (previewMode) return;
+    fetch('/api/prices')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.tiers) setPricing(data.tiers); })
+      .catch(() => {});
+  }, [previewMode]);
+
+  const isFirst = currentStep === 0;
+  const isLast = currentStep === TOTAL_STEPS - 1;
+  const progress = (currentStep + 1) / TOTAL_STEPS;
+
+  // Per-step validation
+  const canAdvance = (() => {
+    switch (currentStep) {
+      case 0: return profileData.displayName.trim().length > 0;
+      default: return true;
+    }
+  })();
+
+  // Per-step pre-advance cleanup (trim, normalize, etc.)
+  const prepareStepData = useCallback(() => {
+    switch (currentStep) {
+      case 0:
+        setProfileData(prev => ({ ...prev, displayName: prev.displayName.trim() }));
+        break;
+    }
+  }, [currentStep]);
+
+  const transitionToStep = useCallback((nextStep: number) => {
+    setFadeState('out');
+    pendingStepRef.current = nextStep;
+  }, []);
+
+  // After fade-out completes, switch step and fade back in
+  const handleTransitionEnd = useCallback(() => {
+    if (fadeState === 'out' && pendingStepRef.current !== null) {
+      setCurrentStep(pendingStepRef.current);
+      pendingStepRef.current = null;
+      setFadeState('in');
+    }
+  }, [fadeState]);
+
+  const saveAndComplete = useCallback(async (fullSave: boolean) => {
+    if (previewMode) {
+      onComplete(profileData.startAction);
+      return;
+    }
+    if (!user) return;
+    setSaving(true);
     try {
-      await updateProfile(userId, {
-        favorite_genres: [...selectedGenres],
-        listening_setup: selectedSetup,
-        collecting_goal: selectedGoal,
-        onboarding_selected_tier: selectedTier ?? 'collector',
+      await updateProfile(user.id, {
+        ...(fullSave ? {
+          display_name: profileData.displayName,
+          favorite_genres: profileData.favoriteGenres,
+          listening_setup: profileData.listeningSetup || null,
+          collecting_goal: profileData.collectingGoal || null,
+          onboarding_selected_tier: profileData.selectedTier,
+        } : {}),
         onboarding_completed: true,
-      });
+      } as Parameters<typeof updateProfile>[1]);
 
       // Fire-and-forget: welcome email on onboarding completion
-      (async () => {
-        try {
-          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-          if (supabase) {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.access_token) {
-              headers['Authorization'] = `Bearer ${session.access_token}`;
-            }
-          }
-          await fetch('/api/onboarding/complete', { method: 'POST', headers });
-        } catch { /* welcome email is best-effort */ }
-      })();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      fetch('/api/onboarding/complete', { method: 'POST', headers }).catch(() => {});
+
+      // Paid tier → Stripe checkout redirect (page will navigate away)
+      const tier = profileData.selectedTier;
+      if (fullSave && tier !== 'collector') {
+        const priceId = pricing?.[tier]?.monthly?.priceId;
+        if (priceId) {
+          checkout(priceId);
+          return; // Stripe redirects the page; don't call onComplete
+        }
+      }
+
+      onComplete(profileData.startAction);
     } catch (err) {
       console.error('Failed to save onboarding profile:', err);
-      setError('Could not save preferences \u2014 you can update them later.');
+      // Still proceed — profile can be updated later
+      onComplete(profileData.startAction);
+    } finally {
+      setSaving(false);
     }
-    sessionStorage.removeItem('selected_tier');
-    onComplete(action, selectedTier);
+  }, [previewMode, user, session, profileData, onComplete, checkout, pricing]);
+
+  const handleSkipAll = useCallback(() => {
+    saveAndComplete(false);
+  }, [saveAndComplete]);
+
+  const handleNext = useCallback(() => {
+    if (!canAdvance) return;
+    prepareStepData();
+    if (isLast) {
+      saveAndComplete(true);
+    } else {
+      transitionToStep(currentStep + 1);
+    }
+  }, [canAdvance, prepareStepData, isLast, currentStep, saveAndComplete, transitionToStep]);
+
+  const handleBack = useCallback(() => {
+    if (!isFirst) {
+      transitionToStep(currentStep - 1);
+    }
+  }, [isFirst, currentStep, transitionToStep]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !saving && canAdvance) {
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, saving, canAdvance]);
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <StepWelcome
+            displayName={profileData.displayName}
+            onDisplayNameChange={value => setProfileData(prev => ({ ...prev, displayName: value }))}
+          />
+        );
+      case 1:
+        return (
+          <StepHabits
+            favoriteGenres={profileData.favoriteGenres}
+            listeningSetup={profileData.listeningSetup}
+            collectingGoal={profileData.collectingGoal}
+            onToggleGenre={genre =>
+              setProfileData(prev => ({
+                ...prev,
+                favoriteGenres: prev.favoriteGenres.includes(genre)
+                  ? prev.favoriteGenres.filter(g => g !== genre)
+                  : [...prev.favoriteGenres, genre],
+              }))
+            }
+            onSetListeningSetup={id => setProfileData(prev => ({ ...prev, listeningSetup: id }))}
+            onSetCollectingGoal={id => setProfileData(prev => ({ ...prev, collectingGoal: id }))}
+          />
+        );
+      case 2:
+        return (
+          <StepPlanSelection
+            emailDigestOptin={profileData.emailDigestOptin}
+            selectedTier={profileData.selectedTier}
+            onToggleEmailDigest={() =>
+              setProfileData(prev => ({ ...prev, emailDigestOptin: !prev.emailDigestOptin }))
+            }
+            onSelectTier={tier => setProfileData(prev => ({ ...prev, selectedTier: tier }))}
+          />
+        );
+      case 3:
+        return (
+          <TourStepLayout
+            heading="Scan Any Record Instantly"
+            description="Point your camera at any album cover. Our AI identifies it in seconds and fills in artist, title, tracklist, and pricing automatically."
+            bullets={[
+              'Works with any commercially released record',
+              'Cross-references Discogs for pressing details',
+              'Barcode scanning for instant matches',
+            ]}
+          >
+            <ScanDemoPreview />
+          </TourStepLayout>
+        );
+      case 4:
+        return (
+          <TourStepLayout
+            heading="Your Collection, Beautifully Organized"
+            description="Every record cataloged with cover art, tracklist, condition grading, and market value. Search, filter, and sort your entire library instantly."
+            bullets={[
+              'Grid and list views',
+              'Filter by genre, decade, condition',
+              'Mark favorites, track play counts',
+            ]}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {DUMMY_ALBUMS.map(album => (
+                <AlbumCard key={album.id} album={album} onDelete={noop} onSelect={noop} />
+              ))}
+            </div>
+          </TourStepLayout>
+        );
+      case 5:
+        return (
+          <TourStepLayout
+            heading="Track Records You're Hunting For"
+            description="Add records to your wantlist and watch their market prices. When you find one, mark it as owned and it moves straight into your collection."
+            bullets={[
+              'Import your Discogs wantlist in one click',
+              'Real-time Discogs marketplace pricing',
+              'Two-step confirm before marking as owned',
+            ]}
+          >
+            <div className="flex flex-col gap-3">
+              {DUMMY_WANTLIST.map(item => (
+                <WantlistCard key={item.id} item={item} onRemove={noop} onMarkAsOwned={noop} isInCollection={false} />
+              ))}
+            </div>
+          </TourStepLayout>
+        );
+      case 6:
+        return (
+          <TourStepLayout
+            heading="Connect Your Discogs Account"
+            description="Already have your collection cataloged on Discogs? Import it in one click. Connect your account to sync your collection, wantlist, and get real-time marketplace pricing."
+            bullets={[
+              'Import thousands of records instantly',
+              'Wantlist sync with live pricing',
+              'Two-way collection sync',
+              'Powered by the world\'s largest vinyl database',
+            ]}
+          >
+            <DiscogsPreview />
+          </TourStepLayout>
+        );
+      case 7:
+        return (
+          <TourStepLayout
+            heading="Catalog Your Entire Setup"
+            description="Stakkd is your audio gear catalog. Photograph your turntable, amplifier, or speakers and our AI identifies it, pulls specs, and helps you document your complete signal chain."
+            bullets={[
+              'AI-powered gear identification',
+              'Full specs database (turntables, amps, cartridges, speakers)',
+              'Document your signal chain',
+              'Track purchase prices and gear value',
+            ]}
+          >
+            <StakkdGearPreview />
+          </TourStepLayout>
+        );
+      case 8:
+        return (
+          <StepGetStarted
+            displayName={profileData.displayName}
+            startAction={profileData.startAction}
+            selectedTier={profileData.selectedTier}
+            onSelectStartAction={action => setProfileData(prev => ({ ...prev, startAction: action }))}
+          />
+        );
+      default:
+        return (
+          <div className="glass-morphism rounded-xl p-8 md:p-12 w-full text-center">
+            <span className="font-label text-[10px] tracking-widest text-[#dd6e42] uppercase block mb-4">
+              // Step {currentStep + 1}
+            </span>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-th-text mb-2">
+              Step {currentStep + 1}
+            </h2>
+            <p className="text-th-text3 text-sm">
+              Content for this step will be added in a future task.
+            </p>
+          </div>
+        );
+    }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <div style={labelStyle}>// All Set</div>
-        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.75rem', fontWeight: 700, color: t.slateDark }}>
-          You're Ready to <em style={{ color: t.peach, fontWeight: 400 }}>Rekkrd</em>
-        </h3>
-        <p style={{ color: t.text3, fontSize: '.9rem', marginTop: 8 }}>Here's what we know about you</p>
-      </div>
-
-      {/* Summary */}
-      <div style={{ width: '100%', marginBottom: 24 }}>
-        {selectedGenres.size > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ ...labelStyle, marginBottom: 8 }}>Your Genres</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {[...selectedGenres].map(g => (
-                <span key={g} style={{ padding: '4px 12px', borderRadius: t.radiusSm, fontSize: '.75rem', fontWeight: 600, background: 'rgba(221,110,66,.08)', border: '1.5px solid rgba(221,110,66,.2)', color: t.peach }}>{g}</span>
-              ))}
-            </div>
+    <div className="fixed inset-0 z-50 bg-th-bg flex flex-col">
+      {/* Top bar */}
+      <header className="flex items-center justify-between px-4 md:px-8 py-4 shrink-0">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-tr from-[#dd6e42] to-[#4f6d7a] rounded-lg flex items-center justify-center shadow-lg">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="11" fill="#f0a882" />
+              <circle cx="12" cy="12" r="9.5" fill="none" stroke="#d48a6a" strokeWidth="0.4" opacity="0.5" />
+              <circle cx="12" cy="12" r="8" fill="none" stroke="#d48a6a" strokeWidth="0.3" opacity="0.4" />
+              <circle cx="12" cy="12" r="5.2" fill="#c45a30" />
+              <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#f0a882">R</text>
+            </svg>
           </div>
-        )}
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {selectedSetup && (
-            <div style={{ borderRadius: t.radius, border: `2px solid ${t.alabaster}`, background: t.bg, padding: 14, textAlign: 'center' }}>
-              <p style={{ fontFamily: "'Space Mono',monospace", fontSize: '.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: t.text3, marginBottom: 4 }}>Setup</p>
-              <p style={{ fontSize: '.85rem', fontWeight: 600, color: t.slateDark }}>{setupLabel}</p>
-            </div>
-          )}
-          {goalOption && (
-            <div style={{ borderRadius: t.radius, border: `2px solid ${t.alabaster}`, background: t.bg, padding: 14, textAlign: 'center' }}>
-              <p style={{ fontFamily: "'Space Mono',monospace", fontSize: '.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: t.text3, marginBottom: 4 }}>Goal</p>
-              <p style={{ fontSize: '.85rem', fontWeight: 600, color: t.slateDark }}>{goalOption.label}</p>
-            </div>
+          <span className="font-display text-lg font-bold text-th-text tracking-tight">
+            Rekk<span className="text-[#dd6e42]">r</span>d
+          </span>
+          {previewMode && (
+            <span className="ml-2 bg-[#dd6e42] text-white text-[10px] font-label tracking-wider uppercase px-2 py-0.5 rounded">
+              Preview
+            </span>
           )}
         </div>
-      </div>
 
-      {/* Error */}
-      <div aria-live="assertive" style={{ width: '100%', minHeight: 20, marginBottom: 8 }}>
-        {error && <p role="alert" style={{ color: t.peachDark, fontSize: '.8rem', textAlign: 'center' }}>{error}</p>}
-      </div>
+        {/* Center: Progress */}
+        <div className="flex flex-col items-center gap-1.5 flex-1 mx-4">
+          <span className="font-label text-[10px] tracking-widest text-th-text3 uppercase">
+            Step {currentStep + 1} of {TOTAL_STEPS}
+          </span>
+          <div className="w-full max-w-xs h-1 rounded-full bg-th-bg3/40 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#dd6e42] transition-all duration-500 ease-out"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        </div>
 
-      {/* CTAs */}
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <button type="button" onClick={() => handleFinish('add')} disabled={saving !== null} aria-label="Add your first album"
-          className="btn-primary"
-          style={{ width: '100%', justifyContent: 'center', opacity: saving !== null ? 0.6 : 1, cursor: saving ? 'wait' : 'pointer', display: 'inline-flex', gap: 8 }}>
-          {saving === 'add' ? (
-            <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'landing-pulse 0.6s linear infinite' }} />
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          )}
-          Add Your First Album
+        {/* Right: Skip */}
+        <button
+          type="button"
+          onClick={handleSkipAll}
+          disabled={saving}
+          className="font-label text-[10px] tracking-widest text-th-text3 uppercase hover:text-th-text2 transition-colors bg-transparent border-none cursor-pointer px-2 py-1 disabled:opacity-50"
+        >
+          Skip Setup
         </button>
+      </header>
 
-        <button type="button" onClick={() => handleFinish('explore')} disabled={saving !== null} aria-label="Explore the app"
-          className="btn-secondary"
-          style={{ width: '100%', justifyContent: 'center', opacity: saving !== null ? 0.6 : 1, cursor: saving ? 'wait' : 'pointer', display: 'inline-flex', gap: 8 }}>
-          {saving === 'explore' ? (
-            <span style={{ display: 'inline-block', width: 16, height: 16, border: `2px solid ${t.slateLight}`, borderTopColor: t.slate, borderRadius: '50%', animation: 'landing-pulse 0.6s linear infinite' }} />
+      {/* Main content area */}
+      <main className="flex-1 flex items-center justify-center px-4 md:px-8 overflow-y-auto">
+        <div
+          className="w-full max-w-5xl flex flex-col items-center justify-center py-12"
+          style={{
+            opacity: fadeState === 'in' ? 1 : 0,
+            transition: 'opacity 150ms ease-in-out',
+          }}
+          onTransitionEnd={handleTransitionEnd}
+        >
+          {renderStep()}
+        </div>
+      </main>
+
+      {/* Bottom nav bar */}
+      <footer className="flex items-center justify-between px-4 md:px-8 py-4 shrink-0 border-t border-th-surface/[0.06]">
+        {/* Left: Back */}
+        {!isFirst ? (
+          <button
+            type="button"
+            onClick={handleBack}
+            disabled={saving}
+            className="font-label text-xs tracking-wider text-th-text3 uppercase hover:text-th-text2 transition-colors bg-transparent border-none cursor-pointer px-4 py-2 disabled:opacity-50"
+          >
+            Back
+          </button>
+        ) : (
+          <div />
+        )}
+
+        {/* Right: Next / Get Started */}
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={saving || !canAdvance}
+          className="px-6 py-2.5 rounded-lg bg-[#dd6e42] hover:bg-[#c45a30] text-white font-label text-xs tracking-wider uppercase transition-colors cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? (
+            <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : isLast ? (
+            'Get Started'
           ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
+            'Next'
           )}
-          Explore the App
         </button>
-      </div>
-
-      <p style={{ color: t.text3, fontSize: '.75rem', marginTop: 20, textAlign: 'center' }}>
-        You can update these anytime in your profile
-      </p>
+      </footer>
     </div>
   );
 };

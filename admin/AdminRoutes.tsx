@@ -8,6 +8,7 @@ import EmailsPage from './pages/EmailsPage';
 import ContentPage from './pages/ContentPage';
 import BlogPage from './pages/BlogPage';
 import CardAnalytics from '../src/components/admin/CardAnalytics';
+import OnboardingPreviewPage from './pages/OnboardingPreviewPage';
 
 const AdminRoutes: React.FC = () => (
   <Routes>
@@ -20,6 +21,7 @@ const AdminRoutes: React.FC = () => (
       <Route path="blog" element={<BlogPage />} />
       <Route path="analytics" element={<CardAnalytics />} />
     </Route>
+    <Route path="onboarding-preview" element={<OnboardingPreviewPage />} />
   </Routes>
 );
 

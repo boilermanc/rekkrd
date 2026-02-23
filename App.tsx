@@ -88,6 +88,7 @@ const App: React.FC = () => {
 
   const [gridPage, setGridPage] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isSupabaseReady = !!supabase;
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -243,6 +244,8 @@ const App: React.FC = () => {
         }
       } catch (err) {
         console.error('Failed to ensure profile exists:', err);
+      } finally {
+        setOnboardingChecked(true);
       }
     })();
   }, [user]);
@@ -595,6 +598,16 @@ const App: React.FC = () => {
     return <Landing />;
   }
 
+  // Wait for onboarding check to complete before showing any app UI
+  if (!onboardingChecked) {
+    return (
+      <div className="min-h-screen bg-th-bg flex flex-col items-center justify-center">
+        <SpinningRecord size="w-32 h-32" />
+        <p className="font-label text-[10px] tracking-widest mt-6 text-th-text3 uppercase">Loading</p>
+      </div>
+    );
+  }
+
   // Logged-in user viewing pricing page (from upgrade prompt)
   if (showPricingPage) {
     return <Landing onEnterApp={() => setShowPricingPage(false)} scrollToPricing />;
@@ -604,41 +617,11 @@ const App: React.FC = () => {
   if (showOnboarding) {
     return (
       <OnboardingWizard
-        userId={user.id}
-        onComplete={async (action, tier) => {
+        onComplete={(startAction) => {
           setShowOnboarding(false);
-
-          // Trigger Stripe checkout for paid tiers selected via /welcome CTAs
-          if (tier === 'curator' || tier === 'enthusiast') {
-            try {
-              const pricesRes = await fetch('/api/prices');
-              if (pricesRes.ok) {
-                const { tiers } = await pricesRes.json();
-                const priceId = tiers?.[tier]?.monthly?.priceId;
-                if (priceId) {
-                  const session = await supabase?.auth.getSession();
-                  const token = session?.data?.session?.access_token;
-                  if (token) {
-                    const checkoutRes = await fetch('/api/checkout', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                      body: JSON.stringify({ priceId }),
-                    });
-                    const { url } = await checkoutRes.json();
-                    if (url) { window.location.href = url; return; }
-                  }
-                }
-              }
-            } catch (err) {
-              console.error('Post-onboarding checkout failed:', err);
-            }
-          }
-
-          if (action === 'add') {
-            setCurrentView('landing');
+          setCurrentView('landing');
+          if (startAction === 'scan') {
             setIsCameraOpen(true);
-          } else {
-            setCurrentView('landing');
           }
         }}
       />
