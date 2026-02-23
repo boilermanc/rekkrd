@@ -17,6 +17,8 @@ export interface Profile {
   discogs_username: string | null;
   discogs_user_id: number | null;
   discogs_connected_at: string | null;
+  email_digest_optin: boolean;
+  email_updates_optin: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +35,7 @@ const PROFILE_COLUMNS = [
   'onboarding_completed', 'role', 'onboarding_selected_tier',
   'utm_source', 'utm_medium', 'utm_campaign',
   'discogs_username', 'discogs_user_id', 'discogs_connected_at',
+  'email_digest_optin', 'email_updates_optin',
   'created_at', 'updated_at',
 ].join(', ');
 

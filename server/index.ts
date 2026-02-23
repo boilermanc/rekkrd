@@ -36,6 +36,9 @@ import authRouter from './routes/auth.js';
 import discogsRouter from './routes/discogs.js';
 import discogsAuthRouter from './routes/discogsAuth.js';
 import collectionValueRouter from './routes/collectionValue.js';
+import accountRouter from './routes/account.js';
+import priceAlertsRouter from './routes/priceAlerts.js';
+import alertsCheckRouter from './routes/alertsCheck.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 import { validateDiscogsConfig } from './lib/discogs.js';
 
@@ -49,7 +52,7 @@ const _routerMap: Record<string, unknown> = {
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, supportRouter, sitemapRouter, emailRouter,
   onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter,
-  collectionValueRouter,
+  collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -145,6 +148,9 @@ mountRouter('authRouter', authRouter);
 mountRouter('discogsRouter', discogsRouter);
 mountRouter('discogsAuthRouter', discogsAuthRouter);
 mountRouter('collectionValueRouter', collectionValueRouter);
+mountRouter('accountRouter', accountRouter);
+mountRouter('priceAlertsRouter', priceAlertsRouter);
+mountRouter('alertsCheckRouter', alertsCheckRouter);
 console.log('[boot] All routes registered');
 
 // Ensure gear-photos storage bucket exists

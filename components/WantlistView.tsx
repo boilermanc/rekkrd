@@ -1,7 +1,7 @@
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Heart, RefreshCw } from 'lucide-react';
-import { WantlistItem } from '../types';
+import { WantlistItem, PriceAlert } from '../types';
 import { wantlistService } from '../services/wantlistService';
 import { supabase } from '../services/supabaseService';
 import { useToast } from '../contexts/ToastContext';
@@ -23,10 +23,37 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showImportBrowser, setShowImportBrowser] = useState(false);
+  const [alerts, setAlerts] = useState<PriceAlert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
   const { showToast } = useToast();
 
   const importModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(importModalRef, showImportBrowser, () => setShowImportBrowser(false));
+
+  const alertedReleaseIds = useMemo(
+    () => new Set(alerts.filter((a) => a.is_active).map((a) => a.discogs_release_id)),
+    [alerts],
+  );
+
+  const fetchAlerts = useCallback(async () => {
+    try {
+      const session = await supabase?.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      if (!token) return;
+
+      const res = await fetch('/api/price-alerts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const body = (await res.json()) as { alerts: PriceAlert[] };
+        setAlerts(body.alerts);
+      }
+    } catch {
+      // Non-fatal — default to empty
+    } finally {
+      setAlertsLoading(false);
+    }
+  }, []);
 
   const fetchWantlist = useCallback(async () => {
     try {
@@ -44,7 +71,8 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
 
   useEffect(() => {
     fetchWantlist();
-  }, [fetchWantlist, userId]);
+    fetchAlerts();
+  }, [fetchWantlist, fetchAlerts, userId]);
 
   async function handleRemove(id: string) {
     const previous = wantlist;
@@ -106,6 +134,47 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
     } finally {
       setRefreshing(false);
     }
+  }
+
+  async function handleSetAlert(item: WantlistItem, targetPrice: number, conditionMinimum: string) {
+    const session = await supabase?.auth.getSession();
+    const token = session?.data?.session?.access_token;
+    if (!token) {
+      showToast('Not authenticated', 'error');
+      throw new Error('Not authenticated');
+    }
+
+    const res = await fetch('/api/price-alerts', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        discogs_release_id: item.discogs_release_id,
+        artist: item.artist,
+        title: item.title,
+        cover_url: item.cover_url,
+        target_price: targetPrice,
+        condition_minimum: conditionMinimum,
+      }),
+    });
+
+    if (res.status === 409) {
+      showToast('You already have an alert for this record', 'error');
+      throw new Error('Duplicate alert');
+    }
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const msg = (body as { error?: string }).error || `Failed to set alert (${res.status})`;
+      showToast(msg, 'error');
+      throw new Error(msg);
+    }
+
+    const { alert } = (await res.json()) as { alert: PriceAlert };
+    setAlerts((prev) => [alert, ...prev]);
+    showToast(`Alert set — we'll notify you when ${item.artist} — ${item.title} drops to $${targetPrice}`, 'success');
   }
 
   if (loading) {
@@ -177,6 +246,8 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
               onRemove={handleRemove}
               onMarkAsOwned={onMarkAsOwned}
               isInCollection={item.discogs_release_id ? collectionDiscogsIds.has(item.discogs_release_id) : false}
+              hasAlert={alertedReleaseIds.has(item.discogs_release_id ?? -1)}
+              onSetAlert={handleSetAlert}
             />
           ))}
         </div>

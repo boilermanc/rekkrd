@@ -1,14 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Disc3, Trash2 } from 'lucide-react';
+import { Bell, BellRing, CheckCircle, Disc3, Loader2, Trash2 } from 'lucide-react';
 import { WantlistItem } from '../types';
 import { proxyImageUrl } from '../services/imageProxy';
+
+const CONDITION_OPTIONS = ['M', 'NM', 'VG+', 'VG', 'G+', 'G', 'F', 'P'] as const;
 
 interface WantlistCardProps {
   item: WantlistItem;
   onRemove: (id: string) => void;
   onMarkAsOwned: (item: WantlistItem) => void;
   isInCollection?: boolean;
+  hasAlert?: boolean;
+  onSetAlert?: (item: WantlistItem, targetPrice: number, conditionMinimum: string) => Promise<void>;
 }
 
 function formatRelativeDate(dateString: string): string {
@@ -25,15 +29,39 @@ function formatRelativeDate(dateString: string): string {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwned, isInCollection }) => {
+const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwned, isInCollection, hasAlert, onSetAlert }) => {
   const hasPrices = item.price_low !== null || item.price_median !== null || item.price_high !== null;
   const [confirmingOwned, setConfirmingOwned] = useState(false);
+  const [alertMode, setAlertMode] = useState(false);
+  const [alertSaving, setAlertSaving] = useState(false);
+  const [targetPrice, setTargetPrice] = useState('');
+  const [conditionMinimum, setConditionMinimum] = useState('VG');
 
   useEffect(() => {
     if (!confirmingOwned) return;
     const timer = setTimeout(() => setConfirmingOwned(false), 4000);
     return () => clearTimeout(timer);
   }, [confirmingOwned]);
+
+  const openAlertMode = () => {
+    const prefill = item.price_median !== null ? String(Math.floor(item.price_median * 0.8)) : '';
+    setTargetPrice(prefill);
+    setConditionMinimum('VG');
+    setAlertMode(true);
+  };
+
+  const handleSetAlert = async () => {
+    if (!onSetAlert) return;
+    const price = parseFloat(targetPrice);
+    if (isNaN(price) || price <= 0) return;
+    setAlertSaving(true);
+    try {
+      await onSetAlert(item, price, conditionMinimum);
+      setAlertMode(false);
+    } finally {
+      setAlertSaving(false);
+    }
+  };
 
   return (
     <div className="group relative glass-morphism rounded-xl overflow-hidden hover:neon-border transition-all duration-300 transform hover:-translate-y-1 border border-th-surface/[0.06]">
@@ -140,6 +168,19 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
                 <Disc3 className="w-3.5 h-3.5" />
                 Mark as Owned
               </button>
+              {item.discogs_release_id !== null && onSetAlert && (
+                <button
+                  onClick={openAlertMode}
+                  className="flex items-center justify-center transition-colors p-2 rounded-lg hover:bg-th-surface/[0.08]"
+                  aria-label="Set price alert"
+                >
+                  {hasAlert ? (
+                    <BellRing className="w-4 h-4 text-[#dd6e42]" />
+                  ) : (
+                    <Bell className="w-4 h-4 text-th-text3 hover:text-th-text" />
+                  )}
+                </button>
+              )}
               <button
                 onClick={() => onRemove(item.id)}
                 className="flex items-center justify-center text-th-text3 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-th-surface/[0.08]"
@@ -149,6 +190,53 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
               </button>
             </>
           )}
+        </div>
+
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${alertMode ? 'max-h-48 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}
+        >
+          <div className="pt-3 border-t border-th-surface/[0.08]">
+            <p className="text-th-text3 text-xs mb-2">Alert me when price drops to:</p>
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-th-text3 text-xs">$</span>
+                <input
+                  type="number"
+                  min={1}
+                  step={0.01}
+                  value={targetPrice}
+                  onChange={(e) => setTargetPrice(e.target.value)}
+                  placeholder="e.g. 15"
+                  className="w-full h-8 pl-5 pr-2 text-xs rounded-lg glass-morphism bg-th-surface/[0.06] border border-th-surface/[0.1] text-th-text placeholder:text-th-text3/40 focus:outline-none focus:border-[#dd6e42]/50"
+                />
+              </div>
+              <select
+                value={conditionMinimum}
+                onChange={(e) => setConditionMinimum(e.target.value)}
+                className="h-8 px-2 text-xs rounded-lg glass-morphism bg-th-surface/[0.06] border border-th-surface/[0.1] text-th-text focus:outline-none focus:border-[#dd6e42]/50"
+              >
+                {CONDITION_OPTIONS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleSetAlert}
+                disabled={alertSaving || !targetPrice || parseFloat(targetPrice) <= 0}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#dd6e42] hover:bg-[#c45a30] disabled:opacity-50 disabled:cursor-not-allowed text-th-text text-xs font-medium py-1.5 px-3 rounded-lg transition-colors"
+              >
+                {alertSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
+                Set Alert
+              </button>
+              <button
+                onClick={() => setAlertMode(false)}
+                className="text-th-text3 text-xs px-3 py-1.5 rounded-lg hover:text-th-text transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

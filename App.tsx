@@ -34,15 +34,18 @@ import DiscogsConnect from './components/DiscogsConnect';
 import DiscogsCollectionBrowser from './components/DiscogsCollectionBrowser';
 import WantlistView from './components/WantlistView';
 import CollectionValueDashboard from './src/components/CollectionValueDashboard';
+import PriceAlertsView from './src/components/PriceAlertsView';
 import CollectionInsightsCard from './src/components/CollectionInsightsCard';
-import { TrendingUp } from 'lucide-react';
+import ProfilePage from './src/components/ProfilePage';
+import MobileBottomNav from './src/components/MobileBottomNav';
+import { Bell, TrendingUp, User } from 'lucide-react';
 import { wantlistService } from './services/wantlistService';
-import { WantlistItem } from './types';
+import { WantlistItem, PriceAlert } from './types';
 
 const PAGE_SIZE = 40;
 
 type SortOption = 'recent' | 'year' | 'artist' | 'title' | 'value';
-type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd' | 'discogs' | 'wantlist' | 'value-dashboard';
+type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd' | 'discogs' | 'wantlist' | 'value-dashboard' | 'profile' | 'price-alerts';
 
 interface DuplicatePendingData {
   identity: { artist: string; title: string };
@@ -73,6 +76,7 @@ const App: React.FC = () => {
   const [discogsReleaseId, setDiscogsReleaseId] = useState<number | null>(null);
   const [discogsConnected, setDiscogsConnected] = useState(false);
   const [wantlistCount, setWantlistCount] = useState(0);
+  const [priceAlertCount, setPriceAlertCount] = useState(0);
   const [prefilledWantlistItem, setPrefilledWantlistItem] = useState<WantlistItem | null>(null);
 
   const [yearRange, setYearRange] = useState({ min: '', max: '' });
@@ -133,11 +137,30 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const refreshPriceAlertCount = useCallback(async () => {
+    try {
+      const session = await supabase?.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      if (!token) return;
+
+      const res = await fetch('/api/price-alerts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const body = (await res.json()) as { alerts: PriceAlert[] };
+        setPriceAlertCount(body.alerts.filter((a) => a.is_active).length);
+      }
+    } catch {
+      // badge is non-critical
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       refreshWantlistCount();
+      refreshPriceAlertCount();
     }
-  }, [user, refreshWantlistCount]);
+  }, [user, refreshWantlistCount, refreshPriceAlertCount]);
 
   const mapWantlistItemToNewAlbum = (item: WantlistItem): Partial<NewAlbum> => ({
     artist: item.artist,
@@ -630,7 +653,7 @@ const App: React.FC = () => {
 
 
   return (
-    <div className={`min-h-screen ${currentView !== 'landing' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' ? 'pb-24' : ''} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
+    <div className={`min-h-screen ${currentView === 'landing' || currentView === 'public-landing' ? '' : `pb-20 ${currentView === 'grid' || currentView === 'list' ? 'md:pb-24' : 'md:pb-0'}`} selection:bg-[#dd6e42]/30 relative overflow-x-hidden`}>
       <SEO
         title="My Collection"
         description="Browse and manage your vinyl record collection."
@@ -679,7 +702,7 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && <div className="flex-1 max-w-xl flex items-center gap-2">
+          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && currentView !== 'profile' && currentView !== 'price-alerts' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button
               onClick={() => setShowStats(!showStats)}
               className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
@@ -761,6 +784,18 @@ const App: React.FC = () => {
               <TrendingUp className="w-5 h-5" />
             </button>
             <button
+              onClick={() => setCurrentView('price-alerts')}
+              className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 relative ${currentView === 'price-alerts' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
+              title="Price Alerts"
+            >
+              <Bell className="w-5 h-5" />
+              {priceAlertCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#dd6e42] text-th-text text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {priceAlertCount}
+                </span>
+              )}
+            </button>
+            <button
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
               className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${isFilterPanelOpen ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
             >
@@ -804,6 +839,15 @@ const App: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                 </svg>
               )}
+            </button>
+
+            <button
+              onClick={() => setCurrentView('profile')}
+              className={`p-2 rounded-full transition-all ${currentView === 'profile' ? 'bg-[#dd6e42] text-white' : 'text-th-text3/70 hover:text-th-text2 hover:bg-th-surface/[0.04]'}`}
+              title="Profile"
+              aria-label="Profile"
+            >
+              <User className="w-5 h-5" />
             </button>
 
             <button
@@ -1230,8 +1274,14 @@ const App: React.FC = () => {
             collectionDiscogsIds={collectionDiscogsIds}
           />
         </main>
+      ) : currentView === 'price-alerts' ? (
+        <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8 pb-8">
+          <PriceAlertsView />
+        </main>
       ) : currentView === 'value-dashboard' ? (
         <CollectionValueDashboard />
+      ) : currentView === 'profile' ? (
+        <ProfilePage userId={user.id} albumCount={albums.length} onClose={() => setCurrentView('landing')} />
       ) : (
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
           {albums.length === 0 ? (
@@ -1274,8 +1324,8 @@ const App: React.FC = () => {
         </main>
       )}
 
-      {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && (
-        <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
+      {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && currentView !== 'profile' && currentView !== 'price-alerts' && (
+        <div className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-3 md:gap-4 z-50 w-full px-4 justify-center">
           <button
             onClick={() => {
               if (!canUse('playlist')) {
@@ -1325,6 +1375,35 @@ const App: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Mobile bottom navigation — replaces FAB on small screens */}
+      {currentView !== 'public-landing' && currentView !== 'landing' && (
+        <MobileBottomNav
+          currentView={currentView}
+          onNavigate={setCurrentView}
+          onScanPress={() => {
+            if (!canUse('scan')) {
+              setUpgradeFeature('scan');
+              return;
+            }
+            setIsCameraOpen(true);
+          }}
+          onOpenStudio={() => {
+            if (!canUse('playlist')) {
+              setUpgradeFeature('playlist');
+              return;
+            }
+            setIsStudioOpen(true);
+          }}
+          onUploadPress={() => fileInputRef.current?.click()}
+          onToggleFilters={() => setIsFilterPanelOpen(prev => !prev)}
+          isFilterPanelOpen={isFilterPanelOpen}
+          wantlistCount={wantlistCount}
+          priceAlertCount={priceAlertCount}
+          scansRemaining={scansRemaining}
+        />
+      )}
+
       <input
         ref={fileInputRef}
         type="file"

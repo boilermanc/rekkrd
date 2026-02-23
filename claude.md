@@ -268,4 +268,17 @@ A task is complete when:
 
 ---
 
-*Last updated: 2026-02-16*
+## Deployment Notes — Nginx
+
+When deploying new client-side routes, add a `location` block to the nginx config so the SPA fallback serves `index.html`:
+
+```nginx
+# Sellr — client-side route, pass to SPA
+location /sellr {
+  try_files $uri /index.html;
+}
+```
+
+---
+
+*Last updated: 2026-02-23*

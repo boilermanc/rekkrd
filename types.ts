@@ -217,3 +217,20 @@ export interface WantlistItem {
 
 /** Shape of a wantlist item before it has been persisted (no DB-generated fields). */
 export type NewWantlistItem = Omit<WantlistItem, 'id' | 'user_id' | 'created_at' | 'prices_updated_at'>;
+
+// ── Price Alerts ───────────────────────────────────────────────
+
+export interface PriceAlert {
+  id: string;
+  user_id: string;
+  discogs_release_id: number;
+  artist: string;
+  title: string;
+  cover_url: string | null;
+  target_price: number;
+  condition_minimum: string;
+  is_active: boolean;
+  last_checked_at: string | null;
+  triggered_at: string | null;
+  created_at: string;
+}

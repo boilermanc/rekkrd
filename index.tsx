@@ -20,6 +20,7 @@ import BlogPost from './pages/BlogPost';
 import ErrorPage from './components/ErrorPage';
 import SupportPage from './components/SupportPage';
 import WelcomeLandingPage from './src/components/WelcomeLandingPage';
+import SellrLandingPage from './src/sellr/pages/LandingPage';
 
 
 function NotFoundPage() {
@@ -54,6 +55,7 @@ root.render(
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/support" element={<SupportPage />} />
                   <Route path="/welcome" element={<WelcomeLandingPage />} />
+                  <Route path="/sellr" element={<SellrLandingPage />} />
                   <Route path="/" element={<App />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>

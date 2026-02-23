@@ -28,6 +28,24 @@ export const emailPresets: EmailPreset[] = [
   // WARM ORANGE TEMPLATE
   // ─────────────────────────────────────────────
   {
+    id: 'price-alert',
+    name: 'Price Alert Triggered',
+    category: 'transactional',
+    description: 'Sent automatically when a Discogs price alert target is met',
+    templateId: 'orange',
+    automated: true,
+    variables: {
+      subject: 'Price drop alert: {{artist}} — {{title}}',
+      preheader_text: 'A record on your watchlist just hit your target price.',
+      headline: 'Price Alert Triggered',
+      hero_body: '{{title}} by {{artist}} is now available for ${{current_price}} — at or below your target of ${{target_price}}.',
+      body_content: "This is your chance — marketplace prices fluctuate, so if you've been waiting for this one, now's the time to move.",
+      cta_text: 'View on Discogs',
+      cta_url: '{{discogs_url}}',
+      secondary_content: "This alert has been deactivated. You can re-enable it or create new alerts from your Rekkrd dashboard.",
+    },
+  },
+  {
     id: 'welcome',
     name: 'Welcome',
     category: 'transactional',
