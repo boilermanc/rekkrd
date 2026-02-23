@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { updateProfile } from '../services/profileService';
 import { useAuthContext } from '../contexts/AuthContext';
-import { Headphones, Music, Disc3, Tv, Sparkles, Heart, Trophy, TrendingUp, Mail, Archive, Crown, Gem, Camera, Compass } from 'lucide-react';
+import { Headphones, Music, Disc3, Tv, Sparkles, Heart, Trophy, TrendingUp, Mail, Archive, Crown, Gem, Camera, Compass, Layers } from 'lucide-react';
 import AlbumCard from './AlbumCard';
 import WantlistCard from './WantlistCard';
 import { useCheckout } from '../hooks/useCheckout';
@@ -362,7 +362,7 @@ interface TourStepLayoutProps {
 const TourStepLayout: React.FC<TourStepLayoutProps> = ({ heading, description, bullets, children }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
     {/* Left: copy */}
-    <div className="flex flex-col min-w-0">
+    <div className="flex flex-col min-w-0 pt-4">
       <span className="font-label text-[10px] tracking-widest text-[#dd6e42] uppercase mb-3">
         Feature Tour
       </span>
@@ -474,7 +474,7 @@ const DUMMY_WANTLIST: WantlistItem[] = [
     title: 'Ziggy Stardust',
     year: '1972',
     genre: 'Rock',
-    cover_url: 'https://picsum.photos/seed/bowie/300/300',
+    cover_url: '',
     discogs_release_id: null,
     discogs_url: null,
     price_low: 18,
@@ -490,7 +490,7 @@ const DUMMY_WANTLIST: WantlistItem[] = [
     title: 'I Never Loved a Man',
     year: '1967',
     genre: 'Soul',
-    cover_url: 'https://picsum.photos/seed/aretha/300/300',
+    cover_url: '',
     discogs_release_id: null,
     discogs_url: null,
     price_low: null,
@@ -545,9 +545,15 @@ const StakkdGearPreview: React.FC = () => (
       <span className="text-th-text3">Signal-to-Noise</span>
       <span className="text-th-text2">78 dB</span>
     </div>
-    <div className="flex items-center justify-between pt-2 border-t border-white/5">
-      <span className="text-th-text3 text-[10px] font-label tracking-wider uppercase">Collector</span>
-      <span className="text-[#dd6e42] text-xs font-label tracking-wider">Stakkd</span>
+    <div className="border-t border-white/10 mt-4 pt-4 flex items-center justify-between">
+      <span className="text-th-text3 text-xs">Powered by</span>
+      <div className="flex flex-col items-end">
+        <div className="flex items-center gap-1.5">
+          <Layers size={16} className="text-[#dd6e42]" />
+          <span className="text-[#dd6e42] font-bold text-lg font-mono">Stakkd</span>
+        </div>
+        <span className="text-th-text3 text-xs italic">Your complete audio gear catalog</span>
+      </div>
     </div>
   </div>
 );
