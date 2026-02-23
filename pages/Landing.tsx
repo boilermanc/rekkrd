@@ -335,15 +335,10 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             <span>Rekk<span>r</span>d</span>
           </a>
           <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#discogs">Discogs</a>
-            <a href="#value">Value</a>
-            <a href="#playlist">Playlists</a>
+            <a href="#collection">Collection</a>
             <a href="#stakkd">Stakkd</a>
-            <a href="/sellr">Sellr</a>
+            <a href="#value">Value</a>
             <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
             <a href="/blog">Blog</a>
             {user ? (
               <>
@@ -373,11 +368,11 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               <circle cx="12" cy="12" r="10" />
               <circle cx="12" cy="12" r="3" />
             </svg>
-            Selling your crate?
+            Looking to sell your crate?
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <a href="/sellr/start">
-              Try Sellr — know your value before you sell →
+              Try Sellr →
             </a>
             <button
               aria-label="Dismiss Sellr banner"
