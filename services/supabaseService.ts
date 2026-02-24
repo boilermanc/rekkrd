@@ -148,6 +148,7 @@ export const supabaseService = {
         discogs_release_id: album.discogs_release_id,
         discogs_url: album.discogs_url,
         barcode: album.barcode,
+        format: album.format || 'Vinyl',
       }])
       .select()
       .single();

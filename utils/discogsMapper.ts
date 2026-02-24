@@ -65,7 +65,10 @@ export function mapDiscogsToAlbum(release: DiscogsRelease): DiscogsNewAlbum {
   const catalogNumber = firstLabel?.catno ?? '';
 
   // ── Format ──────────────────────────────────────────────────────
-  const format = release.formats?.[0]?.name ?? '';
+  const rawFormat = (release.formats?.[0]?.name ?? '').toLowerCase();
+  const format = rawFormat.includes('cassette') ? 'Cassette'
+    : rawFormat.includes('8-track') ? '8-Track'
+    : 'Vinyl';
 
   // ── Cover URL ───────────────────────────────────────────────────
   const cover_url = getDiscogsCoverUrl(release);
