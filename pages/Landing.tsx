@@ -7,6 +7,7 @@ import { LANDING_DEFAULTS } from '../constants/landingDefaults';
 import type { CmsLandingContent } from '../types/cms';
 import SEO from '../components/SEO';
 import Turnstile from '../components/Turnstile';
+import FeatureTour from '../components/FeatureTour';
 
 interface LandingProps {
   onEnterApp?: () => void;
@@ -74,6 +75,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showFeatureTour, setShowFeatureTour] = useState(false);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
@@ -268,7 +270,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
     if (user && onEnterApp) {
       onEnterApp();
     } else if (!user) {
-      openAuthPanel('signup');
+      setShowFeatureTour(true);
     }
   };
 
@@ -348,7 +350,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             ) : (
               <>
                 <button className="nav-sign-in" onClick={() => openAuthPanel('signin')}>Sign In</button>
-                <button className="nav-cta" onClick={() => openAuthPanel('signup')}>Get Started</button>
+                <button className="nav-cta" onClick={() => setShowFeatureTour(true)}>Get Started</button>
               </>
             )}
           </div>
@@ -393,7 +395,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               ) : (
                 <>
                   <button className="mobile-drawer-btn outline" onClick={() => { openAuthPanel('signin'); closeMobileMenu(); }}>Sign In</button>
-                  <button className="mobile-drawer-btn primary" onClick={() => { openAuthPanel('signup'); closeMobileMenu(); }}>Get Started</button>
+                  <button className="mobile-drawer-btn primary" onClick={() => { setShowFeatureTour(true); closeMobileMenu(); }}>Get Started</button>
                 </>
               )}
             </div>
@@ -1179,6 +1181,17 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
           </button>
         )}
       </nav>
+
+      {/* Feature Tour overlay — shown before sign-up for new users */}
+      {showFeatureTour && (
+        <FeatureTour
+          onComplete={() => {
+            setShowFeatureTour(false);
+            openAuthPanel('signup');
+          }}
+          onClose={() => setShowFeatureTour(false)}
+        />
+      )}
     </div>
   );
 };

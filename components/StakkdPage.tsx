@@ -428,6 +428,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
           onClose={() => setManualModalOpen(false)}
           onGearSaved={handleGearSaved}
           onUpgradeRequired={onUpgradeRequired}
+          onScanWithAI={() => { setManualModalOpen(false); setAddFlowOpen(true); }}
         />
       </div>
     );

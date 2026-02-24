@@ -14,6 +14,7 @@ interface CoverResult {
 interface MusicBrainzRelease {
   id?: string;
   title?: string;
+  media?: Array<{ format?: string }>;
 }
 
 async function searchMusicBrainz(artist: string, title: string): Promise<CoverResult[]> {
@@ -26,8 +27,15 @@ async function searchMusicBrainz(artist: string, title: string): Promise<CoverRe
     if (!resp.ok) return [];
     const json = await resp.json();
     const releases = json.releases || [];
+    const EXCLUDED_FORMATS = ['8-track cartridge'];
     const candidates = releases
-      .filter((r: MusicBrainzRelease) => r.id)
+      .filter((r: MusicBrainzRelease) => {
+        if (!r.id) return false;
+        if (r.media?.some((m: { format?: string }) =>
+          m.format && EXCLUDED_FORMATS.includes(m.format.toLowerCase())
+        )) return false;
+        return true;
+      })
       .map((r: MusicBrainzRelease) => ({
         url: `https://coverartarchive.org/release/${r.id}/front-500`,
         source: 'MusicBrainz' as const,

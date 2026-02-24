@@ -146,6 +146,34 @@ router.post('/api/gear', requireAuthWithUser, gearRateLimit, async (req: Request
   }
 });
 
+// ── GET /api/gear/catalog/search ──────────────────────────────────
+// Public catalog lookup — no auth required
+
+router.get('/api/gear/catalog/search', async (req: Request, res: Response) => {
+  try {
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    const limit = Math.min(Math.max(parseInt(String(req.query.limit)) || 10, 1), 50);
+
+    if (q.length < 2) {
+      res.status(200).json([]);
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase.rpc('search_gear_catalog', {
+      search_query: q,
+      max_results: limit,
+    });
+
+    if (error) throw error;
+
+    res.status(200).json(data || []);
+  } catch (err) {
+    console.error('GET /api/gear/catalog/search error:', err);
+    res.status(500).json({ error: 'Failed to search gear catalog' });
+  }
+});
+
 // ── PUT /api/gear/reorder (before :id to avoid catch) ─────────────
 
 router.put('/api/gear/reorder', requireAuthWithUser, async (req: Request, res: Response) => {
