@@ -73,6 +73,9 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   const { user, signOut } = useAuthContext();
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   // Latest blog post
   interface LatestPost { id: string; title: string; slug: string; excerpt: string | null; featured_image: string | null; author: string; published_at: string; }
@@ -349,14 +352,54 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               </>
             )}
           </div>
-          {!user && (
-            <div className="nav-mobile-auth-group">
-              <button className="nav-mobile-auth" onClick={() => openAuthPanel('signin')}>Sign In</button>
-              <button className="nav-mobile-cta" onClick={() => openAuthPanel('signup')}>Get Started</button>
-            </div>
-          )}
+          <button
+            className="nav-hamburger"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-drawer-overlay" onClick={closeMobileMenu}>
+          <div className="mobile-drawer" role="dialog" aria-modal="true" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+            <nav className="mobile-drawer-links">
+              <a href="#features" onClick={closeMobileMenu}>Features</a>
+              <a href="#collection" onClick={closeMobileMenu}>Collection</a>
+              <a href="#stakkd" onClick={closeMobileMenu}>Stakkd</a>
+              <a href="#value" onClick={closeMobileMenu}>Value</a>
+              <a href="#pricing" onClick={closeMobileMenu}>Pricing</a>
+              <a href="/blog" onClick={closeMobileMenu}>Blog</a>
+              <a href="/sellr" onClick={closeMobileMenu}>Sellr</a>
+            </nav>
+            <div className="mobile-drawer-auth">
+              {user ? (
+                <>
+                  <button className="mobile-drawer-btn outline" onClick={() => { signOut(); closeMobileMenu(); }}>Sign Out</button>
+                  <button className="mobile-drawer-btn primary" onClick={() => { handleCTA(); closeMobileMenu(); }}>My Collection</button>
+                </>
+              ) : (
+                <>
+                  <button className="mobile-drawer-btn outline" onClick={() => { openAuthPanel('signin'); closeMobileMenu(); }}>Sign In</button>
+                  <button className="mobile-drawer-btn primary" onClick={() => { openAuthPanel('signup'); closeMobileMenu(); }}>Get Started</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <a href="/sellr" className="sellr-tab">
         Looking to sell your crate? <span>Try Sellr →</span>
@@ -720,7 +763,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
               {checkItem('One-time payment — no subscription required')}
             </ul>
             <div style={{ marginTop: 36, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-              <a href="/sellr/start" className="btn-primary">
+              <a href="/sellr" className="btn-primary">
                 Start Your Appraisal <Arrow />
               </a>
               <a href="/sellr" className="btn-secondary">
@@ -1109,6 +1152,33 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
           </div>
         </div>
       )}
+
+      {/* Mobile bottom nav */}
+      <nav className="mobile-bottom-nav" aria-label="Quick navigation">
+        <a href="#features">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Features</span>
+        </a>
+        <a href="#pricing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          <span>Pricing</span>
+        </a>
+        <a href="/sellr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          <span>Sellr</span>
+        </a>
+        {user ? (
+          <button onClick={handleCTA}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+            <span>Collection</span>
+          </button>
+        ) : (
+          <button onClick={() => openAuthPanel('signup')}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+            <span>Sign Up</span>
+          </button>
+        )}
+      </nav>
     </div>
   );
 };

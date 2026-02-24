@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import SellrLogo from './SellrLogo';
 import SlotCounter from './SlotCounter';
 import { useSellrAuth } from '../hooks/useSellrAuth';
@@ -13,6 +14,8 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
   const { user, loading, signOut } = useSellrAuth();
   const { slotsUsed, slotsPurchased, loading: slotsLoading } = useSellrAccount();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -32,6 +35,21 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
     };
   }, []);
 
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile menu on Escape
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMenuOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen]);
+
   return (
     <div className="min-h-screen bg-sellr-bg text-sellr-charcoal">
       {/* ── Top Nav ──────────────────────────────────────────── */}
@@ -45,7 +63,7 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
           </Link>
           <a
             href="https://rekkrd.com"
-            className="hidden sm:inline-flex items-center gap-1 text-xs text-sellr-charcoal/50 hover:text-sellr-blue transition-colors"
+            className="hidden md:inline-flex items-center gap-1 text-xs text-sellr-charcoal/50 hover:text-sellr-blue transition-colors"
           >
             &larr; Rekkrd
           </a>
@@ -56,38 +74,50 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
             <span className="text-sm text-sellr-charcoal/40 min-h-[44px] flex items-center">...</span>
           ) : user ? (
             <>
-              <span
-                className="hidden sm:block text-sm text-sellr-charcoal/50 max-w-[160px] truncate"
-                title={user.email ?? ''}
-              >
-                {user.email}
-              </span>
-              {!slotsLoading && (
-                <div className="hidden sm:block">
+              {/* Desktop: inline links */}
+              <div className="hidden md:flex items-center gap-3">
+                <span
+                  className="text-sm text-sellr-charcoal/50 max-w-[160px] truncate"
+                  title={user.email ?? ''}
+                >
+                  {user.email}
+                </span>
+                {!slotsLoading && (
                   <SlotCounter slotsUsed={slotsUsed} slotsPurchased={slotsPurchased} size="sm" />
-                </div>
-              )}
-              <Link
-                to="/sellr/dashboard"
-                className="flex items-center px-4 py-2.5 min-h-[44px] text-sm font-medium text-sellr-blue hover:text-sellr-blue-light transition-colors"
-                aria-label="Go to dashboard"
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/sellr/account"
-                className="flex items-center px-4 py-2.5 min-h-[44px] text-sm text-sellr-charcoal/60 hover:text-sellr-charcoal transition-colors"
-                aria-label="Account settings"
-              >
-                Account
-              </Link>
+                )}
+                <Link
+                  to="/sellr/dashboard"
+                  className="flex items-center px-4 py-2.5 min-h-[44px] text-sm font-medium text-sellr-blue hover:text-sellr-blue-light transition-colors"
+                  aria-label="Go to dashboard"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/sellr/account"
+                  className="flex items-center px-4 py-2.5 min-h-[44px] text-sm text-sellr-charcoal/60 hover:text-sellr-charcoal transition-colors"
+                  aria-label="Account settings"
+                >
+                  Account
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex items-center px-4 py-2.5 min-h-[44px] text-sm text-sellr-charcoal/60 hover:text-sellr-charcoal transition-colors"
+                  aria-label="Sign out of Sellr"
+                >
+                  Sign Out
+                </button>
+              </div>
+
+              {/* Mobile: hamburger toggle */}
               <button
                 type="button"
-                onClick={handleSignOut}
-                className="flex items-center px-4 py-2.5 min-h-[44px] text-sm text-sellr-charcoal/60 hover:text-sellr-charcoal transition-colors"
-                aria-label="Sign out of Sellr"
+                onClick={() => setIsMenuOpen(prev => !prev)}
+                className="md:hidden flex items-center justify-center w-11 h-11 min-h-[44px] min-w-[44px] text-sellr-charcoal/70 hover:text-sellr-charcoal transition-colors"
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMenuOpen}
               >
-                Sign Out
+                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </>
           ) : (
@@ -110,6 +140,70 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
           )}
         </div>
       </nav>
+
+      {/* ── Mobile Menu Backdrop ───────────────────────────── */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── Mobile Menu Dropdown ───────────────────────────── */}
+      {user && (
+        <div className="relative z-50">
+          <div
+            className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${
+              isMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+            role="menu"
+            aria-label="Mobile navigation"
+          >
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-4 pt-1 space-y-1">
+              <div className="px-3 py-2 text-sm text-sellr-charcoal/50 truncate">
+                {user.email}
+              </div>
+              {!slotsLoading && (
+                <div className="px-3 py-2">
+                  <SlotCounter slotsUsed={slotsUsed} slotsPurchased={slotsPurchased} size="sm" />
+                </div>
+              )}
+              <div className="border-t border-sellr-charcoal/10 mx-3" />
+              <Link
+                to="/sellr/dashboard"
+                className="flex items-center px-3 py-3 min-h-[44px] text-sm font-medium text-sellr-blue hover:bg-sellr-surface rounded transition-colors"
+                role="menuitem"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/sellr/account"
+                className="flex items-center px-3 py-3 min-h-[44px] text-sm text-sellr-charcoal/70 hover:bg-sellr-surface rounded transition-colors"
+                role="menuitem"
+              >
+                Account
+              </Link>
+              <a
+                href="https://rekkrd.com"
+                className="flex items-center gap-1 px-3 py-3 min-h-[44px] text-sm text-sellr-charcoal/50 hover:bg-sellr-surface rounded transition-colors"
+                role="menuitem"
+              >
+                &larr; Rekkrd
+              </a>
+              <div className="border-t border-sellr-charcoal/10 mx-3" />
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex items-center w-full px-3 py-3 min-h-[44px] text-sm text-sellr-charcoal/60 hover:bg-sellr-surface rounded transition-colors text-left"
+                role="menuitem"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Page Content ────────────────────────────────────── */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">

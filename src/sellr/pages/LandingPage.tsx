@@ -152,7 +152,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ── Lot Mode Callout ─────────────────────────────────── */}
-      <section aria-labelledby="lot-heading" className="py-16 md:py-20 bg-sellr-surface rounded-2xl px-8 md:px-12">
+      <section aria-labelledby="lot-heading" className="py-16 md:py-20 bg-sellr-surface rounded-2xl px-5 sm:px-8 md:px-12">
         <div className="flex flex-col md:flex-row items-center gap-10">
           <div className="flex-1">
             <span className="text-xs font-bold tracking-widest text-sellr-sage uppercase">
