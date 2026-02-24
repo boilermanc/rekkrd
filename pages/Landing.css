@@ -1630,6 +1630,26 @@
   .landing-page .mock-card:nth-child(2){margin-top:0}
   .landing-page .mock-card:nth-child(3){margin-top:0}
 
+  /* Discogs */
+  .landing-page .discogs-section .container{gap:32px}
+  .landing-page .discogs-text .section-title{font-size:clamp(1.3rem,5vw,1.75rem)}
+  .landing-page .discogs-text .section-sub{font-size:.9rem}
+  .landing-page .discogs-text .showcase-list{margin-top:20px !important}
+  .landing-page .discogs-text .showcase-list li{font-size:.85rem}
+  .landing-page .discogs-mock{padding:16px;border-radius:12px}
+  .landing-page .discogs-mock-header{margin-bottom:12px}
+  .landing-page .discogs-mock-label{font-size:.8rem}
+  .landing-page .discogs-mock-count{font-size:.7rem}
+  .landing-page .discogs-mock-progress{margin-bottom:14px}
+  .landing-page .discogs-mock-items{gap:8px}
+  .landing-page .discogs-mock-item{padding:6px 8px;gap:10px}
+  .landing-page .discogs-mock-disc{width:28px;height:28px}
+  .landing-page .discogs-mock-disc::after{width:6px;height:6px}
+  .landing-page .discogs-mock-artist{font-size:.75rem}
+  .landing-page .discogs-mock-title{font-size:.7rem}
+  .landing-page .discogs-mock-price{font-size:.7rem}
+  .landing-page .discogs-mock-footer{font-size:.75rem;margin-top:12px}
+
   /* Playlist */
   .landing-page .playlist-demo{padding:20px}
   .landing-page .playlist-demo-header{margin-bottom:16px}
@@ -1869,8 +1889,9 @@
     right:auto;
     left:50%;
     transform:translateX(-50%);
-    font-size:11px;
-    padding:3px 12px;
+    font-size:12px;
+    padding:6px 20px;
+    border-radius:0 0 10px 10px;
   }
 }
 

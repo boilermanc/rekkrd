@@ -63,7 +63,7 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
           </Link>
           <a
             href="https://rekkrd.com"
-            className="hidden md:inline-flex items-center gap-1 text-xs text-sellr-charcoal/50 hover:text-sellr-blue transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-sellr-charcoal/50 hover:text-sellr-blue transition-colors"
           >
             &larr; Rekkrd
           </a>
