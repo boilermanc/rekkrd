@@ -442,7 +442,7 @@ export const adminService = {
     }
   },
 
-  async testIntegration(integration: string, config: Record<string, string>): Promise<{ success: boolean; message: string }> {
+  async testIntegration(integration: string, config: Record<string, string>): Promise<{ success: boolean; message: string; details?: Record<string, unknown> }> {
     const headers = await getAuthHeaders();
     const resp = await fetch('/api/admin/integrations/test', {
       method: 'POST',

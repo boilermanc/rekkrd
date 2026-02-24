@@ -106,7 +106,7 @@ router.post('/api/admin/integrations/test', requireAdmin, async (req: Request, r
       return;
     }
 
-    let result: { success: boolean; message: string };
+    let result: { success: boolean; message: string; details?: Record<string, unknown> };
 
     switch (integration) {
       case 'stripe': {
@@ -117,11 +117,54 @@ router.post('/api/admin/integrations/test', requireAdmin, async (req: Request, r
         }
         try {
           const testStripe = new Stripe(secretKey);
-          await testStripe.balance.retrieve();
-          result = { success: true, message: 'Stripe connection successful' };
+
+          // Fetch balance + account info in parallel
+          const [balance, account] = await Promise.all([
+            testStripe.balance.retrieve(),
+            testStripe.accounts.retrieve().catch(() => null),
+          ]);
+
+          // Format available balances
+          const available = balance.available.map((b) => ({
+            amount: (b.amount / 100).toFixed(2),
+            currency: b.currency.toUpperCase(),
+          }));
+          const pending = balance.pending.map((b) => ({
+            amount: (b.amount / 100).toFixed(2),
+            currency: b.currency.toUpperCase(),
+          }));
+
+          // Determine mode from key prefix
+          const keyMode = secretKey.startsWith('sk_test_') ? 'Test' : secretKey.startsWith('sk_live_') ? 'Live' : 'Unknown';
+
+          result = {
+            success: true,
+            message: 'Stripe connection successful',
+            details: {
+              mode: keyMode,
+              livemode: balance.livemode,
+              account_name: account?.settings?.dashboard?.display_name || account?.business_profile?.name || 'N/A',
+              account_id: account?.id || 'N/A',
+              country: account?.country || 'N/A',
+              default_currency: (account?.default_currency || balance.available[0]?.currency || 'N/A').toUpperCase(),
+              payouts_enabled: account?.payouts_enabled ?? 'N/A',
+              charges_enabled: account?.charges_enabled ?? 'N/A',
+              available_balance: available,
+              pending_balance: pending,
+            },
+          };
         } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Unknown error';
-          result = { success: false, message: `Stripe test failed: ${msg}` };
+          const stripeErr = err as { type?: string; code?: string; statusCode?: number; message?: string; raw?: { message?: string } };
+          result = {
+            success: false,
+            message: `Stripe test failed: ${stripeErr.message || 'Unknown error'}`,
+            details: {
+              type: stripeErr.type || 'unknown',
+              code: stripeErr.code || 'N/A',
+              status: stripeErr.statusCode || 'N/A',
+              raw_message: stripeErr.raw?.message || stripeErr.message || 'No details',
+            },
+          };
         }
         break;
       }

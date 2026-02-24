@@ -60,7 +60,7 @@ const IntegrationsPage: React.FC = () => {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [testingTest, setTestingTest] = useState(false);
   const [testingLive, setTestingLive] = useState(false);
-  const [testResult, setTestResult] = useState<{ mode: StripeMode; success: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ mode: StripeMode; success: boolean; message: string; details?: Record<string, unknown> } | null>(null);
 
   const [mode, setMode] = useState<StripeMode>('live');
   const [testKeys, setTestKeys] = useState<ModeKeys>({ ...EMPTY_KEYS });
@@ -544,7 +544,7 @@ interface KeySectionProps {
   toggleShow: (id: string) => void;
   testing: boolean;
   onTest: () => void;
-  testResult: { success: boolean; message: string } | null;
+  testResult: { success: boolean; message: string; details?: Record<string, unknown> } | null;
 }
 
 const KeySection: React.FC<KeySectionProps> = ({
@@ -619,13 +619,45 @@ const KeySection: React.FC<KeySectionProps> = ({
 
         {testResult && (
           <div
-            className="flex items-start gap-2 px-4 py-3 rounded-lg text-sm"
+            className="rounded-lg text-sm overflow-hidden"
             style={{
               backgroundColor: testResult.success ? 'rgb(240,253,244)' : 'rgb(254,242,242)',
               color: testResult.success ? 'rgb(22,101,52)' : 'rgb(153,27,27)',
             }}
           >
-            {testResult.message}
+            <div className="px-4 py-3 font-medium flex items-center gap-2">
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: testResult.success ? 'rgb(34,197,94)' : 'rgb(239,68,68)' }}
+              />
+              {testResult.message}
+            </div>
+            {testResult.details && (
+              <div
+                className="px-4 pb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs"
+                style={{ color: testResult.success ? 'rgb(22,101,52)' : 'rgb(153,27,27)', opacity: 0.85 }}
+              >
+                {Object.entries(testResult.details).map(([key, value]) => {
+                  // Format balance arrays nicely
+                  if (Array.isArray(value)) {
+                    const formatted = value.map((b: { amount: string; currency: string }) => `${b.currency} ${b.amount}`).join(', ') || 'None';
+                    return (
+                      <React.Fragment key={key}>
+                        <span className="font-medium" style={{ opacity: 0.7 }}>{key.replace(/_/g, ' ')}</span>
+                        <span className="font-mono">{formatted}</span>
+                      </React.Fragment>
+                    );
+                  }
+                  const display = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value ?? 'N/A');
+                  return (
+                    <React.Fragment key={key}>
+                      <span className="font-medium" style={{ opacity: 0.7 }}>{key.replace(/_/g, ' ')}</span>
+                      <span className="font-mono">{display}</span>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
