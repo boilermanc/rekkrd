@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { stripe } from '../lib/stripe.js';
 import type Stripe from 'stripe';
 import { sendPaymentConfirmedEmail, sendAdminOrderAlert } from '../sellrEmails.js';
+import { purchaseSlots, TIER_SLOTS } from '../sellrSlots.js';
 
 const router = Router();
 
@@ -182,6 +183,26 @@ router.post('/api/sellr/checkout/webhook', async (req: Request, res: Response) =
             .from('sellr_sessions')
             .update({ status: 'paid' })
             .eq('id', sessionId);
+        }
+
+        // ── Provision slots for the user ──────────────────────────
+        if (sessionId) {
+          const { data: sessionRow } = await supabase
+            .from('sellr_sessions')
+            .select('user_id')
+            .eq('id', sessionId)
+            .single();
+
+          if (sessionRow?.user_id) {
+            const tier = paymentIntent.metadata.tier;
+            const slotsToAdd = TIER_SLOTS[tier] ?? 25;
+            const success = await purchaseSlots(sessionRow.user_id, slotsToAdd, tier);
+            if (!success) {
+              console.warn(`[sellr-checkout] Failed to provision ${slotsToAdd} slots for user ${sessionRow.user_id} (tier: ${tier}). Order ${order.id} is complete — correct manually via admin tools.`);
+            }
+          } else {
+            console.warn(`[sellr-checkout] No user_id on session ${sessionId} — skipping slot provisioning for order ${order.id}`);
+          }
         }
 
         // ── Trigger emails (fire-and-forget) ──────────────────────

@@ -47,7 +47,10 @@ import sellrReportRouter from './routes/sellrReport.js';
 import sellrCopyRouter from './routes/sellrCopy.js';
 import integrationsRouter from './routes/integrations.js';
 import sellrAdminRouter from './routes/sellrAdmin.js';
+import sellrAccountRouter from './routes/sellrAccount.js';
+import sellrDashboardRouter from './routes/sellrDashboard.js';
 import sellrImportRouter from './routes/sellrImport.js';
+import sellrLotRouter from './routes/sellrLot.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 import { validateDiscogsConfig } from './lib/discogs.js';
 import { startSellrCron } from './sellrCron.js';
@@ -64,7 +67,7 @@ const _routerMap: Record<string, unknown> = {
   onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
   sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
-  sellrAdminRouter, sellrImportRouter, integrationsRouter,
+  sellrAdminRouter, sellrAccountRouter, sellrDashboardRouter, sellrImportRouter, sellrLotRouter, integrationsRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -171,7 +174,10 @@ mountRouter('sellrCheckoutRouter', sellrCheckoutRouter);
 mountRouter('sellrReportRouter', sellrReportRouter);
 mountRouter('sellrCopyRouter', sellrCopyRouter);
 mountRouter('sellrAdminRouter', sellrAdminRouter);
+mountRouter('sellrAccountRouter', sellrAccountRouter);
+mountRouter('sellrDashboardRouter', sellrDashboardRouter);
 mountRouter('sellrImportRouter', sellrImportRouter);
+mountRouter('sellrLotRouter', sellrLotRouter);
 mountRouter('integrationsRouter', integrationsRouter);
 console.log('[boot] All routes registered');
 

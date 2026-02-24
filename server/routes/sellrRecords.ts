@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { consumeSlots, releaseSlot } from '../sellrSlots.js';
 
 const router = Router();
 
@@ -36,9 +37,24 @@ async function getActiveSession(supabase: ReturnType<typeof getSupabaseAdmin>, s
 }
 
 // ── POST /api/sellr/records ──────────────────────────────────────────
-// Insert a new record. Enforces tier record limits.
+// Insert a new record. Requires auth, enforces tier + slot limits.
 router.post('/api/sellr/records', async (req: Request, res: Response) => {
   try {
+    // ── Auth: verify Supabase JWT ──
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      errorResponse(res, 401, 'Authentication required');
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+    if (authErr || !user) {
+      errorResponse(res, 401, 'Invalid or expired token');
+      return;
+    }
+
     const {
       session_id, title, artist, year, label, condition,
       discogs_id, cover_image, price_low, price_median, price_high,
@@ -49,7 +65,6 @@ router.post('/api/sellr/records', async (req: Request, res: Response) => {
       return;
     }
 
-    const supabase = getSupabaseAdmin();
     const session = await getActiveSession(supabase, session_id);
 
     if (!session) {
@@ -64,6 +79,13 @@ router.post('/api/sellr/records', async (req: Request, res: Response) => {
         errorResponse(res, 403, 'Tier limit reached');
         return;
       }
+    }
+
+    // ── Slot check: consume 1 slot ──
+    const slotConsumed = await consumeSlots(user.id, 1);
+    if (!slotConsumed) {
+      res.status(402).json({ error: 'No slots remaining', code: 'NO_SLOTS' });
+      return;
     }
 
     // Insert record
@@ -151,6 +173,12 @@ router.delete('/api/sellr/records/:record_id', async (req: Request, res: Respons
       console.error('[sellr] Failed to delete record:', deleteErr.message);
       errorResponse(res, 500, 'Failed to delete record');
       return;
+    }
+
+    // Release the slot back to the user's account
+    const released = await releaseSlot(session.user_id);
+    if (!released) {
+      console.error('[sellr] Failed to release slot for user:', session.user_id);
     }
 
     // Decrement record_count (floor at 0)

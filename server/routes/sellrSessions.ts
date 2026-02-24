@@ -19,9 +19,24 @@ function errorResponse(res: Response, code: number, message: string) {
 }
 
 // ── POST /api/sellr/sessions ─────────────────────────────────────────
-// Creates a new session. No auth required.
+// Creates a new session. Requires Supabase auth.
 router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
   try {
+    // ── Auth: verify Supabase JWT ──
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      errorResponse(res, 401, 'Authentication required');
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+    if (authErr || !user) {
+      errorResponse(res, 401, 'Invalid or expired token');
+      return;
+    }
+
     const { email, tier } = req.body ?? {};
 
     // Validate tier if provided
@@ -30,9 +45,34 @@ router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
       return;
     }
 
-    const supabase = getSupabaseAdmin();
+    // ── Slots check ──
+    // Allow creation if user already has an active session (returning to continue)
+    const { data: existingActive } = await supabase
+      .from('sellr_sessions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle();
 
-    const insert: Record<string, unknown> = { status: 'active' };
+    if (!existingActive) {
+      const { data: slotsData, error: slotsErr } = await supabase
+        .rpc('sellr_slots_available', { uid: user.id });
+
+      if (slotsErr) {
+        console.error('[sellr] Failed to check slots:', slotsErr.message);
+        errorResponse(res, 500, 'Failed to verify slot availability');
+        return;
+      }
+
+      if (slotsData === 0) {
+        res.status(402).json({ error: 'No slots remaining', code: 'NO_SLOTS' });
+        return;
+      }
+    }
+
+    // ── Create session ──
+    const insert: Record<string, unknown> = { status: 'active', user_id: user.id };
     if (email && typeof email === 'string') insert.email = email;
     if (tier) insert.tier = tier;
 

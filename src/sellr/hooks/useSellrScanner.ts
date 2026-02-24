@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useSellrAccount } from './useSellrAccount';
 import type { SellrRecord } from '../types';
 
 interface UseSellrScannerOptions {
@@ -13,6 +14,8 @@ interface UseSellrScannerReturn {
   isScanning: boolean;
   scanError: string | null;
   tierLimitReached: boolean;
+  noSlots: boolean;
+  slotsRemaining: number;
 }
 
 /** Convert a File to a base64 data URL. */
@@ -163,9 +166,11 @@ async function postSellrRecord(
 }
 
 export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOptions): UseSellrScannerReturn {
+  const { slotsRemaining } = useSellrAccount();
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [tierLimitReached, setTierLimitReached] = useState(false);
+  const [noSlots, setNoSlots] = useState(false);
 
   const scan = useCallback(async (base64DataUrl: string) => {
     if (!sessionId) {
@@ -173,9 +178,16 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
       return;
     }
 
+    if (slotsRemaining <= 0) {
+      setNoSlots(true);
+      setScanError('No slots remaining');
+      return;
+    }
+
     setIsScanning(true);
     setScanError(null);
     setTierLimitReached(false);
+    setNoSlots(false);
 
     try {
       // 1. Identify album via Sellr scan endpoint (unauthenticated)
@@ -192,8 +204,11 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
       const record = await postSellrRecord(sessionId, identity, metadata);
       onRecordAdded?.(record);
     } catch (err: unknown) {
-      const error = err as Error & { code?: number };
-      if (error.code === 403) {
+      const error = err as Error & { code?: number | string };
+      if (error.code === 'NO_SLOTS' || error.code === 402) {
+        setNoSlots(true);
+        setScanError('No slots remaining');
+      } else if (error.code === 403) {
         setTierLimitReached(true);
         setScanError('Tier limit reached');
       } else {
@@ -202,7 +217,7 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
     } finally {
       setIsScanning(false);
     }
-  }, [sessionId, onRecordAdded]);
+  }, [sessionId, slotsRemaining, onRecordAdded]);
 
   const scanFromFile = useCallback(async (file: File) => {
     try {
@@ -234,8 +249,11 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
       setIsScanning(false);
       await scan(base64);
     } catch (err: unknown) {
-      const error = err as Error & { code?: number };
-      if (error.code === 403) {
+      const error = err as Error & { code?: number | string };
+      if (error.code === 'NO_SLOTS' || error.code === 402) {
+        setNoSlots(true);
+        setScanError('No slots remaining');
+      } else if (error.code === 403) {
         setTierLimitReached(true);
         setScanError('Tier limit reached');
       } else {
@@ -245,5 +263,5 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
     }
   }, [sessionId, scan]);
 
-  return { scan, isScanning, scanError, scanFromFile, scanFromUrl, tierLimitReached };
+  return { scan, isScanning, scanError, scanFromFile, scanFromUrl, tierLimitReached, noSlots, slotsRemaining };
 }

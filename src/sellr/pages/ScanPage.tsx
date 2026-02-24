@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Camera, Search, Loader2, Plus, X, Check } from 'lucide-react';
+import { Camera, Search, Loader2, Plus, X, Check, AlertCircle } from 'lucide-react';
 import SellrLayout from '../components/SellrLayout';
 import SellrSidebar from '../components/SellrSidebar';
 import { useSellrMeta } from '../hooks/useSellrMeta';
@@ -69,6 +69,9 @@ const ScanPage: React.FC = () => {
 
   // Tier-limit modal
   const [showLimitModal, setShowLimitModal] = useState(false);
+
+  // Low-slot warning dismissal
+  const [lowSlotsDismissed, setLowSlotsDismissed] = useState(false);
 
   // Search adding — track which result is being added
   const [addingId, setAddingId] = useState<number | null>(null);
@@ -217,10 +220,52 @@ const ScanPage: React.FC = () => {
         </div>
       )}
 
+      {/* ── Slot exhaustion banner ─────────────────────────────── */}
+      {scanner.noSlots && (
+        <div className="flex items-start gap-3 bg-sellr-amber/10 border border-sellr-amber rounded-lg p-4 mb-6">
+          <AlertCircle className="w-5 h-5 text-sellr-amber flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-sellr-charcoal">
+              You've used all your record slots.
+            </p>
+            <p className="text-sm text-sellr-charcoal/60 mt-0.5">
+              Purchase more slots to keep scanning.
+            </p>
+          </div>
+          <Link
+            to="/sellr/start"
+            className="flex-shrink-0 px-4 py-2 bg-sellr-amber text-white text-sm font-medium rounded hover:bg-sellr-amber-light transition-colors"
+          >
+            Buy More Slots
+          </Link>
+        </div>
+      )}
+
+      {/* ── Low-slot warning banner ────────────────────────────── */}
+      {!scanner.noSlots && scanner.slotsRemaining > 0 && scanner.slotsRemaining <= 5 && !lowSlotsDismissed && (
+        <div className="flex items-center gap-3 bg-sellr-amber/5 border border-sellr-amber/30 rounded-lg p-4 mb-6">
+          <AlertCircle className="w-5 h-5 text-sellr-amber flex-shrink-0" />
+          <p className="flex-1 text-sm text-sellr-charcoal/70">
+            Only {scanner.slotsRemaining} slot{scanner.slotsRemaining !== 1 ? 's' : ''} remaining &mdash; scan your most important records first.
+          </p>
+          <button
+            onClick={() => setLowSlotsDismissed(true)}
+            className="flex-shrink-0 p-1 text-sellr-charcoal/30 hover:text-sellr-charcoal/60 transition-colors"
+            aria-label="Dismiss warning"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* ── Two-column layout ─────────────────────────────────── */}
       <div className="flex flex-col lg:flex-row gap-8">
         {/* ── Left: Scan / Search ──────────────────────────────── */}
-        <section className="lg:w-[60%] w-full" aria-label="Record input">
+        <section
+          className={`lg:w-[60%] w-full ${scanner.noSlots ? 'opacity-50 pointer-events-none' : ''}`}
+          aria-label="Record input"
+          aria-disabled={scanner.noSlots || undefined}
+        >
           {/* Tab bar */}
           <div className="flex border-b border-sellr-charcoal/10 mb-6" role="tablist">
             <button
@@ -282,7 +327,7 @@ const ScanPage: React.FC = () => {
                 )}
               </button>
 
-              {scanner.scanError && !scanner.tierLimitReached && (
+              {scanner.scanError && !scanner.tierLimitReached && !scanner.noSlots && (
                 <p className="mt-3 text-sm text-red-600">{scanner.scanError}</p>
               )}
 

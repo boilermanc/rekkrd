@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import SellrLogo from './SellrLogo';
-import { SELLR_TIERS } from '../types';
+import { useSellrAccount } from '../hooks/useSellrAccount';
 import type { SellrSession, SellrRecord } from '../types';
 
 interface SellrSidebarProps {
@@ -85,15 +85,10 @@ function fmtPrice(value: number): string {
 
 const SellrSidebar: React.FC<SellrSidebarProps> = ({ session, records, onRecordDeleted }) => {
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
-
-  const tier = session?.tier
-    ? SELLR_TIERS.find(t => t.id === session.tier)
-    : null;
+  const { slotsUsed, slotsPurchased, loading: slotsLoading } = useSellrAccount();
 
   const count = session?.record_count ?? 0;
-  const limit = tier?.record_limit ?? 0;
-  const pct = limit > 0 ? Math.min(100, Math.round((count / limit) * 100)) : 0;
-  const remaining = limit > 0 ? Math.max(0, limit - count) : 0;
+  const pct = slotsPurchased > 0 ? Math.min(100, Math.round((slotsUsed / slotsPurchased) * 100)) : 0;
 
   // Value calculations
   const pricedRecords = records.filter(r => r.price_median != null);
@@ -118,7 +113,7 @@ const SellrSidebar: React.FC<SellrSidebarProps> = ({ session, records, onRecordD
             {count} record{count !== 1 ? 's' : ''}
           </p>
 
-          {tier ? (
+          {!slotsLoading && slotsPurchased > 0 ? (
             <>
               <div className="mt-3 h-2 rounded-full bg-sellr-charcoal/10 overflow-hidden">
                 <div
@@ -127,17 +122,17 @@ const SellrSidebar: React.FC<SellrSidebarProps> = ({ session, records, onRecordD
                 />
               </div>
               <p className="mt-1.5 text-xs text-sellr-charcoal/40">
-                {remaining} slot{remaining !== 1 ? 's' : ''} remaining
+                {slotsUsed} of {slotsPurchased} slots used
               </p>
             </>
-          ) : (
+          ) : !slotsLoading ? (
             <p className="mt-2 text-xs text-sellr-charcoal/40">
-              <Link to="/sellr#pricing" className="text-sellr-blue hover:text-sellr-blue-light underline">
-                Select a plan
-              </Link>{' '}
-              to see your limit
+              No plan selected.{' '}
+              <Link to="/sellr/start" className="text-sellr-blue hover:text-sellr-blue-light underline">
+                Choose a plan
+              </Link>
             </p>
-          )}
+          ) : null}
         </div>
 
         {/* ── 2. Value Summary ───────────────────────────────────── */}

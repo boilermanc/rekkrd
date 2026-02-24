@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Loader2, Check, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { Loader2, Check, ArrowUpDown, ChevronDown, List, Package } from 'lucide-react';
 import SellrLayout from '../components/SellrLayout';
+import LotPricingPanel from '../components/LotPricingPanel';
 import { useSellrMeta } from '../hooks/useSellrMeta';
 import { SELLR_TIERS } from '../types';
 import type { SellrSession, SellrRecord, SellrTier } from '../types';
@@ -63,6 +64,10 @@ const ReviewPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Sell mode
+  const [sellMode, setSellMode] = useState<'individual' | 'lot'>('individual');
+  const [lotPostGenerated, setLotPostGenerated] = useState(false);
+
   // Sorting
   const [sortKey, setSortKey] = useState<SortKey>('artist');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -83,6 +88,7 @@ const ReviewPage: React.FC = () => {
       const data = await res.json();
       setSession(data.session);
       setRecords(data.records ?? []);
+      if (data.session?.collection_ad_copy) setLotPostGenerated(true);
     } catch {
       navigate('/sellr', { replace: true });
       showToast('Session expired — start a new appraisal.');
@@ -205,8 +211,59 @@ const ReviewPage: React.FC = () => {
           </p>
         </section>
 
+        {/* ── Sell Mode Toggle ─────────────────────────────────── */}
+        {records.length > 0 && (
+          <section className="py-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={() => setSellMode('individual')}
+                className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-colors text-left ${
+                  sellMode === 'individual'
+                    ? 'border-sellr-blue bg-sellr-blue/5'
+                    : 'border-sellr-charcoal/10 bg-sellr-surface hover:border-sellr-charcoal/20'
+                }`}
+              >
+                <List className={`w-6 h-6 flex-shrink-0 ${sellMode === 'individual' ? 'text-sellr-blue' : 'text-sellr-charcoal/40'}`} />
+                <div>
+                  <p className={`font-medium ${sellMode === 'individual' ? 'text-sellr-blue' : 'text-sellr-charcoal'}`}>
+                    Sell Individually
+                  </p>
+                  <p className="text-sm text-sellr-charcoal/60">Price and list each record separately</p>
+                </div>
+              </button>
+              <button
+                onClick={() => setSellMode('lot')}
+                className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-colors text-left ${
+                  sellMode === 'lot'
+                    ? 'border-sellr-blue bg-sellr-blue/5'
+                    : 'border-sellr-charcoal/10 bg-sellr-surface hover:border-sellr-charcoal/20'
+                }`}
+              >
+                <Package className={`w-6 h-6 flex-shrink-0 ${sellMode === 'lot' ? 'text-sellr-blue' : 'text-sellr-charcoal/40'}`} />
+                <div>
+                  <p className={`font-medium ${sellMode === 'lot' ? 'text-sellr-blue' : 'text-sellr-charcoal'}`}>
+                    Sell as a Lot
+                  </p>
+                  <p className="text-sm text-sellr-charcoal/60">One price for your whole crate</p>
+                </div>
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* ── Lot Mode: Pricing Panel ────────────────────────────── */}
+        {sellMode === 'lot' && records.length > 0 && (
+          <section className="py-8">
+            <LotPricingPanel
+              sessionId={sessionId!}
+              records={records}
+              onPostGenerated={() => setLotPostGenerated(true)}
+            />
+          </section>
+        )}
+
         {/* ── Section 2: Record Table / Cards ────────────────────── */}
-        <section className="py-8">
+        <section className={`py-8 ${sellMode === 'lot' ? 'hidden' : ''}`}>
           {records.length === 0 ? (
             <p className="text-sellr-charcoal/40 text-center py-12">
               No records in this session yet.{' '}
@@ -454,47 +511,73 @@ const ReviewPage: React.FC = () => {
         )}
 
         {/* ── Section 4: Checkout CTA (desktop inline) ──────────── */}
-        <section className="py-8 border-t border-sellr-charcoal/10 hidden sm:block">
-          <div className="relative group">
+        {sellMode === 'individual' ? (
+          <section className="py-8 border-t border-sellr-charcoal/10 hidden sm:block">
+            <div className="relative group">
+              <button
+                disabled={!tierSelected}
+                onClick={() => tierSelected && sessionId && navigate(`/sellr/success?session=${sessionId}`)}
+                className={`w-full px-6 py-4 text-lg font-medium rounded transition-colors ${
+                  tierSelected
+                    ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
+                    : 'bg-sellr-charcoal/10 text-sellr-charcoal/30 cursor-not-allowed'
+                }`}
+              >
+                Get My Full Report
+              </button>
+              {!tierSelected && (
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-sellr-charcoal text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  Select a plan above.
+                </span>
+              )}
+            </div>
+
+            <ul className="mt-6 space-y-2" role="list">
+              {TIER_FEATURES.map(feature => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-sellr-charcoal/70">
+                  <Check className="w-4 h-4 text-sellr-sage flex-shrink-0" strokeWidth={2} />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <p className="mt-6 text-sm text-sellr-charcoal/50 text-center">
+              Need to add more records?{' '}
+              <Link
+                to={`/sellr/scan?session=${sessionId}`}
+                className="text-sellr-blue hover:text-sellr-blue-light underline"
+              >
+                Back to scanning
+              </Link>
+            </p>
+          </section>
+        ) : (
+          <section className="py-8 border-t border-sellr-charcoal/10 hidden sm:block">
             <button
-              disabled={!tierSelected}
-              onClick={() => tierSelected && sessionId && navigate(`/sellr/checkout?session=${sessionId}`)}
+              disabled={!lotPostGenerated}
+              onClick={() => lotPostGenerated && sessionId && navigate(`/sellr/lot?session=${sessionId}`)}
               className={`w-full px-6 py-4 text-lg font-medium rounded transition-colors ${
-                tierSelected
+                lotPostGenerated
                   ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
                   : 'bg-sellr-charcoal/10 text-sellr-charcoal/30 cursor-not-allowed'
               }`}
             >
-              Get My Full Report
+              {lotPostGenerated ? 'Get My Lot Report' : 'Generate a lot post to continue'}
             </button>
-            {!tierSelected && (
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-sellr-charcoal text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Select a plan above.
-              </span>
-            )}
-          </div>
 
-          <ul className="mt-6 space-y-2" role="list">
-            {TIER_FEATURES.map(feature => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-sellr-charcoal/70">
-                <Check className="w-4 h-4 text-sellr-sage flex-shrink-0" strokeWidth={2} />
-                {feature}
-              </li>
-            ))}
-          </ul>
+            <p className="mt-6 text-sm text-sellr-charcoal/50 text-center">
+              Need to add more records?{' '}
+              <Link
+                to={`/sellr/scan?session=${sessionId}`}
+                className="text-sellr-blue hover:text-sellr-blue-light underline"
+              >
+                Back to scanning
+              </Link>
+            </p>
+          </section>
+        )}
 
-          <p className="mt-6 text-sm text-sellr-charcoal/50 text-center">
-            Need to add more records?{' '}
-            <Link
-              to={`/sellr/scan?session=${sessionId}`}
-              className="text-sellr-blue hover:text-sellr-blue-light underline"
-            >
-              Back to scanning
-            </Link>
-          </p>
-        </section>
-
-        {/* Desktop: back to scanning link */}
+        {/* Back to scanning link (mobile) */}
         <p className="sm:hidden pb-20 text-sm text-sellr-charcoal/50 text-center">
           Need to add more records?{' '}
           <Link
@@ -508,17 +591,31 @@ const ReviewPage: React.FC = () => {
 
       {/* ── Mobile sticky bottom CTA ─────────────────────────────── */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-sellr-charcoal/10 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <button
-          disabled={!tierSelected}
-          onClick={() => tierSelected && sessionId && navigate(`/sellr/checkout?session=${sessionId}`)}
-          className={`w-full px-6 py-3.5 text-base font-medium rounded transition-colors ${
-            tierSelected
-              ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
-              : 'bg-sellr-charcoal/10 text-sellr-charcoal/30 cursor-not-allowed'
-          }`}
-        >
-          {tierSelected ? 'Get My Full Report' : 'Select a plan to continue'}
-        </button>
+        {sellMode === 'individual' ? (
+          <button
+            disabled={!tierSelected}
+            onClick={() => tierSelected && sessionId && navigate(`/sellr/success?session=${sessionId}`)}
+            className={`w-full px-6 py-3.5 text-base font-medium rounded transition-colors ${
+              tierSelected
+                ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
+                : 'bg-sellr-charcoal/10 text-sellr-charcoal/30 cursor-not-allowed'
+            }`}
+          >
+            {tierSelected ? 'Get My Full Report' : 'Select a plan to continue'}
+          </button>
+        ) : (
+          <button
+            disabled={!lotPostGenerated}
+            onClick={() => lotPostGenerated && sessionId && navigate(`/sellr/lot?session=${sessionId}`)}
+            className={`w-full px-6 py-3.5 text-base font-medium rounded transition-colors ${
+              lotPostGenerated
+                ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
+                : 'bg-sellr-charcoal/10 text-sellr-charcoal/30 cursor-not-allowed'
+            }`}
+          >
+            {lotPostGenerated ? 'Get My Lot Report' : 'Generate a lot post to continue'}
+          </button>
+        )}
       </div>
     </SellrLayout>
   );

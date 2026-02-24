@@ -9,6 +9,7 @@ import {
   sendAdminOrderAlert,
 } from '../sellrEmails.js';
 import crypto from 'crypto';
+import { getSlotStatus } from '../sellrSlots.js';
 import {
   getCronJobHistory,
   runAbandonedSessionEmailsTracked,
@@ -653,6 +654,76 @@ router.post('/api/sellr/admin/tools/regenerate-report-token', async (req: Reques
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[sellr-admin] regenerate-report-token error:', message);
+    res.status(500).json({ success: false, message });
+  }
+});
+
+// ── POST /api/sellr/admin/tools/adjust-slots ─────────────────────────
+// Manually adjust a user's slot balance. Positive = add, negative = remove.
+router.post('/api/sellr/admin/tools/adjust-slots', async (req: Request, res: Response) => {
+  if (!requireSellrAdmin(req, res)) return;
+
+  try {
+    const { user_id, adjustment, reason } = req.body as {
+      user_id?: string;
+      adjustment?: number;
+      reason?: string;
+    };
+
+    if (!user_id || typeof user_id !== 'string') {
+      res.status(400).json({ success: false, message: 'Missing or invalid user_id' });
+      return;
+    }
+
+    if (adjustment === undefined || typeof adjustment !== 'number' || !Number.isInteger(adjustment) || adjustment === 0) {
+      res.status(400).json({ success: false, message: 'adjustment must be a non-zero integer' });
+      return;
+    }
+
+    if (!reason || typeof reason !== 'string') {
+      res.status(400).json({ success: false, message: 'reason is required' });
+      return;
+    }
+
+    const status = await getSlotStatus(user_id);
+
+    if (status.slots_purchased === 0 && status.last_tier === null) {
+      res.status(404).json({ success: false, message: 'No sellr_accounts row found for this user' });
+      return;
+    }
+
+    const newPurchased = Math.max(0, status.slots_purchased + adjustment);
+    // Clamp slots_used so it never exceeds new slots_purchased
+    const newUsed = Math.min(status.slots_used, newPurchased);
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from('sellr_accounts')
+      .update({
+        slots_purchased: newPurchased,
+        slots_used: newUsed,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', user_id);
+
+    if (error) {
+      console.error('[sellr-admin] adjust-slots DB error:', error.message);
+      res.status(500).json({ success: false, message: 'Failed to update slots' });
+      return;
+    }
+
+    const updatedStatus = {
+      slots_purchased: newPurchased,
+      slots_used: newUsed,
+      slots_remaining: Math.max(0, newPurchased - newUsed),
+    };
+
+    console.log(`[sellr-admin] Slot adjustment: user=${user_id} adjustment=${adjustment > 0 ? '+' : ''}${adjustment} reason="${reason}" | before: purchased=${status.slots_purchased} used=${status.slots_used} | after: purchased=${newPurchased} used=${newUsed}`);
+
+    res.json({ success: true, ...updatedStatus });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[sellr-admin] adjust-slots error:', message);
     res.status(500).json({ success: false, message });
   }
 });

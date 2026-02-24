@@ -53,7 +53,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ sessionId, amountCents }) => 
     const { error: submitErr } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/sellr/success?session=${sessionId}`,
+        return_url: `${window.location.origin}/sellr/scan?session=${sessionId}`,
       },
     });
 

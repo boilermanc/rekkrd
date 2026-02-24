@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Camera, Check, CheckCircle2, Copy, Disc3, HelpCircle, Loader2, Package, Archive, RefreshCw, ScanLine, Search, Sun, Tag } from 'lucide-react';
 import SellrLayout from '../components/SellrLayout';
 import { useSellrMeta } from '../hooks/useSellrMeta';
 import { SELLR_TIERS } from '../types';
 import type { SellrTier } from '../types';
+import { supabase } from '../../../services/supabaseService';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -35,7 +36,7 @@ const VALID_TIERS = ['starter', 'standard', 'full'] as const;
 
 // ── Session creation (mirrors ScanPage pattern) ──────────────────────
 
-async function createSession(tier?: string): Promise<string> {
+async function createSession(tier: string | undefined, token: string): Promise<string> {
   const body: Record<string, string> = {};
   if (tier && VALID_TIERS.includes(tier as typeof VALID_TIERS[number])) {
     body.tier = tier;
@@ -43,7 +44,10 @@ async function createSession(tier?: string): Promise<string> {
 
   const res = await fetch('/api/sellr/sessions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
     body: JSON.stringify(body),
   });
 
@@ -499,12 +503,21 @@ Discogs median puts these at $27–$45 depending on pressing. Asking $30 — fai
 
 Local pickup preferred. Cash or Venmo. DM with any questions!`;
 
+const MOCK_LOT_AD_COPY = `47 Vinyl Records — Classic Rock, Soul & Jazz Collection
+
+Solid, well-cared-for collection built over 20 years. Highlights include Fleetwood Mac — Rumours (VG+, ~$28), Marvin Gaye — What's Going On (VG, ~$35), and Miles Davis — Kind of Blue (VG+, ~$42).
+
+Total collection valued at ~$840 on Discogs. Asking $520 — fair deal for the whole crate.
+
+Pickup only. Cash or Venmo. DM me if you want the full list.`;
+
 const StepSeeWhatYouGet: React.FC<StepProps & { completing: boolean }> = ({
   state,
   onNext,
   completing,
 }) => {
   const tierInfo = state.tier ? SELLR_TIERS.find((t) => t.id === state.tier) : null;
+  const [previewMode, setPreviewMode] = useState<'individual' | 'lot'>('individual');
 
   return (
     <div>
@@ -512,83 +525,153 @@ const StepSeeWhatYouGet: React.FC<StepProps & { completing: boolean }> = ({
         Here&rsquo;s what you&rsquo;ll get
       </h2>
       <p className="mt-3 text-sellr-charcoal/60 text-center">
-        For every record in your collection, Sellr generates this.
+        {previewMode === 'individual'
+          ? 'For every record in your collection, Sellr generates this.'
+          : 'Selling a whole crate? Sellr handles lot pricing too.'}
       </p>
 
-      {/* Mock appraisal card */}
-      <div className="mt-10 bg-sellr-surface rounded-xl p-6">
-        {/* Top row — album info */}
-        <div className="flex gap-4">
-          <MiniVinyl />
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sellr-charcoal">Fleetwood Mac</p>
-            <p className="font-display text-xl text-sellr-charcoal mt-0.5">Rumours</p>
-            <p className="text-sm text-sellr-charcoal/60 mt-1">1977 &middot; Warner Bros.</p>
-            <span className="inline-block mt-2 px-2.5 py-0.5 text-xs font-bold rounded bg-sellr-amber/15 text-sellr-amber">
-              VG+
-            </span>
-          </div>
-        </div>
-
-        {/* Pricing row */}
-        <div className="mt-6 grid grid-cols-3 gap-2">
-          <div className="bg-sellr-bg rounded-lg py-3 text-center">
-            <p className="text-lg font-semibold text-sellr-charcoal">$18.00</p>
-            <p className="text-xs text-sellr-charcoal/50 mt-0.5">Low</p>
-          </div>
-          <div className="bg-sellr-bg rounded-lg py-3 text-center ring-1 ring-sellr-amber/30">
-            <p className="text-xl font-bold text-sellr-amber">~$27.50</p>
-            <p className="text-xs text-sellr-charcoal/50 mt-0.5">Est. Value</p>
-          </div>
-          <div className="bg-sellr-bg rounded-lg py-3 text-center">
-            <p className="text-lg font-semibold text-sellr-charcoal">$45.00</p>
-            <p className="text-xs text-sellr-charcoal/50 mt-0.5">High</p>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <hr className="my-6 border-sellr-charcoal/10" />
-
-        {/* Facebook Ad Copy section */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              {/* Simple FB-style icon */}
-              <div className="w-5 h-5 rounded bg-[#1877F2] flex items-center justify-center">
-                <span className="text-white text-xs font-bold leading-none">f</span>
-              </div>
-              <span className="text-sm font-semibold" style={{ color: '#1877F2' }}>
-                Marketplace
+      {/* ── Individual mock appraisal card ──────────────────────── */}
+      {previewMode === 'individual' && (
+        <div className="mt-10 bg-sellr-surface rounded-xl p-6">
+          {/* Top row — album info */}
+          <div className="flex gap-4">
+            <MiniVinyl />
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sellr-charcoal">Fleetwood Mac</p>
+              <p className="font-display text-xl text-sellr-charcoal mt-0.5">Rumours</p>
+              <p className="text-sm text-sellr-charcoal/60 mt-1">1977 &middot; Warner Bros.</p>
+              <span className="inline-block mt-2 px-2.5 py-0.5 text-xs font-bold rounded bg-sellr-amber/15 text-sellr-amber">
+                VG+
               </span>
             </div>
-            <span className="text-xs text-sellr-charcoal/40">AI-Generated Ad Copy</span>
           </div>
 
-          <div className="bg-sellr-bg rounded-lg p-4">
-            <p className="text-sm text-sellr-charcoal/80 leading-relaxed whitespace-pre-line">
-              {MOCK_AD_COPY}
-            </p>
+          {/* Pricing row */}
+          <div className="mt-6 grid grid-cols-3 gap-2">
+            <div className="bg-sellr-bg rounded-lg py-3 text-center">
+              <p className="text-lg font-semibold text-sellr-charcoal">$18.00</p>
+              <p className="text-xs text-sellr-charcoal/50 mt-0.5">Low</p>
+            </div>
+            <div className="bg-sellr-bg rounded-lg py-3 text-center ring-1 ring-sellr-amber/30">
+              <p className="text-xl font-bold text-sellr-amber">~$27.50</p>
+              <p className="text-xs text-sellr-charcoal/50 mt-0.5">Est. Value</p>
+            </div>
+            <div className="bg-sellr-bg rounded-lg py-3 text-center">
+              <p className="text-lg font-semibold text-sellr-charcoal">$45.00</p>
+              <p className="text-xs text-sellr-charcoal/50 mt-0.5">High</p>
+            </div>
           </div>
 
-          {/* Mock action buttons */}
-          <div className="flex gap-2 mt-3">
-            <span
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border border-sellr-charcoal/20 text-sellr-charcoal/40 opacity-50 cursor-default"
-              title="Available after your appraisal"
-            >
-              <Copy className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Copy to Clipboard
-            </span>
-            <span
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border border-sellr-charcoal/20 text-sellr-charcoal/40 opacity-50 cursor-default"
-              title="Available after your appraisal"
-            >
-              <RefreshCw className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Regenerate
-            </span>
+          {/* Divider */}
+          <hr className="my-6 border-sellr-charcoal/10" />
+
+          {/* Facebook Ad Copy section */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded bg-[#1877F2] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold leading-none">f</span>
+                </div>
+                <span className="text-sm font-semibold" style={{ color: '#1877F2' }}>
+                  Marketplace
+                </span>
+              </div>
+              <span className="text-xs text-sellr-charcoal/40">AI-Generated Ad Copy</span>
+            </div>
+
+            <div className="bg-sellr-bg rounded-lg p-4">
+              <p className="text-sm text-sellr-charcoal/80 leading-relaxed whitespace-pre-line">
+                {MOCK_AD_COPY}
+              </p>
+            </div>
+
+            {/* Mock action buttons */}
+            <div className="flex gap-2 mt-3">
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border border-sellr-charcoal/20 text-sellr-charcoal/40 opacity-50 cursor-default"
+                title="Available after your appraisal"
+              >
+                <Copy className="w-3.5 h-3.5" strokeWidth={1.5} />
+                Copy to Clipboard
+              </span>
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border border-sellr-charcoal/20 text-sellr-charcoal/40 opacity-50 cursor-default"
+                title="Available after your appraisal"
+              >
+                <RefreshCw className="w-3.5 h-3.5" strokeWidth={1.5} />
+                Regenerate
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ── Lot mock card ──────────────────────────────────────── */}
+      {previewMode === 'lot' && (
+        <div className="mt-10 bg-sellr-surface rounded-xl p-6">
+          {/* Lot header */}
+          <div className="flex items-center gap-3 mb-4">
+            <Package className="w-8 h-8 text-sellr-blue flex-shrink-0" strokeWidth={1.5} />
+            <div>
+              <p className="font-display text-xl text-sellr-charcoal">Full Crate Lot</p>
+              <p className="text-sm text-sellr-charcoal/60">47 records &middot; Est. value $840</p>
+            </div>
+          </div>
+
+          {/* Lot pricing row */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-sellr-bg rounded-lg py-3 text-center">
+              <p className="text-lg font-semibold text-sellr-charcoal">$462</p>
+              <p className="text-xs text-sellr-charcoal/50 mt-0.5">Quick Sale</p>
+            </div>
+            <div className="bg-sellr-bg rounded-lg py-3 text-center ring-1 ring-sellr-amber/30">
+              <p className="text-xl font-bold text-sellr-amber">$520</p>
+              <p className="text-xs text-sellr-charcoal/50 mt-0.5">Fair Price</p>
+            </div>
+            <div className="bg-sellr-bg rounded-lg py-3 text-center">
+              <p className="text-lg font-semibold text-sellr-charcoal">$630</p>
+              <p className="text-xs text-sellr-charcoal/50 mt-0.5">Collector</p>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <hr className="my-6 border-sellr-charcoal/10" />
+
+          {/* Facebook lot post */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded bg-[#1877F2] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold leading-none">f</span>
+                </div>
+                <span className="text-sm font-semibold" style={{ color: '#1877F2' }}>
+                  Marketplace
+                </span>
+              </div>
+              <span className="text-xs text-sellr-charcoal/40">AI-Generated Lot Post</span>
+            </div>
+
+            <div className="bg-sellr-bg rounded-lg p-4">
+              <p className="text-sm text-sellr-charcoal/80 leading-relaxed whitespace-pre-line">
+                {MOCK_LOT_AD_COPY}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Mode toggle link ───────────────────────────────────── */}
+      <p className="mt-4 text-center">
+        <button
+          type="button"
+          onClick={() => setPreviewMode(previewMode === 'individual' ? 'lot' : 'individual')}
+          className="text-sellr-blue text-sm hover:text-sellr-blue-light transition-colors underline"
+        >
+          {previewMode === 'individual'
+            ? 'Selling as a lot instead?'
+            : 'See individual pricing instead'}
+        </button>
+      </p>
 
       {/* Value callout */}
       <div className="mt-8 bg-sellr-amber/10 border-l-4 border-sellr-amber rounded-r-lg p-4">
@@ -681,10 +764,20 @@ const OnboardingPage: React.FC = () => {
     setCompleting(true);
 
     try {
+      // Get current Supabase session JWT
+      const { data: authData } = await supabase!.auth.getSession();
+      const token = authData.session?.access_token;
+
+      if (!token) {
+        // User not logged in — redirect to signup, then back here
+        navigate('/sellr/signup?redirect=/sellr/start', { replace: true });
+        return;
+      }
+
       const tier = wizardState.tier ?? undefined;
-      const sessionId = await createSession(tier ?? undefined);
+      const sessionId = await createSession(tier, token);
       navigate(
-        `/sellr/scan?tier=${tier || 'starter'}&session=${sessionId}`,
+        `/sellr/checkout?tier=${tier || 'starter'}&session=${sessionId}`,
       );
     } catch {
       setCompleting(false);
@@ -717,6 +810,12 @@ const OnboardingPage: React.FC = () => {
   return (
     <SellrLayout>
       <div className="max-w-2xl mx-auto min-h-screen pt-8 sm:pt-12">
+        <Link
+          to="/sellr"
+          className="inline-flex items-center gap-1 text-sm text-sellr-charcoal/50 hover:text-sellr-blue transition-colors mb-4"
+        >
+          &larr; Back to Sellr
+        </Link>
         <ProgressBar currentStep={currentStep} />
 
         <div
