@@ -122,6 +122,10 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
   const [editPurchaseDate, setEditPurchaseDate] = useState('');
   const [editNotes, setEditNotes] = useState('');
 
+  // Photo upload state
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   // Find Manual flow state
   const [manualSearching, setManualSearching] = useState(false);
   const [manualResult, setManualResult] = useState<ManualSearchResult | null>(null);
@@ -283,6 +287,44 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
     }
   };
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select an image file.', 'error');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const publicUrl = await gearService.uploadPhoto(base64);
+      if (publicUrl) {
+        const updated = await gearService.updateGear(gear.id, {
+          original_photo_url: publicUrl,
+          image_url: publicUrl,
+        });
+        onUpdate(updated);
+        showToast('Photo updated.', 'success');
+      } else {
+        showToast('Failed to upload photo.', 'error');
+      }
+    } catch (err) {
+      console.error('Photo upload error:', err);
+      showToast('Failed to upload photo.', 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   const canSave = editBrand.trim() !== '' && editModel.trim() !== '';
 
   return (
@@ -308,18 +350,77 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
 
         {/* Hero image */}
         <div className="w-full h-48 md:h-64 overflow-hidden bg-th-bg flex items-center justify-center flex-shrink-0 relative">
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={`${gear.brand} ${gear.model}`}
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
+            <>
+              <img
+                src={imageUrl}
+                alt={`${gear.brand} ${gear.model}`}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="absolute bottom-3 right-3 z-20 inline-flex items-center gap-1.5 bg-th-bg/70 backdrop-blur-sm text-th-text/80 text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-lg hover:bg-th-bg/90 hover:text-th-text transition-all disabled:opacity-40"
+              >
+                {uploadingPhoto ? (
+                  <>
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                    </svg>
+                    Change
+                  </>
+                )}
+              </button>
+            </>
           ) : (
-            <HeroPlaceholderIcon category={gear.category} />
+            <div className="flex flex-col items-center gap-3">
+              <HeroPlaceholderIcon category={gear.category} />
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="inline-flex items-center gap-1.5 text-th-text3/50 text-[10px] uppercase tracking-widest hover:text-[#dd6e42] transition-colors disabled:opacity-40"
+              >
+                {uploadingPhoto ? (
+                  <>
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                    </svg>
+                    Add Photo
+                  </>
+                )}
+              </button>
+            </div>
           )}
           {/* Gradient overlay at bottom for text readability */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-th-bg/80 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-th-bg/80 to-transparent pointer-events-none" />
         </div>
 
         {/* Scrollable content */}
