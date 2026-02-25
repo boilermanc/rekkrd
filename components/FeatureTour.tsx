@@ -1,8 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Layers, X } from 'lucide-react';
+import { Disc3, Layers, Trash2, X } from 'lucide-react';
 import AlbumCard from './AlbumCard';
-import WantlistCard from './WantlistCard';
-import type { Album, WantlistItem } from '../types';
+import type { Album } from '../types';
 
 const TOTAL_STEPS = 5;
 
@@ -128,42 +127,79 @@ const DUMMY_ALBUMS: Album[] = [
   },
 ];
 
-/* ─── Wantlist Tour — Dummy Data ─── */
+/* ─── Wantlist Tour — Compact Preview ─── */
 
-const DUMMY_WANTLIST: WantlistItem[] = [
-  {
-    id: 'wl-demo-1',
-    user_id: 'demo',
-    artist: 'David Bowie',
-    title: 'Ziggy Stardust',
-    year: '1972',
-    genre: 'Rock',
-    cover_url: '',
-    discogs_release_id: null,
-    discogs_url: null,
-    price_low: 18,
-    price_median: 34,
-    price_high: 67,
-    prices_updated_at: new Date().toISOString(),
-    created_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'wl-demo-2',
-    user_id: 'demo',
-    artist: 'Aretha Franklin',
-    title: 'I Never Loved a Man',
-    year: '1967',
-    genre: 'Soul',
-    cover_url: '',
-    discogs_release_id: null,
-    discogs_url: null,
-    price_low: null,
-    price_median: 28,
-    price_high: null,
-    prices_updated_at: null,
-    created_at: '2024-01-02T00:00:00Z',
-  },
+interface WantlistPreviewItem {
+  title: string;
+  artist: string;
+  year: string;
+  genre: string;
+  priceLow: number | null;
+  priceMedian: number;
+  priceHigh: number | null;
+  updated: boolean;
+}
+
+const WANTLIST_ITEMS: WantlistPreviewItem[] = [
+  { title: 'Ziggy Stardust', artist: 'David Bowie', year: '1972', genre: 'Rock', priceLow: 18, priceMedian: 34, priceHigh: 67, updated: true },
+  { title: 'I Never Loved a Man', artist: 'Aretha Franklin', year: '1967', genre: 'Soul', priceLow: null, priceMedian: 28, priceHigh: null, updated: false },
 ];
+
+const WantlistPreview: React.FC = () => (
+  <div className="flex flex-col gap-3">
+    {WANTLIST_ITEMS.map(item => (
+      <div key={item.title} className="glass-morphism rounded-xl border border-white/10 overflow-hidden">
+        {/* Compact cover placeholder */}
+        <div className="h-28 bg-th-bg/40 relative flex items-center justify-center">
+          <Disc3 className="w-12 h-12 text-th-text3/30" />
+          <div className="absolute bottom-2 left-2 bg-[#dd6e42]/90 backdrop-blur-sm text-th-text px-2 py-0.5 rounded text-[10px] font-bold shadow-lg border border-[#f0a882]/50">
+            ${item.priceMedian}
+          </div>
+        </div>
+        <div className="p-3">
+          <h3 className="font-bold text-th-text text-sm truncate">{item.title}</h3>
+          <p className="text-[#dd6e42] text-xs font-medium truncate">{item.artist}</p>
+          <div className="mt-1.5 flex items-center justify-between text-[10px] text-th-text3 uppercase tracking-widest">
+            <span>{item.year}</span>
+            <span>{item.genre}</span>
+          </div>
+          {/* Price row */}
+          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px]">
+            {item.priceLow !== null && (
+              <div className="text-center">
+                <span className="block text-th-text3 uppercase tracking-wider">Low</span>
+                <span className="block text-[#dd6e42] font-bold">${item.priceLow}</span>
+              </div>
+            )}
+            <div className="text-center">
+              <span className="block text-th-text3 uppercase tracking-wider">Med</span>
+              <span className="block text-[#dd6e42] font-bold">${item.priceMedian}</span>
+            </div>
+            {item.priceHigh !== null && (
+              <div className="text-center">
+                <span className="block text-th-text3 uppercase tracking-wider">High</span>
+                <span className="block text-[#dd6e42] font-bold">${item.priceHigh}</span>
+              </div>
+            )}
+          </div>
+          {item.updated && (
+            <p className="text-[9px] text-th-text3/60 mt-1 text-center">Updated today</p>
+          )}
+          {/* Action buttons */}
+          <div className="mt-2 flex gap-2">
+            <div className="flex-1 flex items-center justify-center gap-1.5 bg-[#dd6e42] text-white text-xs font-medium py-2 px-3 rounded-lg">
+              <Disc3 className="w-3.5 h-3.5" />
+              Mark as Owned
+            </div>
+            <div className="flex items-center justify-center text-th-text3 p-2 rounded-lg">
+              <Trash2 className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 /* ─── Discogs Integration ─── */
 
@@ -315,11 +351,7 @@ const FeatureTour: React.FC<FeatureTourProps> = ({ onComplete, onClose }) => {
               'Two-step confirm before marking as owned',
             ]}
           >
-            <div className="flex flex-col gap-3 max-w-sm mx-auto">
-              {DUMMY_WANTLIST.map(item => (
-                <WantlistCard key={item.id} item={item} onRemove={noop} onMarkAsOwned={noop} isInCollection={false} />
-              ))}
-            </div>
+            <WantlistPreview />
           </TourStepLayout>
         );
       case 3:
