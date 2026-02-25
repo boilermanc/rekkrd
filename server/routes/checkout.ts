@@ -220,6 +220,7 @@ router.post(
         payment_behavior: 'default_incomplete',
         payment_settings: { save_default_payment_method: 'on_subscription' },
         metadata: { supabase_user_id: userId },
+        expand: ['latest_invoice.payment_intent'],
       });
 
       // If subscription is already active (e.g. $0 invoice), treat as success
@@ -228,22 +229,7 @@ router.post(
         return;
       }
 
-      // Retrieve invoice separately with payment_intent expanded
-      // (nested expand via subscriptions.create is unreliable across SDK versions)
-      const invoiceId = typeof subscription.latest_invoice === 'string'
-        ? subscription.latest_invoice
-        : (subscription.latest_invoice as Stripe.Invoice)?.id;
-
-      if (!invoiceId) {
-        console.error('Subscribe: no invoice on subscription', subscription.id);
-        res.status(500).json({ error: 'No invoice created for subscription' });
-        return;
-      }
-
-      const invoice = await stripe.invoices.retrieve(invoiceId, {
-        expand: ['payment_intent'],
-      });
-
+      const invoice = subscription.latest_invoice as Stripe.Invoice;
       const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
 
       if (!paymentIntent?.client_secret) {

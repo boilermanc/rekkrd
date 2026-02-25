@@ -309,11 +309,13 @@ const StepPlanSelection: React.FC<StepPlanSelectionProps> = ({
           <button
             key={id}
             type="button"
+            role="radio"
+            aria-checked={selected}
             onClick={() => onSelectTier(id)}
-            className={`relative glass-morphism rounded-xl p-5 flex flex-col items-center text-center transition-all cursor-pointer border ${
+            className={`relative glass-morphism rounded-xl p-5 flex flex-col items-center text-center transition-all duration-200 cursor-pointer border ${
               selected
-                ? 'border-[#dd6e42] bg-[#dd6e42]/10'
-                : 'border-white/10'
+                ? 'border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/50'
+                : 'border-white/10 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10'
             } ${isCurator && selected ? 'shadow-[0_0_20px_rgba(221,110,66,0.15)]' : ''}`}
           >
             {badge && (
