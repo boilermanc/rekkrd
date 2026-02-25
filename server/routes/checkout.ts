@@ -198,24 +198,28 @@ router.post(
         .update({ stripe_customer_id: customerId })
         .eq('id', userId);
 
-      // Cancel existing trialing subscription
-      if (sub?.stripe_subscription_id) {
-        try {
-          const existingSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
-          if (existingSub.status === 'trialing') {
-            await stripe.subscriptions.cancel(sub.stripe_subscription_id);
-            await supabase
-              .from('subscriptions')
-              .update({ stripe_subscription_id: null, status: 'canceled' })
-              .eq('user_id', userId);
+      // Cancel ALL non-active subscriptions for this customer in Stripe
+      // (trialing, incomplete, past_due) to avoid duplicates
+      const existingSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'all',
+      });
+      for (const existingSub of existingSubs.data) {
+        if (['trialing', 'incomplete', 'past_due', 'incomplete_expired'].includes(existingSub.status)) {
+          try {
+            await stripe.subscriptions.cancel(existingSub.id);
+          } catch (e) {
+            console.warn(`Could not cancel subscription ${existingSub.id}:`, e);
           }
-        } catch (e) {
-          console.warn('Could not retrieve existing subscription, clearing:', e);
-          await supabase
-            .from('subscriptions')
-            .update({ stripe_subscription_id: null })
-            .eq('user_id', userId);
         }
+      }
+
+      // Clear local subscription reference since we canceled everything
+      if (sub?.stripe_subscription_id) {
+        await supabase
+          .from('subscriptions')
+          .update({ stripe_subscription_id: null, status: 'canceled' })
+          .eq('user_id', userId);
       }
 
       // Remove any saved payment methods so Stripe doesn't auto-charge
@@ -228,13 +232,16 @@ router.post(
         await stripe.paymentMethods.detach(pm.id);
       }
 
-      // Also clear the customer's default payment method
-      await stripe.customers.update(customerId, {
-        invoice_settings: { default_payment_method: null as unknown as string },
-      });
+      // Clear the customer's default payment method if they have one
+      if (paymentMethods.data.length > 0) {
+        await stripe.customers.update(customerId, {
+          invoice_settings: { default_payment_method: '' },
+        });
+      }
 
       // Create subscription with incomplete payment — returns client_secret
-      // for frontend PaymentElement to collect payment inline
+      // for frontend PaymentElement to collect payment inline.
+      // trial_end: 'now' ensures no trial even if one is configured on the price
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{ price: priceId }],
@@ -242,6 +249,7 @@ router.post(
         payment_settings: { save_default_payment_method: 'on_subscription' },
         expand: ['latest_invoice.payment_intent'],
         metadata: { supabase_user_id: userId },
+        trial_end: 'now',
       });
 
       const invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent: Stripe.PaymentIntent };
@@ -255,11 +263,13 @@ router.post(
 
       if (!paymentIntent?.client_secret) {
         console.error('Subscribe: missing client_secret', {
+          subscriptionId: subscription.id,
           subscriptionStatus: subscription.status,
+          invoiceId: typeof invoice === 'object' ? (invoice as Stripe.Invoice)?.id : invoice,
           invoiceStatus: invoice?.status,
+          paymentIntentId: typeof paymentIntent === 'object' ? paymentIntent?.id : paymentIntent,
           paymentIntentStatus: paymentIntent?.status,
-          hasInvoice: !!invoice,
-          hasPaymentIntent: !!paymentIntent,
+          latestInvoiceType: typeof subscription.latest_invoice,
         });
         res.status(500).json({ error: 'Failed to create payment intent' });
         return;
