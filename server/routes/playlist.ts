@@ -118,6 +118,7 @@ ${JSON.stringify(simplifiedCollection)}`;
       let name = 'Crate Mix';
       let attempts = 0;
       const maxAttempts = 2;
+      const startTime = Date.now();
 
       while (attempts < maxAttempts) {
         attempts++;
@@ -158,8 +159,15 @@ ${JSON.stringify(simplifiedCollection)}`;
         // If we got results or playlist name says no matches, don't retry
         if (verifiedItems.length > 0 || name === 'No Matches Found') break;
 
+        // Only retry if first attempt was fast enough to leave room before Cloudflare's 100s timeout
+        const elapsed = Date.now() - startTime;
+        if (elapsed > 45_000) {
+          console.log(`Playlist attempt ${attempts} returned empty after ${Math.round(elapsed / 1000)}s, skipping retry (timeout risk)`);
+          break;
+        }
+
         // Otherwise retry once — Gemini sometimes returns empty on valid input
-        console.log(`Playlist attempt ${attempts} returned empty, retrying...`);
+        console.log(`Playlist attempt ${attempts} returned empty after ${Math.round(elapsed / 1000)}s, retrying...`);
       }
 
       res.status(200).json({
