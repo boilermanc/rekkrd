@@ -41,6 +41,7 @@ import ProfilePage from './src/components/ProfilePage';
 import MobileBottomNav from './src/components/MobileBottomNav';
 import { Bell, TrendingUp, User } from 'lucide-react';
 import { wantlistService } from './services/wantlistService';
+import { engagementService } from './services/engagementService';
 import { WantlistItem, PriceAlert } from './types';
 import { MEDIA_FORMATS, FORMAT_COLORS, type MediaFormat } from './constants/formatTypes';
 
@@ -69,6 +70,7 @@ const App: React.FC = () => {
   const [showPricingPage, setShowPricingPage] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [sessionSeedAlbum, setSessionSeedAlbum] = useState<Album | null>(null);
   const [processingStatus, setProcessingStatus] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -82,6 +84,7 @@ const App: React.FC = () => {
   const [wantlistCount, setWantlistCount] = useState(0);
   const [priceAlertCount, setPriceAlertCount] = useState(0);
   const [prefilledWantlistItem, setPrefilledWantlistItem] = useState<WantlistItem | null>(null);
+  const [spinningAlbumId, setSpinningAlbumId] = useState<string | null>(null);
 
   const [yearRange, setYearRange] = useState({ min: '', max: '' });
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -163,6 +166,15 @@ const App: React.FC = () => {
       setLoading(false);
     }
   }, [isSupabaseReady, user, authLoading]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchSpinning = async () => {
+      const id = await engagementService.getNowSpinning();
+      setSpinningAlbumId(id);
+    };
+    fetchSpinning();
+  }, [user]);
 
   const refreshWantlistCount = useCallback(async () => {
     try {
@@ -1482,7 +1494,7 @@ const App: React.FC = () => {
               )}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
                 {paginatedAlbums.map(album => (
-                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} isImported={importedAlbumIds.has(album.id)} />
+                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} isImported={importedAlbumIds.has(album.id)} spinningAlbumId={spinningAlbumId} />
                 ))}
               </div>
               <Pagination
@@ -1586,7 +1598,7 @@ const App: React.FC = () => {
       />
 
       {isCameraOpen && <CameraModal onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}
-      {isStudioOpen && <PlaylistStudio albums={albums} onClose={() => setIsStudioOpen(false)} />}
+      {isStudioOpen && <PlaylistStudio albums={albums} onClose={() => { setIsStudioOpen(false); setSessionSeedAlbum(null); }} seedAlbum={sessionSeedAlbum} />}
       {selectedAlbum && (
         <AlbumDetailModal
           album={selectedAlbum}
@@ -1599,6 +1611,11 @@ const App: React.FC = () => {
           canUseLyrics={canUse('lyrics')}
           canUseCovers={canUse('covers')}
           onUpgradeRequired={(feature: string) => setUpgradeFeature(feature)}
+          onMoreLikeThis={(album) => {
+            setSessionSeedAlbum(album);
+            setSelectedAlbum(null);
+            setIsStudioOpen(true);
+          }}
         />
       )}
       {upgradeFeature && (

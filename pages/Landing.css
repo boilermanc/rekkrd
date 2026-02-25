@@ -1227,6 +1227,25 @@
   color:#fff;
 }
 
+.landing-page .skip-trial-link {
+  display:block;
+  width:100%;
+  margin-top:8px;
+  padding:0;
+  background:none;
+  border:none;
+  color:var(--slate);
+  opacity:0.7;
+  font-size:0.8rem;
+  cursor:pointer;
+  text-decoration:underline;
+  transition:opacity 0.2s;
+}
+
+.landing-page .skip-trial-link:hover {
+  opacity:1;
+}
+
 /* —— FAQ —— */
 .landing-page .faq-section {
   background:var(--bg);
@@ -2373,4 +2392,43 @@
   color:var(--peach-dark);
 }
 
+/* Google OAuth button */
+.landing-page .auth-google-btn {
+  width:100%;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:#fff;
+  color:var(--text1);
+  font-family:'Space Mono',monospace;
+  font-size:.95rem;
+  cursor:pointer;
+  transition:border-color .2s,box-shadow .2s;
+}
+
+.landing-page .auth-google-btn:hover {
+  border-color:var(--peach);
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.landing-page .auth-divider {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:16px 0;
+  color:var(--text3);
+  font-size:.85rem;
+}
+
+.landing-page .auth-divider::before,
+.landing-page .auth-divider::after {
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
 

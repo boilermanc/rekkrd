@@ -24,6 +24,10 @@
   --color-text2: 192 214 223;
   --color-text3: 125 145 153;
   --color-surface: 232 218 178;
+
+  /* Inverted nav bar — light bar on dark theme for contrast */
+  --color-nav-bg: 247 244 239;
+  --color-nav-text: 79 109 122;
 }
 
 /* Light theme override */
@@ -35,6 +39,10 @@
   --color-text2: 79 109 122;
   --color-text3: 125 145 153;
   --color-surface: 79 109 122;
+
+  /* Inverted nav bar — dark bar on light theme for contrast */
+  --color-nav-bg: 26 37 40;
+  --color-nav-text: 192 214 223;
 }
 
 body {

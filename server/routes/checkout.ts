@@ -54,7 +54,7 @@ router.post(
     }
 
     // Checkout flow
-    const { priceId } = req.body;
+    const { priceId, skipTrial } = req.body;
     if (!priceId || typeof priceId !== 'string') {
       res.status(400).json({ error: 'Missing priceId' });
       return;
@@ -107,7 +107,7 @@ router.post(
         line_items: [{ price: priceId, quantity: 1 }],
         subscription_data: {
           metadata: { supabase_user_id: userId },
-          ...(!hasExistingSubscription && { trial_period_days: TRIAL_DAYS }),
+          ...(!hasExistingSubscription && !skipTrial && { trial_period_days: TRIAL_DAYS }),
         },
         success_url: `${appUrl}/?checkout=success`,
         cancel_url: `${appUrl}/?checkout=canceled`,

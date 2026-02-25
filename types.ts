@@ -38,6 +38,7 @@ export interface RawPlaylistItem {
   artist?: string;
   albumTitle?: string;
   itemTitle?: string;
+  reason?: string;
 }
 
 export interface PlaylistItem {
@@ -47,6 +48,7 @@ export interface PlaylistItem {
   itemTitle: string;
   cover_url: string;
   type: 'album' | 'side' | 'song';
+  reason?: string;
 }
 
 export interface Playlist {

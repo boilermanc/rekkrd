@@ -387,15 +387,16 @@ export const geminiService = {
     }
   },
 
-  async generatePlaylist(albums: Album[], mood: string, type: 'album' | 'side' | 'song'): Promise<Playlist> {
+  async generatePlaylist(albums: Album[], mood: string, type: 'album' | 'side' | 'song', durationMinutes?: number): Promise<Playlist> {
     try {
       const response = await fetch('/api/playlist', {
         method: 'POST',
         headers: await getAuthHeaders(),
         body: JSON.stringify({
-          albums: albums.map(a => ({ id: a.id, artist: a.artist, title: a.title, genre: a.genre, tags: a.tags, tracklist: a.tracklist })),
+          albums: albums.map(a => ({ id: a.id, artist: a.artist, title: a.title, genre: a.genre, tags: a.tags, tracklist: a.tracklist, play_count: a.play_count || 0, isFavorite: a.isFavorite || false, description: a.description })),
           mood,
-          type
+          type,
+          durationMinutes: durationMinutes || undefined
         })
       });
 
@@ -424,6 +425,7 @@ export const geminiService = {
             itemTitle: item.itemTitle,
             cover_url: album.cover_url || '',
             type,
+            reason: item.reason,
           };
         })
         .filter((item): item is PlaylistItem => item !== null);

@@ -20,6 +20,8 @@ export default {
         'th-text2': 'rgb(var(--color-text2) / <alpha-value>)',
         'th-text3': 'rgb(var(--color-text3) / <alpha-value>)',
         'th-surface': 'rgb(var(--color-surface) / <alpha-value>)',
+        'th-nav-bg': 'rgb(var(--color-nav-bg) / <alpha-value>)',
+        'th-nav-text': 'rgb(var(--color-nav-text) / <alpha-value>)',
         // Sellr palette
         'sellr-blue': '#2C4A6E',
         'sellr-amber': '#E8A838',

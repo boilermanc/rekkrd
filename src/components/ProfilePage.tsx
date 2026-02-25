@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Disc3, Heart, Calendar, Pencil, ChevronRight, User, Lock, Link2,
   AlertTriangle, Crown, Gem, Sparkles, Headphones, Music, Tv, Trophy,
@@ -235,6 +235,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Section refs for scroll-into-view
+  const passwordRef = useRef<HTMLElement>(null);
+  const discogsRef = useRef<HTMLElement>(null);
+  const emailRef = useRef<HTMLElement>(null);
+  const dangerRef = useRef<HTMLElement>(null);
+
   // Auto-cancel delete confirmation after 5 seconds
   useEffect(() => {
     if (!confirmingDelete) return;
@@ -270,7 +276,23 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
     return () => { cancelled = true; };
   }, [userId]);
 
+  const closeAllSections = () => {
+    setEditMode(false);
+    setPasswordMode(false);
+    setDiscogsMode(false);
+    setEmailMode(false);
+    setDangerMode(false);
+    setConfirmingDelete(false);
+  };
+
+  const scrollTo = (ref: React.RefObject<HTMLElement | null>) => {
+    requestAnimationFrame(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
   const enterEditMode = () => {
+    closeAllSections();
     setForm(buildFormState(profile));
     setEditMode(true);
   };
@@ -347,6 +369,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
   // Email preferences
   const enterEmailMode = () => {
+    closeAllSections();
     setEmailDigestOptin(profile?.email_digest_optin ?? false);
     setEmailUpdatesOptin(profile?.email_updates_optin ?? false);
     setEmailMode(true);
@@ -384,10 +407,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
   };
 
   // Discogs connection change — refresh profile to pick up new discogs fields
-  const handleDiscogsConnectionChange = async (connected: boolean) => {
+  const handleDiscogsConnectionChange = async () => {
     const updated = await getProfile(userId);
     if (updated) setProfile(updated);
-    if (!connected) setDiscogsMode(false);
   };
 
   // Sign out
@@ -505,10 +527,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
   const quickLinks = [
     { label: 'Edit Profile', icon: <User className="w-5 h-5" />, action: enterEditMode },
-    { label: 'Change Password', icon: <Lock className="w-5 h-5" />, action: () => setPasswordMode(true) },
-    { label: 'Discogs Connection', icon: <Link2 className="w-5 h-5" />, action: () => setDiscogsMode(true) },
-    { label: 'Email Preferences', icon: <Bell className="w-5 h-5" />, action: enterEmailMode },
-    { label: 'Danger Zone', icon: <AlertTriangle className="w-5 h-5" />, accent: true, action: () => setDangerMode(true) },
+    { label: 'Change Password', icon: <Lock className="w-5 h-5" />, action: () => { closeAllSections(); setPasswordMode(true); scrollTo(passwordRef); } },
+    { label: 'Discogs Connection', icon: <Link2 className="w-5 h-5" />, action: () => { closeAllSections(); setDiscogsMode(true); scrollTo(discogsRef); } },
+    { label: 'Email Preferences', icon: <Bell className="w-5 h-5" />, action: () => { enterEmailMode(); scrollTo(emailRef); } },
+    { label: 'Danger Zone', icon: <AlertTriangle className="w-5 h-5" />, accent: true, action: () => { closeAllSections(); setDangerMode(true); scrollTo(dangerRef); } },
   ];
 
   if (loading) {
@@ -739,7 +761,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          {hasStripeCustomer ? (
+          {hasStripeCustomer || plan === 'enthusiast' ? (
             <button
               onClick={handleManageSubscription}
               disabled={portalLoading}
@@ -760,7 +782,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
       {/* ── PASSWORD CHANGE ── */}
       {passwordMode && (
-        <section className="glass-morphism rounded-2xl border border-th-surface/[0.10] p-6 md:p-8">
+        <section ref={passwordRef} className="glass-morphism rounded-2xl border border-th-surface/[0.10] p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2.5 rounded-xl bg-th-surface/[0.08] text-th-text3">
               <Lock className="w-5 h-5" />
@@ -869,7 +891,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
       {/* ── DISCOGS CONNECTION ── */}
       {discogsMode && (
-        <section className="glass-morphism rounded-2xl border border-th-surface/[0.10] p-6 md:p-8">
+        <section ref={discogsRef} className="glass-morphism rounded-2xl border border-th-surface/[0.10] p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-th-surface/[0.08] text-th-text3">
@@ -905,7 +927,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
       {/* ── EMAIL PREFERENCES ── */}
       {emailMode && (
-        <section className="glass-morphism rounded-2xl border border-th-surface/[0.10] p-6 md:p-8">
+        <section ref={emailRef} className="glass-morphism rounded-2xl border border-th-surface/[0.10] p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2.5 rounded-xl bg-th-surface/[0.08] text-th-text3">
               <Mail className="w-5 h-5" />
@@ -961,7 +983,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
 
       {/* ── DANGER ZONE ── */}
       {dangerMode && (
-        <section className="glass-morphism rounded-2xl border border-red-500/20 p-6 md:p-8">
+        <section ref={dangerRef} className="glass-morphism rounded-2xl border border-red-500/20 p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400">

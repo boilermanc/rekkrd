@@ -14,6 +14,9 @@ interface PlaylistAlbumInput {
   genre?: string;
   tags?: string[];
   tracklist?: string[];
+  play_count?: number;
+  isFavorite?: boolean;
+  description?: string;
 }
 
 interface RawPlaylistItem {
@@ -21,6 +24,7 @@ interface RawPlaylistItem {
   artist?: string;
   albumTitle?: string;
   itemTitle?: string;
+  reason?: string;
 }
 
 const router = Router();
@@ -37,7 +41,7 @@ router.post(
     if (!sub) return;
 
     try {
-      const { albums, mood: rawMood, type: rawType } = req.body;
+      const { albums, mood: rawMood, type: rawType, durationMinutes: rawDuration } = req.body;
       if (!Array.isArray(albums) || !rawMood || typeof rawMood !== 'string') {
         res.status(400).json({ error: 'Missing albums array or mood' });
         return;
@@ -54,7 +58,17 @@ router.post(
       const mood = sanitizePromptInput(rawMood, 1000);
 
       const type = ['album', 'side', 'song'].includes(rawType) ? rawType : 'song';
-      const maxItems = type === 'album' ? 8 : type === 'side' ? 12 : 15;
+      const durationMinutes = (typeof rawDuration === 'number' && Number.isInteger(rawDuration) && rawDuration > 0 && rawDuration <= 300)
+        ? rawDuration : 0;
+
+      let maxItems: number;
+      if (durationMinutes > 0) {
+        if (type === 'song') maxItems = Math.min(20, Math.ceil(durationMinutes / 4));
+        else if (type === 'album') maxItems = Math.min(10, Math.ceil(durationMinutes / 40));
+        else maxItems = Math.min(16, Math.ceil(durationMinutes / 20));
+      } else {
+        maxItems = type === 'album' ? 8 : type === 'side' ? 12 : 15;
+      }
 
       const MAX_ALBUMS = 200;
       const simplifiedCollection = albums.slice(0, MAX_ALBUMS).map((a: PlaylistAlbumInput) => ({
@@ -63,13 +77,21 @@ router.post(
         title: a.title,
         genre: a.genre,
         tags: a.tags,
-        tracklist: a.tracklist
+        tracklist: a.tracklist,
+        play_count: a.play_count || 0,
+        favorite: a.isFavorite || false,
+        description: a.description ? a.description.slice(0, 100) : undefined,
       }));
 
       const typeInstructions: Record<string, string> = {
-        album: 'Pick full albums to listen to front-to-back. itemTitle should be the album title. The listener will play the entire record.',
-        side: 'Pick specific sides of vinyl records (Side A or Side B). itemTitle should be "Side A" or "Side B". This is for curating a listening session by vinyl sides.',
-        song: 'Pick individual songs/tracks. itemTitle should be the actual song name. Use each album\'s tracklist data (if available) to pick real track names.'
+        album: `Pick full albums to listen to front-to-back. itemTitle should be the album title. The listener will play the entire record.
+SEQUENCING: Sequence albums as a listening session — consider the arc from first record to last.`,
+        side: `Pick specific sides of vinyl records (Side A or Side B). itemTitle should be "Side A" or "Side B". This is for curating a listening session by vinyl sides.
+VARIETY: Pick sides from DIFFERENT albums. Maximum 1 side per album. Consider that Side A and Side B of vinyl records often have different energy — choose the side that best matches the mood.`,
+        song: `Pick individual songs/tracks. itemTitle should be the actual song name. Use each album's tracklist data (if available) to pick real track names.
+VARIETY RULE: Select tracks from as many DIFFERENT albums as possible. Maximum 2 tracks from any single album. If the collection has 10+ matching albums, aim for no more than 1 track per album.
+SEQUENCING: Think like a DJ. Order the tracks with an intentional arc — an opener that sets the mood, a build in energy, a peak, a cooldown, and a closer. Don't just list them randomly.
+DEEP CUTS: Don't always pick Track 1 from each album. Mix obvious picks with deeper cuts (track 3, 4, 5+) when the tracklist data is available.`
       };
 
       const validIds = new Set(simplifiedCollection.map((a: PlaylistAlbumInput) => a.id));
@@ -84,6 +106,9 @@ CRITICAL RULES — FOLLOW EXACTLY:
 5. playlistName: short creative name, 2-5 words max. No explanations.
 6. Selection type: ${type}. ${typeInstructions[type]}
 7. Select up to ${maxItems} items.
+8. For each item, include a "reason" field: a single sentence (max 15 words) explaining why this pick fits the mood and session. Examples: "Opens the session with cool, modal jazz to set the tone" or "Deep cut that shifts the energy from spiritual to swinging".
+9. Albums marked as favorite:true or with high play_count are records the listener loves — weight them slightly higher when they match the mood.${durationMinutes > 0 ? `
+10. TARGET DURATION: The listener wants approximately ${durationMinutes} minutes of music. Use the tracklist data to estimate track lengths (average 4-5 minutes per track if no duration data). Select enough items to fill roughly ${durationMinutes} minutes — do not overshoot by more than 10 minutes or undershoot by more than 5.` : ''}
 
 Example: If the user asks for "jazz" but the collection only has Country and Pop albums, return {"playlistName": "No Matches Found", "items": []}.
 
@@ -106,9 +131,10 @@ ${JSON.stringify(simplifiedCollection)}`;
                     albumId: { type: Type.STRING },
                     artist: { type: Type.STRING },
                     albumTitle: { type: Type.STRING },
-                    itemTitle: { type: Type.STRING }
+                    itemTitle: { type: Type.STRING },
+                    reason: { type: Type.STRING }
                   },
-                  required: ['albumId', 'artist', 'albumTitle', 'itemTitle']
+                  required: ['albumId', 'artist', 'albumTitle', 'itemTitle', 'reason']
                 }
               }
             }

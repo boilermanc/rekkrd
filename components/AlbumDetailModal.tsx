@@ -9,6 +9,7 @@ import CoverPicker from './CoverPicker';
 import FormatBadge from './FormatBadge';
 import { useToast } from '../contexts/ToastContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { engagementService } from '../services/engagementService';
 import { MEDIA_FORMATS, FORMAT_COLORS, type MediaFormat } from '../constants/formatTypes';
 
 interface AlbumDetailModalProps {
@@ -22,6 +23,7 @@ interface AlbumDetailModalProps {
   canUseLyrics?: boolean;
   canUseCovers?: boolean;
   onUpgradeRequired?: (feature: string) => void;
+  onMoreLikeThis?: (album: Album) => void;
 }
 
 const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
@@ -35,6 +37,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   canUseLyrics = true,
   canUseCovers = true,
   onUpgradeRequired,
+  onMoreLikeThis,
 }) => {
   const { showToast } = useToast();
   const modalRef = useRef<HTMLDivElement>(null);
@@ -47,6 +50,41 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [displayCoverUrl, setDisplayCoverUrl] = useState(album.cover_url);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const hasLoggedTracklistExpand = useRef(false);
+  const [isSpinning, setIsSpinning] = useState(false);
+
+  useEffect(() => {
+    if (album?.id) {
+      void engagementService.logEvent(album.id, 'album_open');
+    }
+  }, [album?.id]);
+
+  useEffect(() => {
+    hasLoggedTracklistExpand.current = false;
+  }, [album?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkSpinning = async () => {
+      const spinningId = await engagementService.getNowSpinning();
+      if (!cancelled) setIsSpinning(spinningId === album?.id);
+    };
+    if (album?.id) checkSpinning();
+    return () => { cancelled = true; };
+  }, [album?.id]);
+
+  const handleNowSpinning = async () => {
+    if (!album?.id) return;
+    if (isSpinning) {
+      await engagementService.clearNowSpinning();
+      setIsSpinning(false);
+      showToast('Stopped spinning', 'info');
+    } else {
+      await engagementService.setNowSpinning(album.id);
+      setIsSpinning(true);
+      showToast('Now Spinning! 🎶', 'success');
+    }
+  };
 
   const handleTrackClick = useCallback(async (index: number, trackName: string) => {
     if (expandedTrack === index) {
@@ -62,8 +100,14 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
 
     setExpandedTrack(index);
 
+    if (!hasLoggedTracklistExpand.current) {
+      void engagementService.logEvent(album.id, 'tracklist_expand');
+      hasLoggedTracklistExpand.current = true;
+    }
+
     if (lyricsCache[index] !== undefined) return;
 
+    void engagementService.logEvent(album.id, 'lyrics_lookup');
     setLoadingTrack(index);
     try {
       const result = await geminiService.fetchLyrics(album.artist, trackName, album.title);
@@ -100,6 +144,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   const handlePlaySample = () => {
     const currentPlays = album.play_count || 0;
     onUpdateAlbum?.(album.id, { play_count: currentPlays + 1 });
+    void engagementService.logEvent(album.id, 'play_logged');
     if (album.sample_url) {
       try {
         const parsed = new URL(album.sample_url);
@@ -176,7 +221,10 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                  onUpgradeRequired?.('covers');
                  return;
                }
-               if (!uploadingCover) setShowCoverPicker(true);
+               if (!uploadingCover) {
+                 setShowCoverPicker(true);
+                 void engagementService.logEvent(album.id, 'cover_view');
+               }
              }} className="relative group cursor-pointer z-10">
                <img src={proxyImageUrl(displayCoverUrl)} alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'} loading="lazy" className={`w-full h-auto max-h-[40vh] md:max-h-full object-contain rounded-md shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-opacity ${uploadingCover ? 'opacity-50' : ''}`} />
                {uploadingCover ? (
@@ -270,8 +318,33 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 </svg>
                 {album.isFavorite ? 'Favorited' : 'Add to Favorites'}
               </button>
+              <button
+                onClick={handleNowSpinning}
+                aria-pressed={isSpinning}
+                className={`flex items-center justify-center gap-2 flex-1 py-4 rounded-xl font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95 ${
+                  isSpinning
+                    ? 'bg-[#c45a30] text-th-text shadow-lg shadow-[#c45a30]/30 animate-pulse'
+                    : 'bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text'
+                }`}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                {isSpinning ? 'Spinning' : 'Now Spinning'}
+              </button>
               <button onClick={handlePlaySample} className="flex-1 border border-th-surface/[0.10] text-th-text font-bold py-4 rounded-xl hover:bg-th-surface/[0.08] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
                 Listen Sample
+              </button>
+              <button
+                onClick={() => onMoreLikeThis?.(album)}
+                className="flex items-center justify-center gap-2 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
+                aria-label={`Build a session around ${album.title}`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+                SESSION
               </button>
             </section>
 
