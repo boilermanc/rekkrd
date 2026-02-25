@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Bookmark } from 'lucide-react';
 import { Album } from '../types';
 import { proxyImageUrl } from '../services/imageProxy';
 import { getSpotifySearchUrl } from '../utils/spotify';
@@ -11,11 +12,12 @@ interface AlbumCardProps {
   album: Album;
   onDelete: (id: string) => void;
   onSelect: (album: Album) => void;
+  onAddToWantlist?: (album: Album) => void;
   isImported?: boolean;
   spinningAlbumId?: string | null;
 }
 
-const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect, isImported, spinningAlbumId }) => {
+const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect, onAddToWantlist, isImported, spinningAlbumId }) => {
   const isSpinning = album.id === spinningAlbumId;
   return (
     <div
@@ -126,6 +128,19 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onDelete, onSelect, isImpo
               >
                 <DiscogsIcon size={16} />
               </a>
+            )}
+            {onAddToWantlist && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToWantlist(album);
+                }}
+                className="opacity-0 group-hover:opacity-100 text-th-text2 hover:text-[#dd6e42] transition-all p-1 rounded-md"
+                title="Add to wantlist"
+                aria-label={`Add ${album.title} to wantlist`}
+              >
+                <Bookmark className="w-4 h-4" />
+              </button>
             )}
             <button
               onClick={(e) => {

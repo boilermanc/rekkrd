@@ -13,6 +13,7 @@ interface CollectionListProps {
   onSelect: (album: Album) => void;
   onDelete: (id: string) => void;
   onToggleFavorite?: (albumId: string) => void;
+  onAddToWantlist?: (albumId: string) => void;
   favoritesOnly?: boolean;
   onToggleFavoritesFilter?: () => void;
   searchQuery: string;
@@ -40,7 +41,7 @@ const SortArrow: React.FC<SortArrowProps> = ({ field, currentSortField, sortDir 
   );
 };
 
-const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, favoritesOnly, onToggleFavoritesFilter, searchQuery, importedAlbumIds }) => {
+const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, onAddToWantlist, favoritesOnly, onToggleFavoritesFilter, searchQuery, importedAlbumIds }) => {
   const [sortField, setSortField] = useState<SortField>('title');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,7 +155,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
       {/* Table */}
       <div className="glass-morphism rounded-2xl border border-th-surface/[0.10] overflow-hidden" role="table" aria-label="Album collection">
         {/* Header row */}
-        <div className="grid grid-cols-[48px_28px_1fr_1fr] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_72px_90px_100px_72px] gap-x-3 px-4 py-3 border-b border-th-surface/[0.10] text-[9px] font-label tracking-widest uppercase" role="row">
+        <div className="grid grid-cols-[48px_28px_1fr_1fr] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_72px_90px_100px_96px] gap-x-3 px-4 py-3 border-b border-th-surface/[0.10] text-[9px] font-label tracking-widest uppercase" role="row">
           <div role="columnheader"></div>
           <div className={colHeaderClass('favorite')} onClick={() => handleSort('favorite')} onKeyDown={(e) => handleHeaderKeyDown(e, 'favorite')} tabIndex={0} role="columnheader" aria-sort={getAriaSort('favorite')} title="Sort by favorites">
             <svg className={`w-3.5 h-3.5 ${sortField === 'favorite' ? 'text-[#dd6e42]' : ''}`} viewBox="0 0 24 24" fill={sortField === 'favorite' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
@@ -202,7 +203,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
               <div
                 key={album.id}
                 onClick={() => onSelect(album)}
-                className={`group grid grid-cols-[48px_28px_1fr_1fr] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_72px_90px_100px_72px] gap-x-3 px-4 py-2 items-center cursor-pointer list-row-hover transition-colors${importedAlbumIds?.has(album.id) ? ' animate-import-highlight bg-[#6B8F71]/10' : ''}`}
+                className={`group grid grid-cols-[48px_28px_1fr_1fr] md:grid-cols-[56px_32px_1.5fr_1fr_80px_120px_72px_90px_100px_96px] gap-x-3 px-4 py-2 items-center cursor-pointer list-row-hover transition-colors${importedAlbumIds?.has(album.id) ? ' animate-import-highlight bg-[#6B8F71]/10' : ''}`}
                 role="row"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -281,9 +282,24 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                   {album.price_median ? `$${Math.round(album.price_median)}` : '—'}
                 </p>
 
-                {/* Plays + delete (desktop only) */}
+                {/* Plays + wantlist + delete (desktop only) */}
                 <div className="hidden md:flex items-center justify-end gap-2" role="cell">
                   <span className="text-th-text3 text-xs">{album.play_count || 0}</span>
+                  {onAddToWantlist && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToWantlist(album.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-th-text2 hover:text-[#dd6e42] transition-all p-1 rounded-md"
+                      title="Add to wantlist"
+                      aria-label={`Add ${album.title} to wantlist`}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                      </svg>
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

@@ -24,6 +24,7 @@ interface AlbumDetailModalProps {
   canUseCovers?: boolean;
   onUpgradeRequired?: (feature: string) => void;
   onMoreLikeThis?: (album: Album) => void;
+  onAddToWantlist?: (album: Album) => void;
 }
 
 const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
@@ -38,6 +39,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   canUseCovers = true,
   onUpgradeRequired,
   onMoreLikeThis,
+  onAddToWantlist,
 }) => {
   const { showToast } = useToast();
   const modalRef = useRef<HTMLDivElement>(null);
@@ -346,6 +348,18 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 </svg>
                 SESSION
               </button>
+              {onAddToWantlist && (
+                <button
+                  onClick={() => onAddToWantlist(album)}
+                  className="flex items-center justify-center gap-2 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
+                  aria-label={`Add ${album.title} to wantlist`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  Wantlist
+                </button>
+              )}
             </section>
 
             {/* Collector's Context */}

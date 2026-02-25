@@ -98,6 +98,17 @@ const App: React.FC = () => {
     sessionStorage.setItem('rekkrd-view', currentView);
   }, [currentView]);
 
+  // Reset view to public-landing on sign-out so the next login
+  // always lands on the app home instead of a stale page.
+  const prevUserRef = useRef(user);
+  useEffect(() => {
+    if (prevUserRef.current && !user) {
+      sessionStorage.removeItem('rekkrd-view');
+      setCurrentView('public-landing');
+    }
+    prevUserRef.current = user;
+  }, [user]);
+
   // Sellr import highlighting
   const [importedAlbumIds, setImportedAlbumIds] = useState<Set<string>>(() => {
     try {
@@ -184,6 +195,27 @@ const App: React.FC = () => {
       // badge is non-critical
     }
   }, []);
+
+  const handleAddToWantlist = useCallback(async (album: Album) => {
+    try {
+      await wantlistService.addToWantlist({
+        artist: album.artist,
+        title: album.title,
+        year: album.year || null,
+        genre: album.genre || null,
+        cover_url: album.cover_url || null,
+        discogs_release_id: album.discogs_release_id ?? null,
+        discogs_url: album.discogs_url || null,
+        price_low: null,
+        price_median: null,
+        price_high: null,
+      });
+      showToast(`Added "${album.title}" by ${album.artist} to wantlist`, 'success');
+      refreshWantlistCount();
+    } catch {
+      showToast('Failed to add to wantlist', 'error');
+    }
+  }, [showToast, refreshWantlistCount]);
 
   const refreshPriceAlertCount = useCallback(async () => {
     try {
@@ -1361,6 +1393,10 @@ const App: React.FC = () => {
           onSelect={setSelectedAlbum}
           onDelete={handleDelete}
           onToggleFavorite={handleToggleFavorite}
+          onAddToWantlist={(albumId) => {
+            const album = albums.find(a => a.id === albumId);
+            if (album) handleAddToWantlist(album);
+          }}
           favoritesOnly={favoritesOnly}
           onToggleFavoritesFilter={() => setFavoritesOnly(prev => !prev)}
           searchQuery={searchQuery}
@@ -1412,7 +1448,7 @@ const App: React.FC = () => {
         </main>
       ) : currentView === 'price-alerts' ? (
         <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8 pb-8">
-          <PriceAlertsView />
+          <PriceAlertsView onNavigateToWantlist={() => setCurrentView('wantlist')} />
         </main>
       ) : currentView === 'value-dashboard' ? (
         <CollectionValueDashboard />
@@ -1494,7 +1530,7 @@ const App: React.FC = () => {
               )}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8">
                 {paginatedAlbums.map(album => (
-                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} isImported={importedAlbumIds.has(album.id)} spinningAlbumId={spinningAlbumId} />
+                  <AlbumCard key={album.id} album={album} onDelete={handleDelete} onSelect={setSelectedAlbum} onAddToWantlist={handleAddToWantlist} isImported={importedAlbumIds.has(album.id)} spinningAlbumId={spinningAlbumId} />
                 ))}
               </div>
               <Pagination
@@ -1616,6 +1652,7 @@ const App: React.FC = () => {
             setSelectedAlbum(null);
             setIsStudioOpen(true);
           }}
+          onAddToWantlist={handleAddToWantlist}
         />
       )}
       {upgradeFeature && (

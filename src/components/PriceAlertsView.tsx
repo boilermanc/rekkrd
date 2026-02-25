@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Bell, BellOff, BellRing, Disc3, Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { ArrowRight, Bell, BellOff, BellRing, Disc3, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { PriceAlert } from '../../types';
 import { supabase } from '../../services/supabaseService';
 import { useToast } from '../../contexts/ToastContext';
@@ -25,7 +25,11 @@ async function getToken(): Promise<string | null> {
   return session?.data?.session?.access_token ?? null;
 }
 
-const PriceAlertsView: React.FC = () => {
+interface PriceAlertsViewProps {
+  onNavigateToWantlist?: () => void;
+}
+
+const PriceAlertsView: React.FC<PriceAlertsViewProps> = ({ onNavigateToWantlist }) => {
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
@@ -159,10 +163,24 @@ const PriceAlertsView: React.FC = () => {
       {alerts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-32 text-center px-6">
           <BellOff className="w-16 h-16 text-th-text3/30 mb-6" />
-          <h3 className="text-xl font-bold text-th-text mb-2">No price alerts set</h3>
-          <p className="text-th-text3 text-sm max-w-md">
-            Add alerts from your wantlist to get notified when records drop to your target price.
+          <h3 className="text-xl font-bold text-th-text mb-2">No price alerts yet</h3>
+          <p className="text-th-text3 text-sm max-w-md mb-2">
+            Track price drops on records you want. Here's how:
           </p>
+          <ol className="text-th-text3 text-sm max-w-md text-left list-decimal list-inside space-y-1 mb-6">
+            <li>Head to your <strong className="text-th-text">Wantlist</strong></li>
+            <li>Tap the <Bell className="w-3.5 h-3.5 inline-block text-th-text3 -mt-0.5" /> icon on any record</li>
+            <li>Set your target price and condition</li>
+          </ol>
+          {onNavigateToWantlist && (
+            <button
+              onClick={onNavigateToWantlist}
+              className="flex items-center gap-2 bg-[#dd6e42] hover:bg-[#c45a30] text-th-text text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Go to Wantlist
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-8">

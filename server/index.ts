@@ -35,6 +35,7 @@ import collectionRouter from './routes/collection.js';
 import authRouter from './routes/auth.js';
 import discogsRouter from './routes/discogs.js';
 import discogsAuthRouter from './routes/discogsAuth.js';
+import discogsWantlistRouter from './routes/discogsWantlist.js';
 import collectionValueRouter from './routes/collectionValue.js';
 import accountRouter from './routes/account.js';
 import priceAlertsRouter from './routes/priceAlerts.js';
@@ -64,7 +65,7 @@ const _routerMap: Record<string, unknown> = {
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, supportRouter, sitemapRouter, emailRouter,
-  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter,
+  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsWantlistRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
   sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
   sellrAdminRouter, sellrAccountRouter, sellrDashboardRouter, sellrImportRouter, sellrLotRouter, integrationsRouter,
@@ -163,6 +164,7 @@ mountRouter('collectionRouter', collectionRouter);
 mountRouter('authRouter', authRouter);
 mountRouter('discogsRouter', discogsRouter);
 mountRouter('discogsAuthRouter', discogsAuthRouter);
+mountRouter('discogsWantlistRouter', discogsWantlistRouter);
 mountRouter('collectionValueRouter', collectionValueRouter);
 mountRouter('accountRouter', accountRouter);
 mountRouter('priceAlertsRouter', priceAlertsRouter);

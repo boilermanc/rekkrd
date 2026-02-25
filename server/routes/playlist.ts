@@ -114,39 +114,54 @@ Example: If the user asks for "jazz" but the collection only has Country and Pop
 
 Collection:
 ${JSON.stringify(simplifiedCollection)}`;
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              playlistName: { type: Type.STRING },
-              items: {
-                type: Type.ARRAY,
+      let verifiedItems: RawPlaylistItem[] = [];
+      let name = 'Crate Mix';
+      let attempts = 0;
+      const maxAttempts = 2;
+
+      while (attempts < maxAttempts) {
+        attempts++;
+        const response = await ai.models.generateContent({
+          model: 'gemini-3-pro-preview',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                playlistName: { type: Type.STRING },
                 items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    albumId: { type: Type.STRING },
-                    artist: { type: Type.STRING },
-                    albumTitle: { type: Type.STRING },
-                    itemTitle: { type: Type.STRING },
-                    reason: { type: Type.STRING }
-                  },
-                  required: ['albumId', 'artist', 'albumTitle', 'itemTitle', 'reason']
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      albumId: { type: Type.STRING },
+                      artist: { type: Type.STRING },
+                      albumTitle: { type: Type.STRING },
+                      itemTitle: { type: Type.STRING },
+                      reason: { type: Type.STRING }
+                    },
+                    required: ['albumId', 'artist', 'albumTitle', 'itemTitle', 'reason']
+                  }
                 }
               }
             }
           }
-        }
-      });
+        });
 
-      const result = JSON.parse(response.text || '{}');
-      let name = typeof result.playlistName === 'string' ? result.playlistName.trim() : 'Crate Mix';
-      if (name.length > 60) name = name.slice(0, 57) + '...';
-      const rawItems = Array.isArray(result.items) ? result.items : [];
-      const verifiedItems = rawItems.filter((item: RawPlaylistItem) => item && validIds.has(item.albumId));
+        const result = JSON.parse(response.text || '{}');
+        name = typeof result.playlistName === 'string' ? result.playlistName.trim() : 'Crate Mix';
+        if (name.length > 60) name = name.slice(0, 57) + '...';
+        const rawItems = Array.isArray(result.items) ? result.items : [];
+        verifiedItems = rawItems.filter((item: RawPlaylistItem) => item && validIds.has(item.albumId));
+
+        // If we got results or playlist name says no matches, don't retry
+        if (verifiedItems.length > 0 || name === 'No Matches Found') break;
+
+        // Otherwise retry once — Gemini sometimes returns empty on valid input
+        console.log(`Playlist attempt ${attempts} returned empty, retrying...`);
+      }
+
       res.status(200).json({
         playlistName: name || 'Crate Mix',
         items: verifiedItems

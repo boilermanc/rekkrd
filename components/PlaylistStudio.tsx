@@ -191,7 +191,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
       const albumsForGeneration = mood === 'Surprise Me' ? albums : filteredAlbums;
       const result = await geminiService.generatePlaylist(albumsForGeneration, effectiveMood, effectiveFocus, targetMinutes);
       if (result.items.length === 0) {
-        showToast("No records in your crate match that vibe. Try a different mood!", "info");
+        showToast("No records in your crate match that vibe. Try a different mood!", "info", { duration: 0 });
         setStep('config');
         return;
       }
@@ -206,7 +206,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
   };
 
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => window.print(), 300);
   };
 
   const typeSubtitle = (item: PlaylistItem) => {
@@ -233,8 +233,16 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
 
   return (
     <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Playlist Studio" className="fixed inset-0 z-[100] bg-th-bg/95 backdrop-blur-2xl overflow-y-auto overflow-x-hidden outline-none">
+      {/* Print isolation styles */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          .print-manifest, .print-manifest * { visibility: visible !important; }
+          .print-manifest { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+      `}</style>
       {/* High-Performance Printable Manifest */}
-      <div className="hidden print:block bg-[#e8e2d6] text-[#2d3a3e] p-8 md:p-12 min-h-screen">
+      <div className="print-manifest hidden print:block bg-[#e8e2d6] text-[#2d3a3e] p-8 md:p-12 min-h-screen">
         <div className="flex justify-between items-end border-b-4 border-[#2d3a3e] pb-8 mb-12">
           <div>
             <h1 className="text-4xl md:text-6xl font-black uppercase mb-2 leading-none">{playlist?.name}</h1>
@@ -245,7 +253,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
         <div className="space-y-12">
           {playlist?.items.map((item, idx) => (
             <div key={idx} className="flex gap-8 md:gap-12 items-center break-inside-avoid">
-              <img src={proxyImageUrl(item.cover_url)} loading="lazy" className="w-24 h-24 md:w-40 md:h-40 object-cover border-4 border-[#2d3a3e] shadow-[8px_8px_0_rgba(0,0,0,0.1)]" />
+              <img src={proxyImageUrl(item.cover_url)} crossOrigin="anonymous" loading="lazy" className="w-24 h-24 md:w-40 md:h-40 object-cover border-4 border-[#2d3a3e] shadow-[8px_8px_0_rgba(0,0,0,0.1)]" />
               <div>
                 <span className="text-sm md:text-lg font-black opacity-20 block mb-1">TRACK {idx + 1}</span>
                 <h3 className="text-2xl md:text-4xl font-bold leading-tight">

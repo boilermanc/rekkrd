@@ -42,8 +42,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToast({ message, type, options, key: keyRef.current });
     setVisible(true);
 
-    const duration = options?.duration ?? (options?.action ? 5000 : 3000);
-    timerRef.current = setTimeout(dismiss, duration);
+    const duration = options?.duration !== undefined ? options.duration : (options?.action ? 5000 : 3000);
+    if (duration > 0) timerRef.current = setTimeout(dismiss, duration);
   }, [dismiss]);
 
   useEffect(() => {

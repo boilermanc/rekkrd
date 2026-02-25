@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, RefreshCw } from 'lucide-react';
+import { Heart, Plus, RefreshCw } from 'lucide-react';
 import { WantlistItem, PriceAlert } from '../types';
 import { wantlistService } from '../services/wantlistService';
 import { supabase } from '../services/supabaseService';
@@ -23,12 +23,17 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showImportBrowser, setShowImportBrowser] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ artist: '', title: '', year: '', genre: '' });
+  const [addSubmitting, setAddSubmitting] = useState(false);
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
   const { showToast } = useToast();
 
   const importModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(importModalRef, showImportBrowser, () => setShowImportBrowser(false));
+  useFocusTrap(importModalRef, () => setShowImportBrowser(false));
+  const addModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(addModalRef, () => setShowAddModal(false));
 
   const alertedReleaseIds = useMemo(
     () => new Set(alerts.filter((a) => a.is_active).map((a) => a.discogs_release_id)),
@@ -177,6 +182,39 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
     showToast(`Alert set — we'll notify you when ${item.artist} — ${item.title} drops to $${targetPrice}`, 'success');
   }
 
+  async function handleManualAdd(e: React.FormEvent) {
+    e.preventDefault();
+    const artist = addForm.artist.trim();
+    const title = addForm.title.trim();
+    if (!artist || !title) return;
+
+    setAddSubmitting(true);
+    try {
+      await wantlistService.addToWantlist({
+        artist,
+        title,
+        year: addForm.year.trim() || null,
+        genre: addForm.genre.trim() || null,
+        cover_url: null,
+        discogs_release_id: null,
+        discogs_url: null,
+        price_low: null,
+        price_median: null,
+        price_high: null,
+      });
+      showToast(`Added "${title}" by ${artist} to wantlist`, 'success');
+      setAddForm({ artist: '', title: '', year: '', genre: '' });
+      setShowAddModal(false);
+      const updated = await wantlistService.getWantlist();
+      setWantlist(updated);
+      onRefreshCount();
+    } catch {
+      showToast('Failed to add to wantlist', 'error');
+    } finally {
+      setAddSubmitting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32">
@@ -219,6 +257,15 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
           </button>
           <button
             type="button"
+            onClick={() => setShowAddModal(true)}
+            aria-label="Add record to wantlist manually"
+            className="text-xs font-medium px-4 py-2 rounded-lg border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:bg-th-surface/[0.06] transition-all flex items-center gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Manually
+          </button>
+          <button
+            type="button"
             onClick={() => setShowImportBrowser(true)}
             className="text-xs font-medium px-4 py-2 rounded-lg border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:bg-th-surface/[0.06] transition-all"
           >
@@ -235,6 +282,14 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
           <p className="text-th-text3 text-sm max-w-md">
             Add records you're hunting for and track their market prices.
           </p>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#dd6e42] text-th-text text-sm font-bold hover:bg-[#c45a30] transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Add a Record
+          </button>
         </div>
       ) : (
         /* Wantlist grid */
@@ -250,6 +305,106 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
               onSetAlert={handleSetAlert}
             />
           ))}
+        </div>
+      )}
+
+      {/* Add Manually modal */}
+      {showAddModal && (
+        <div
+          ref={addModalRef}
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add record to wantlist"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
+        >
+          <div className="relative w-full max-w-md glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] animate-in zoom-in-95 duration-500">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-th-surface/[0.06]">
+              <h3 className="text-[#f0a882] text-[11px] font-label tracking-[0.3em] uppercase font-bold">
+                Add to Wantlist
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="w-10 h-10 rounded-full bg-th-bg/50 text-th-text flex items-center justify-center hover:bg-th-text hover:text-th-bg transition-all"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleManualAdd} className="p-6 space-y-4">
+              <div>
+                <label className="block text-th-text3 text-[10px] font-label tracking-widest uppercase mb-1.5">
+                  Artist <span className="text-[#dd6e42]">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={addForm.artist}
+                  onChange={e => setAddForm(prev => ({ ...prev, artist: e.target.value }))}
+                  required
+                  placeholder="e.g. Miles Davis"
+                  className="w-full bg-th-surface/[0.06] border border-th-surface/[0.15] rounded-xl px-4 py-3 text-th-text text-sm placeholder-th-text3/40 focus:outline-none focus:border-[#dd6e42]/50 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-th-text3 text-[10px] font-label tracking-widest uppercase mb-1.5">
+                  Title <span className="text-[#dd6e42]">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={addForm.title}
+                  onChange={e => setAddForm(prev => ({ ...prev, title: e.target.value }))}
+                  required
+                  placeholder="e.g. Kind of Blue"
+                  className="w-full bg-th-surface/[0.06] border border-th-surface/[0.15] rounded-xl px-4 py-3 text-th-text text-sm placeholder-th-text3/40 focus:outline-none focus:border-[#dd6e42]/50 transition-colors"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-th-text3 text-[10px] font-label tracking-widest uppercase mb-1.5">Year</label>
+                  <input
+                    type="text"
+                    value={addForm.year}
+                    onChange={e => setAddForm(prev => ({ ...prev, year: e.target.value }))}
+                    placeholder="e.g. 1959"
+                    maxLength={4}
+                    className="w-full bg-th-surface/[0.06] border border-th-surface/[0.15] rounded-xl px-4 py-3 text-th-text text-sm placeholder-th-text3/40 focus:outline-none focus:border-[#dd6e42]/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-th-text3 text-[10px] font-label tracking-widest uppercase mb-1.5">Genre</label>
+                  <input
+                    type="text"
+                    value={addForm.genre}
+                    onChange={e => setAddForm(prev => ({ ...prev, genre: e.target.value }))}
+                    placeholder="e.g. Jazz"
+                    className="w-full bg-th-surface/[0.06] border border-th-surface/[0.15] rounded-xl px-4 py-3 text-th-text text-sm placeholder-th-text3/40 focus:outline-none focus:border-[#dd6e42]/50 transition-colors"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-th-surface/[0.15] text-th-text3 hover:text-th-text text-sm font-medium transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addSubmitting || !addForm.artist.trim() || !addForm.title.trim()}
+                  className="flex-1 py-3 rounded-xl bg-[#dd6e42] text-th-text text-sm font-bold hover:bg-[#c45a30] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {addSubmitting ? 'Adding...' : 'Add to Wantlist'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
