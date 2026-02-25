@@ -213,21 +213,14 @@ router.post(
         });
       }
 
-      // Create subscription with incomplete payment — returns client_secret
-      // for frontend PaymentElement to collect payment inline.
-      // trial_end: 'now' ensures no trial even if one is configured on the price
+      // Create subscription with incomplete payment
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{ price: priceId }],
         payment_behavior: 'default_incomplete',
         payment_settings: { save_default_payment_method: 'on_subscription' },
-        expand: ['latest_invoice.payment_intent'],
         metadata: { supabase_user_id: userId },
-        trial_end: 'now',
       });
-
-      const invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent: Stripe.PaymentIntent };
-      const paymentIntent = invoice?.payment_intent;
 
       // If subscription is already active (e.g. $0 invoice), treat as success
       if (subscription.status === 'active') {
@@ -235,15 +228,31 @@ router.post(
         return;
       }
 
+      // Retrieve invoice separately with payment_intent expanded
+      // (nested expand via subscriptions.create is unreliable across SDK versions)
+      const invoiceId = typeof subscription.latest_invoice === 'string'
+        ? subscription.latest_invoice
+        : (subscription.latest_invoice as Stripe.Invoice)?.id;
+
+      if (!invoiceId) {
+        console.error('Subscribe: no invoice on subscription', subscription.id);
+        res.status(500).json({ error: 'No invoice created for subscription' });
+        return;
+      }
+
+      const invoice = await stripe.invoices.retrieve(invoiceId, {
+        expand: ['payment_intent'],
+      });
+
+      const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+
       if (!paymentIntent?.client_secret) {
         console.error('Subscribe: missing client_secret', {
           subscriptionId: subscription.id,
-          subscriptionStatus: subscription.status,
-          invoiceId: typeof invoice === 'object' ? (invoice as Stripe.Invoice)?.id : invoice,
-          invoiceStatus: invoice?.status,
-          paymentIntentId: typeof paymentIntent === 'object' ? paymentIntent?.id : paymentIntent,
-          paymentIntentStatus: paymentIntent?.status,
-          latestInvoiceType: typeof subscription.latest_invoice,
+          invoiceId: invoice.id,
+          invoiceStatus: invoice.status,
+          paymentIntentType: typeof invoice.payment_intent,
+          paymentIntentId: paymentIntent?.id,
         });
         res.status(500).json({ error: 'Failed to create payment intent' });
         return;
