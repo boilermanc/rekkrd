@@ -102,6 +102,7 @@ const DUMMY_ALBUMS: Album[] = [
     cover_url: '',
     price_median: 23,
     isFavorite: true,
+    format: 'Vinyl',
   },
   {
     id: 'demo-2',
@@ -112,6 +113,7 @@ const DUMMY_ALBUMS: Album[] = [
     genre: 'Jazz',
     cover_url: '',
     price_median: 45,
+    format: 'Cassette',
   },
   {
     id: 'demo-3',
@@ -122,6 +124,7 @@ const DUMMY_ALBUMS: Album[] = [
     genre: 'Pop',
     cover_url: '',
     price_median: 18,
+    format: 'Vinyl',
   },
 ];
 
@@ -272,10 +275,10 @@ const FeatureTour: React.FC<FeatureTourProps> = ({ onComplete, onClose }) => {
       case 0:
         return (
           <TourStepLayout
-            heading="Scan Any Record Instantly"
-            description="Point your camera at any album cover. Our AI identifies it in seconds and fills in artist, title, tracklist, and pricing automatically."
+            heading="Scan Any Album Instantly"
+            description="Point your camera at any vinyl, cassette, or 8-track. Our AI identifies it in seconds, detects the format, and fills in artist, title, tracklist, and pricing automatically."
             bullets={[
-              'Works with any commercially released record',
+              'Works with vinyl, cassette & 8-track formats',
               'Cross-references Discogs for pressing details',
               'Barcode scanning for instant matches',
             ]}
@@ -287,11 +290,11 @@ const FeatureTour: React.FC<FeatureTourProps> = ({ onComplete, onClose }) => {
         return (
           <TourStepLayout
             heading="Your Collection, Beautifully Organized"
-            description="Every record cataloged with cover art, tracklist, condition grading, and market value. Search, filter, and sort your entire library instantly."
+            description="Every album cataloged with cover art, tracklist, condition grading, and market value. Search, filter, and sort your entire library instantly."
             bullets={[
               'Grid and list views',
-              'Filter by genre, decade, condition',
-              'Mark favorites, track play counts',
+              'Filter by genre, decade, condition, and format',
+              'Color-coded format badges at a glance',
             ]}
           >
             <div className="grid grid-cols-3 gap-2">
@@ -328,7 +331,7 @@ const FeatureTour: React.FC<FeatureTourProps> = ({ onComplete, onClose }) => {
               'Import thousands of records instantly',
               'Wantlist sync with live pricing',
               'Two-way collection sync',
-              'Powered by the world\'s largest vinyl database',
+              'Powered by the world\'s largest music database',
             ]}
           >
             <DiscogsPreview />

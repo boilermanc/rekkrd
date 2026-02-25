@@ -143,7 +143,7 @@ const features = [
   {
     Icon: CameraSvg,
     title: 'AI-Powered Scanning',
-    desc: 'Point your phone at any record cover. Rekkrd identifies the album, pulls metadata, and adds it to your collection in seconds.',
+    desc: 'Point your phone at any album \u2014 vinyl, cassette, or 8-track. Rekkrd identifies it, pulls metadata, and adds it to your collection in seconds.',
   },
   {
     Icon: HeadphonesSvg,
@@ -295,7 +295,7 @@ export default function WelcomeLandingPage() {
 
         <FadeIn className="mt-3 max-w-xl">
           <p className="text-base sm:text-lg" style={{ color: C.bodyLight }}>
-            AI-powered vinyl cataloging and gear tracking for serious collectors
+            AI-powered music cataloging and gear tracking for serious collectors
           </p>
         </FadeIn>
 
@@ -467,7 +467,7 @@ export default function WelcomeLandingPage() {
             className="font-display text-2xl sm:text-3xl md:text-4xl font-bold italic max-w-2xl mx-auto"
             style={{ color: C.headDark }}
           >
-            Your vinyl deserves better than a spreadsheet.
+            Your collection deserves better than a spreadsheet.
           </p>
         </FadeIn>
 

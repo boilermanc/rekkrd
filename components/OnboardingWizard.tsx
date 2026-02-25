@@ -394,9 +394,9 @@ const StepGetStarted: React.FC<StepGetStartedProps> = ({
         >
           <Camera size={28} className={startAction === 'scan' ? 'text-[#dd6e42]' : 'text-th-text3'} />
           <span className={`font-display font-bold text-sm ${startAction === 'scan' ? 'text-th-text' : 'text-th-text2'}`}>
-            Scan Your First Record
+            Scan Your First Album
           </span>
-          <span className="text-th-text3 text-xs">Point your camera at any album cover</span>
+          <span className="text-th-text3 text-xs">Point your camera at any vinyl, cassette, 8-track, or barcode</span>
         </button>
         <button
           type="button"

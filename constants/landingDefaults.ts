@@ -17,9 +17,9 @@ import type {
 } from '../types/cms';
 
 export const DEFAULT_HERO: CmsHero = {
-  badge: 'AI-Powered Vinyl',
-  heading: 'Your Vinyl<br/>Collection, <em>Reimagined.</em>',
-  subheading: 'Scan, catalog, and rediscover your record collection with AI. Get instant identification, valuations, tracklists, and curated playlists from what you already own.',
+  badge: 'AI-Powered Collection',
+  heading: 'Your Music<br/>Collection, <em>Reimagined.</em>',
+  subheading: 'Scan, catalog, and rediscover your music collection with AI. Get instant identification, valuations, tracklists, and curated playlists from what you already own.',
   cta_primary: 'Start Free',
   cta_secondary: 'See Features',
 };
@@ -34,15 +34,15 @@ export const DEFAULT_PROOF_STATS: CmsProofStat[] = [
 export const DEFAULT_FEATURES_HEADER: CmsSectionHeader = {
   label: 'Features',
   title: 'Everything Your Crate Deserves',
-  subtitle: 'From AI scanning to playlist curation, Rekkrd is the most complete vinyl companion ever built.',
+  subtitle: 'From AI scanning to playlist curation, Rekkrd is the most complete music collection companion ever built.',
 };
 
 export const DEFAULT_FEATURES: CmsFeature[] = [
-  { icon: '\uD83D\uDCF7', cls: 'fi-1', title: 'AI Camera Scan', desc: 'Photograph the cover or scan the barcode. Rekkrd cross-references Discogs\u2019 40M+ release database to identify the exact pressing, pull the tracklist, and price it \u2014 in seconds.' },
+  { icon: '\uD83D\uDCF7', cls: 'fi-1', title: 'AI Camera Scan', desc: 'Photograph any vinyl, cassette, or 8-track \u2014 or scan the barcode. Rekkrd cross-references Discogs\u2019 40M+ release database to identify the exact pressing, pull the tracklist, and price it in seconds.' },
   { icon: '\u26A1', cls: 'fi-2', title: 'Auto Enrichment', desc: 'Every album gets filled in automatically: tracklist, genre, year, cover art, market pricing, AI description, and streaming links.' },
   { icon: '\uD83D\uDCB0', cls: 'fi-3', title: 'Collection Valuation', desc: 'See low, median, and high market prices pulled from Discogs. Know what your crate is worth at a glance with portfolio stats.' },
   { icon: '\uD83C\uDFB5', cls: 'fi-4', title: 'Playlist Studio', desc: 'Type a mood. Get a curated playlist from your own collection. Choose albums, sides, or individual songs. Print to PDF.' },
-  { icon: '\uD83D\uDD0D', cls: 'fi-5', title: 'Smart Search & Filter', desc: 'Real-time search across title, artist, and genre. Sort by year, value, or date added. Filter by decade, condition, or favorites.' },
+  { icon: '\uD83D\uDD0D', cls: 'fi-5', title: 'Smart Search & Filter', desc: 'Real-time search across title, artist, and genre. Sort by year, value, or date added. Filter by decade, condition, format, or favorites.' },
   { icon: '\uD83C\uDFB6', cls: 'fi-6', title: 'Lyrics & Liner Notes', desc: 'Look up lyrics for any track in your collection. Add personal notes, tags, and condition grades to every album.' },
   { icon: '\uD83D\uDD27', cls: 'fi-stakkd', title: 'Stakkd Gear Catalog', desc: 'Document your audio equipment with AI. Get instant identification, specs, history, manuals, and custom setup guides for your entire signal chain.' },
   { icon: '\uD83D\uDCC8', cls: 'fi-analytics', title: 'Collection Analytics', desc: 'Track your collection\u2019s value over time, see genre breakdowns, and discover insights about your listening habits.' },
@@ -53,13 +53,13 @@ export const DEFAULT_FEATURES: CmsFeature[] = [
 export const DEFAULT_HOW_IT_WORKS_HEADER: CmsSectionHeader = {
   label: 'How It Works',
   title: 'Three Steps to a Smarter Crate',
-  subtitle: 'From physical vinyl to digital library in seconds.',
+  subtitle: 'From physical media to digital library in seconds.',
 };
 
 export const DEFAULT_HOW_IT_WORKS: CmsStep[] = [
-  { num: '1', title: 'Scan or Add', desc: 'Point your camera at any record cover. AI identifies it instantly, or search and add manually.' },
+  { num: '1', title: 'Scan or Add', desc: 'Point your camera at any album \u2014 vinyl, cassette, or 8-track. AI identifies it instantly, or search and add manually.' },
   { num: '2', title: 'Enrich Automatically', desc: 'Tracklist, genre, cover art, market price, and an AI description all populate in seconds.' },
-  { num: '3', title: 'Explore & Play', desc: 'Browse your collection, generate mood playlists, track value, and discover your vinyl from a new angle.' },
+  { num: '3', title: 'Explore & Play', desc: 'Browse your collection, generate mood playlists, track value, and discover your music from a new angle.' },
 ];
 
 export const DEFAULT_SHOWCASE: CmsShowcase = {
@@ -100,7 +100,7 @@ export const DEFAULT_PLAYLIST_MOODS: string[] = [
   'Late Night Jazz',
   'Sunday Morning',
   'Road Trip Energy',
-  'Rainy Day Vinyl',
+  'Rainy Day Listening',
 ];
 
 export const DEFAULT_PLAYLIST_TRACKS: CmsPlaylistTrack[] = [
@@ -135,7 +135,7 @@ export const DEFAULT_STATS_BAND: CmsStatItem[] = [
 export const DEFAULT_TESTIMONIAL: CmsTestimonial = {
   quote: 'I scanned my entire crate in an afternoon. The playlist feature alone is worth it \u2014 it actually knows my collection better than I do.',
   author: 'Jordan M.',
-  detail: 'Vinyl collector \u2022 340 records',
+  detail: 'Music collector \u2022 340 records',
 };
 
 export const DEFAULT_FAQ_HEADER: { label: string; title: string } = {
@@ -144,7 +144,7 @@ export const DEFAULT_FAQ_HEADER: { label: string; title: string } = {
 };
 
 export const DEFAULT_FAQS: CmsFaq[] = [
-  { q: 'How does the AI scan work?', a: 'Point your phone camera at any vinyl record cover and snap a photo. Our Google Gemini-powered AI analyzes the image, identifies the artist and album, then pulls in tracklist, genre, cover art, pricing data, and more automatically. It works with most commercially released records and typically takes under 3 seconds.' },
+  { q: 'How does the AI scan work?', a: 'Point your phone camera at any album cover \u2014 vinyl, cassette, or 8-track \u2014 and snap a photo. Our Google Gemini-powered AI analyzes the image, identifies the artist and album, detects the physical format, then pulls in tracklist, genre, cover art, pricing data, and more automatically. It works with most commercially released music and typically takes under 3 seconds.' },
   { q: 'Does Rekkrd connect to my Discogs account?', a: 'Yes. You can import your entire Discogs collection with one click, sync your wantlist with live pricing, and set price alerts for records you\u2019re hunting. Rekkrd uses Discogs as its primary pricing and release database.' },
   { q: 'Where does pricing data come from?', a: "Market valuations (low, median, and high) are sourced from Discogs, the world's largest music database and marketplace. This gives you real-world pricing based on actual recent sales, not guesswork." },
   { q: 'How do AI playlists work?', a: 'Type a mood or vibe like "Late Night Jazz" or "Sunday Morning Chill." The AI analyzes your actual collection and picks albums, sides, or individual songs that match. No hallucinated recommendations \u2014 every pick is something you own.' },
@@ -158,15 +158,15 @@ export const DEFAULT_FAQS: CmsFaq[] = [
 
 export const DEFAULT_FINAL_CTA: CmsFinalCta = {
   heading: 'Ready to <em>Rekk<span>r</span>d</em><br/>Your Collection?',
-  description: 'Join thousands of collectors who\u2019ve digitized, valued, and rediscovered their vinyl with AI.',
+  description: 'Join thousands of collectors who\u2019ve digitized, valued, and rediscovered their collection with AI.',
   cta_primary: 'Start Free \u2014 No Card Required',
   cta_secondary: 'View Pricing',
 };
 
 export const DEFAULT_FOOTER: CmsFooter = {
-  brand_description: 'The AI-powered vinyl collection manager for serious crate diggers and casual collectors alike.',
+  brand_description: 'The AI-powered music collection manager for vinyl, cassette & 8-track \u2014 built for serious crate diggers and casual collectors alike.',
   copyright: '\u00A9 2026 Sweetwater Technology',
-  tagline: 'Made with \u2665 for vinyl lovers',
+  tagline: 'Made with \u2665 for music collectors',
 };
 
 export const LANDING_DEFAULTS: CmsLandingContent = {

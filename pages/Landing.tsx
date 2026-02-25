@@ -320,8 +320,8 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
   return (
     <div className="landing-page">
       <SEO
-        title="Rekkrd — Your Vinyl Collection, Elevated"
-        description="Scan, catalog, and explore your vinyl record collection with AI-powered tools."
+        title="Rekkrd — Your Music Collection, Elevated"
+        description="Scan, catalog, and explore your music collection — vinyl, cassette & 8-track — with AI-powered tools."
       />
       <nav className="nav">
         <div className="container">
@@ -529,7 +529,7 @@ const Landing: React.FC<LandingProps> = ({ onEnterApp, scrollToPricing }) => {
             </h2>
             <p className="section-sub">
               Rekkrd connects directly to Discogs — the world's largest
-              vinyl database — so your collection, wantlist, and pricing
+              music database — so your collection, wantlist, and pricing
               are always in sync.
             </p>
             <ul className="showcase-list" style={{ marginTop: 28 }}>
