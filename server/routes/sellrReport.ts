@@ -194,9 +194,10 @@ router.post('/api/sellr/report/pdf', async (req: Request, res: Response) => {
 
     let browser;
     try {
-      browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+      browser = await puppeteer.launch({ headless: 'shell', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
+      await page.emulateMediaType('screen');
 
       const pdfBuffer = await page.pdf({
         format: 'Letter',

@@ -123,7 +123,6 @@ export function buildSellrPdfHtml({ session, records, order }: PdfInput): string
 <head>
   <meta charset="UTF-8">
   <style>
-    @page { margin: 20mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
