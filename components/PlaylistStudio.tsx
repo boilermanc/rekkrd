@@ -230,10 +230,10 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
     return (
       <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Playlist Studio - generating" className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 outline-none">
         <img src={bgUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/75 to-black/60 pointer-events-none" />
         <div className="relative z-10 flex flex-col items-center">
           <div className="relative">
-            <div className="absolute -inset-8 bg-amber-600/20 blur-[80px] rounded-full"></div>
+            <div className="absolute -inset-8 bg-rose-800/20 blur-[80px] rounded-full"></div>
             <SpinningRecord size="w-48 h-48 md:w-64 md:h-64" labelColor="bg-[#4f6d7a]" />
           </div>
           <div className="mt-12 text-center">
@@ -249,7 +249,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
     <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Playlist Studio" className="fixed inset-0 z-[100] bg-black backdrop-blur-2xl overflow-y-auto overflow-x-hidden outline-none">
       {/* Mood background image */}
       <img src={bgUrl} alt="" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/75 to-black/60 pointer-events-none" />
 
       {/* Print isolation styles */}
       <style>{`
@@ -286,7 +286,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
 
       <div className="relative z-10 max-w-4xl mx-auto min-h-screen flex flex-col p-4 md:p-6 print:hidden">
         <header className="flex justify-between items-center py-4 md:py-6 border-b border-white/5">
-          <h2 className="font-label font-bold text-amber-500/80 tracking-widest text-[10px] md:text-xs uppercase">PLAYLIST STUDIO</h2>
+          <h2 className="font-label font-bold text-rose-400/80 tracking-widest text-[10px] md:text-xs uppercase">PLAYLIST STUDIO</h2>
           <button onClick={onClose} className="p-2 text-white/40 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
@@ -340,13 +340,13 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                 <div className="rounded-full bg-white/5 backdrop-blur-sm border border-white/10 p-1 flex">
                   <button
                     onClick={() => handleModeSwitch('quick')}
-                    className={`rounded-full px-6 py-2 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'quick' ? 'bg-gradient-to-r from-amber-600 to-orange-700 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
+                    className={`rounded-full px-6 py-2 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'quick' ? 'bg-gradient-to-r from-rose-900 to-red-950 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
                   >
                     Quick Spin
                   </button>
                   <button
                     onClick={() => handleModeSwitch('custom')}
-                    className={`rounded-full px-6 py-2 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'custom' ? 'bg-gradient-to-r from-amber-600 to-orange-700 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
+                    className={`rounded-full px-6 py-2 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'custom' ? 'bg-gradient-to-r from-rose-900 to-red-950 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
                   >
                     Custom Session
                   </button>
@@ -390,10 +390,10 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                       className={`rounded-full px-5 py-2.5 text-sm font-medium border transition-all duration-300 ${
                         chip === 'Surprise Me'
                           ? mood === chip
-                            ? 'bg-gradient-to-r from-amber-600 to-teal-600 border-transparent text-white shadow-lg shadow-amber-600/20'
+                            ? 'bg-gradient-to-r from-rose-900 to-teal-700 border-transparent text-white shadow-lg shadow-rose-900/20'
                             : 'border-dashed border-white/20 text-white/60 hover:border-white/40 hover:text-white'
                           : mood === chip
-                            ? 'bg-amber-600/80 border-amber-500 text-white shadow-lg shadow-amber-600/20'
+                            ? 'bg-rose-900/80 border-rose-700 text-white shadow-lg shadow-rose-900/20'
                             : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'
                       }`}
                     >
@@ -415,7 +415,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                     value={MOOD_CHIPS.includes(mood) ? '' : mood}
                     onChange={(e) => setMood(e.target.value)}
                     placeholder="e.g. Late Night Jazz, 80s Disco..."
-                    className="mt-4 w-full bg-white/5 border-b-2 border-white/10 text-xl md:text-3xl font-bold text-white focus:border-amber-500 transition-all outline-none py-3 placeholder:text-white/30"
+                    className="mt-4 w-full bg-white/5 border-b-2 border-white/10 text-xl md:text-3xl font-bold text-white focus:border-rose-700 transition-all outline-none py-3 placeholder:text-white/30"
                   />
                 )}
               </section>
@@ -471,7 +471,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                       <button
                         key={key}
                         onClick={() => setFocus(key)}
-                        className={`p-5 md:p-6 rounded-2xl border text-left transition-all ${focus === key ? 'bg-amber-600/30 border-amber-500/50 text-white shadow-xl shadow-amber-600/10 scale-[1.02]' : 'bg-white/5 border-white/10 backdrop-blur-sm text-white/60 hover:border-white/15'}`}
+                        className={`p-5 md:p-6 rounded-2xl border text-left transition-all ${focus === key ? 'bg-rose-900/30 border-rose-700/50 text-white shadow-xl shadow-rose-900/10 scale-[1.02]' : 'bg-white/5 border-white/10 backdrop-blur-sm text-white/60 hover:border-white/15'}`}
                       >
                         <h4 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold mb-1">{key}s</h4>
                         <p className="text-[9px] md:text-[10px] opacity-60">{desc}</p>
@@ -485,7 +485,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
               <button
                 onClick={handleGenerate}
                 disabled={!mood.trim() || filteredAlbums.length === 0}
-                className="w-full py-5 md:py-6 rounded-full bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 text-white font-label tracking-[0.3em] font-bold text-[10px] md:text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-amber-600/30 disabled:opacity-30"
+                className="w-full py-5 md:py-6 rounded-full bg-gradient-to-r from-rose-900 to-red-950 hover:from-rose-800 hover:to-red-900 text-white font-label tracking-[0.3em] font-bold text-[10px] md:text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-rose-900/30 disabled:opacity-30"
               >
                 CURATE SELECTION
               </button>
@@ -499,20 +499,20 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
           <div className="flex-1 flex flex-col items-center justify-center py-6 md:py-12 animate-in fade-in zoom-in-95 duration-700">
             <div className="w-full max-w-lg">
               <div className="aspect-square relative mb-8 md:mb-12">
-                 <div className="absolute inset-0 bg-amber-500/15 blur-[120px] rounded-full animate-pulse"></div>
+                 <div className="absolute inset-0 bg-rose-800/15 blur-[120px] rounded-full animate-pulse"></div>
                  <img
                   key={currentItem?.cover_url}
                   src={proxyImageUrl(currentItem?.cover_url)}
                   loading="lazy"
                   className="w-full h-full object-cover rounded-md shadow-[0_0_80px_rgba(0,0,0,0.8)] relative z-10 transition-all duration-1000 transform hover:scale-105"
                 />
-                <div className="absolute -bottom-4 -right-4 z-20 bg-amber-700/90 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-full font-label text-[9px] md:text-[10px] tracking-widest font-bold shadow-xl">
+                <div className="absolute -bottom-4 -right-4 z-20 bg-rose-900/90 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-full font-label text-[9px] md:text-[10px] tracking-widest font-bold shadow-xl">
                   {currentIndex + 1} / {playlist.items.length}
                 </div>
               </div>
 
               <div className="text-center space-y-3 md:space-y-4 mb-8 md:mb-12 px-4">
-                <span className="text-amber-400 font-label text-[9px] md:text-[10px] tracking-widest uppercase font-bold">{focus} curation</span>
+                <span className="text-rose-400 font-label text-[9px] md:text-[10px] tracking-widest uppercase font-bold">{focus} curation</span>
                 <h3 className="text-2xl md:text-4xl font-bold text-white leading-tight break-words">
                   {focus === 'album' ? currentItem?.albumTitle : currentItem?.itemTitle}
                 </h3>
@@ -520,7 +520,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                   {currentItem && typeSubtitle(currentItem)}
                 </p>
                 {currentItem?.reason && (
-                  <p className="text-amber-400/70 italic text-sm">
+                  <p className="text-rose-400/70 italic text-sm">
                     "{currentItem.reason}"
                   </p>
                 )}
@@ -537,7 +537,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                 <button
                   onClick={() => setCurrentIndex(prev => Math.min(playlist.items.length - 1, prev + 1))}
                   disabled={currentIndex === playlist.items.length - 1}
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white text-black flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all shadow-xl active:scale-90"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white text-black flex items-center justify-center hover:bg-rose-700 hover:text-white transition-all shadow-xl active:scale-90"
                 >
                   <svg className="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </button>
@@ -556,7 +556,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                 onClick={handleSave}
                 disabled={isSaving || isSaved}
                 className={`font-label text-[9px] tracking-widest uppercase transition-colors ${
-                  isSaved ? 'text-amber-400' : 'text-white/30 hover:text-white/60'
+                  isSaved ? 'text-rose-400' : 'text-white/30 hover:text-white/60'
                 }`}
               >
                 {isSaved ? '✓ SAVED' : isSaving ? 'SAVING...' : 'SAVE'}
@@ -594,12 +594,12 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                   <span className="font-label text-white/20 text-lg md:text-xl font-black w-8 md:w-12">{idx + 1}</span>
                   <img src={proxyImageUrl(item.cover_url)} loading="lazy" className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover shadow-lg flex-shrink-0" />
                   <div className="min-w-0">
-                    <h4 className="text-sm md:text-xl font-bold text-white group-hover:text-amber-400 transition-colors truncate">
+                    <h4 className="text-sm md:text-xl font-bold text-white group-hover:text-rose-400 transition-colors truncate">
                       {focus === 'album' ? item.albumTitle : item.itemTitle}
                     </h4>
                     <p className="text-xs md:text-sm text-white/40 font-medium truncate">{typeSubtitle(item)}</p>
                     {item.reason && (
-                      <p className="text-xs text-amber-400/60 italic mt-1 truncate">
+                      <p className="text-xs text-rose-400/60 italic mt-1 truncate">
                         "{item.reason}"
                       </p>
                     )}
