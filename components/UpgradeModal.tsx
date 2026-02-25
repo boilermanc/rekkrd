@@ -233,7 +233,10 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature })
     setSelectedPriceLabel(priceLabel);
 
     const result = await createSubscription(priceId);
-    if (result?.clientSecret) {
+    if (result?.alreadyActive) {
+      // Subscription activated without payment (e.g. $0 or saved method)
+      handlePaymentSuccess();
+    } else if (result?.clientSecret) {
       setClientSecret(result.clientSecret);
       setStep('payment');
     } else {

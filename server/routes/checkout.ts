@@ -218,6 +218,21 @@ router.post(
         }
       }
 
+      // Remove any saved payment methods so Stripe doesn't auto-charge
+      // and instead returns an incomplete payment intent for the frontend
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: customerId,
+        type: 'card',
+      });
+      for (const pm of paymentMethods.data) {
+        await stripe.paymentMethods.detach(pm.id);
+      }
+
+      // Also clear the customer's default payment method
+      await stripe.customers.update(customerId, {
+        invoice_settings: { default_payment_method: null as unknown as string },
+      });
+
       // Create subscription with incomplete payment — returns client_secret
       // for frontend PaymentElement to collect payment inline
       const subscription = await stripe.subscriptions.create({
@@ -232,7 +247,20 @@ router.post(
       const invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent: Stripe.PaymentIntent };
       const paymentIntent = invoice?.payment_intent;
 
+      // If subscription is already active (e.g. $0 invoice), treat as success
+      if (subscription.status === 'active') {
+        res.status(200).json({ alreadyActive: true, subscriptionId: subscription.id });
+        return;
+      }
+
       if (!paymentIntent?.client_secret) {
+        console.error('Subscribe: missing client_secret', {
+          subscriptionStatus: subscription.status,
+          invoiceStatus: invoice?.status,
+          paymentIntentStatus: paymentIntent?.status,
+          hasInvoice: !!invoice,
+          hasPaymentIntent: !!paymentIntent,
+        });
         res.status(500).json({ error: 'Failed to create payment intent' });
         return;
       }
