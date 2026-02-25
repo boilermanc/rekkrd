@@ -99,7 +99,33 @@ router.post(
         .eq('id', userId);
 
       const appUrl = process.env.APP_URL || 'https://rekkrd.com';
-      const hasExistingSubscription = !!sub?.stripe_subscription_id;
+      let hasExistingSubscription = !!sub?.stripe_subscription_id;
+      let canceledTrial = false;
+
+      // If user has a trialing subscription, cancel it so checkout creates
+      // a clean new subscription instead of a duplicate
+      if (hasExistingSubscription && sub?.stripe_subscription_id) {
+        try {
+          const existingSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+          if (existingSub.status === 'trialing') {
+            await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+            await supabase
+              .from('subscriptions')
+              .update({ stripe_subscription_id: null, status: 'canceled' })
+              .eq('user_id', userId);
+            hasExistingSubscription = false;
+            canceledTrial = true;
+          }
+        } catch (e) {
+          // Subscription may not exist in Stripe anymore — clear it locally
+          console.warn('Could not retrieve existing subscription, clearing:', e);
+          await supabase
+            .from('subscriptions')
+            .update({ stripe_subscription_id: null })
+            .eq('user_id', userId);
+          hasExistingSubscription = false;
+        }
+      }
 
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -107,7 +133,7 @@ router.post(
         line_items: [{ price: priceId, quantity: 1 }],
         subscription_data: {
           metadata: { supabase_user_id: userId },
-          ...(!hasExistingSubscription && !skipTrial && { trial_period_days: TRIAL_DAYS }),
+          ...(!hasExistingSubscription && !skipTrial && !canceledTrial && { trial_period_days: TRIAL_DAYS }),
         },
         success_url: `${appUrl}/?checkout=success`,
         cancel_url: `${appUrl}/?checkout=canceled`,
