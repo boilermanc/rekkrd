@@ -516,7 +516,7 @@ const ReviewPage: React.FC = () => {
             <div className="relative group">
               <button
                 disabled={!tierSelected}
-                onClick={() => tierSelected && sessionId && navigate(`/sellr/success?session=${sessionId}`)}
+                onClick={() => tierSelected && sessionId && navigate(`/sellr/checkout?session=${sessionId}`)}
                 className={`w-full px-6 py-4 text-lg font-medium rounded transition-colors ${
                   tierSelected
                     ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
@@ -594,7 +594,7 @@ const ReviewPage: React.FC = () => {
         {sellMode === 'individual' ? (
           <button
             disabled={!tierSelected}
-            onClick={() => tierSelected && sessionId && navigate(`/sellr/success?session=${sessionId}`)}
+            onClick={() => tierSelected && sessionId && navigate(`/sellr/checkout?session=${sessionId}`)}
             className={`w-full px-6 py-3.5 text-base font-medium rounded transition-colors ${
               tierSelected
                 ? 'bg-sellr-amber text-white hover:bg-sellr-amber-light'
