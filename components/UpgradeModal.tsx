@@ -65,6 +65,7 @@ interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   feature?: string;
+  defaultPriceId?: string;
 }
 
 type ModalStep = 'plan_select' | 'loading' | 'payment';
@@ -80,6 +81,7 @@ const FEATURE_LABELS: Record<string, string> = {
   gear_limit: 'Unlimited Gear',
   setup_guide: 'Setup Guides',
   manual_finder: 'Manual Finder',
+  plan_upgrade: 'Premium Features',
 };
 
 const CURATOR_FEATURES = [
@@ -183,7 +185,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ priceLabel, onSuccess }) => {
 
 // ── Main modal ──────────────────────────────────────────────────────
 
-const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature }) => {
+const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, defaultPriceId }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, onClose);
 
@@ -211,22 +213,80 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature })
       ? 'Upgrade to Enthusiast'
       : 'Start Free Trial';
 
+  // Track whether auto-proceed has fired for the current defaultPriceId
+  const autoProceedFired = useRef(false);
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setStep('plan_select');
+      autoProceedFired.current = false;
+      setStep(defaultPriceId ? 'loading' : 'plan_select');
       setClientSecret(null);
       setSelectedPriceLabel('');
     }
-  }, [isOpen]);
+  }, [isOpen, defaultPriceId]);
 
   useEffect(() => {
     if (!isOpen) return;
+    console.log('[upgrade-modal] opened, fetching prices…');
     fetch('/api/prices')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setPricing(data); })
-      .catch(() => {});
+      .then(r => {
+        if (!r.ok) {
+          console.error('[upgrade-modal] /api/prices failed:', r.status);
+          return null;
+        }
+        return r.json();
+      })
+      .then(data => {
+        if (data) {
+          console.log('[upgrade-modal] prices loaded', {
+            curatorMonthly: data.tiers?.curator?.monthly?.priceId,
+            enthusiastMonthly: data.tiers?.enthusiast?.monthly?.priceId,
+          });
+          setPricing(data);
+        } else {
+          console.error('[upgrade-modal] no pricing data received');
+        }
+      })
+      .catch(err => console.error('[upgrade-modal] prices fetch error:', err));
   }, [isOpen]);
+
+  // Auto-proceed: when defaultPriceId is provided and prices are loaded,
+  // resolve the Stripe priceId and skip straight to payment
+  useEffect(() => {
+    if (!isOpen || !defaultPriceId || !pricing || autoProceedFired.current) return;
+    autoProceedFired.current = true;
+
+    // defaultPriceId format: "curator:monthly" or "enthusiast:annual"
+    const [tier, interval] = defaultPriceId.split(':') as [string, string];
+    const tierData = pricing.tiers?.[tier];
+    const priceObj = interval === 'annual' ? tierData?.annual : tierData?.monthly;
+
+    if (priceObj?.priceId) {
+      const label = `$${((priceObj.amount ?? 0) / 100).toFixed(2)}/${interval === 'annual' ? 'year' : 'month'}`;
+      console.log('[upgrade-modal] auto-proceeding with', { tier, interval, priceId: priceObj.priceId, label });
+      // Call handleSelectPlan inline to avoid stale closure
+      (async () => {
+        setStep('loading');
+        setSelectedPriceLabel(label);
+        const result = await createSubscription(priceObj.priceId);
+        if (result?.alreadyActive) {
+          onClose();
+          refreshSubscription().then(() => {
+            showToast('Welcome! Your subscription is now active.', 'success');
+          });
+        } else if (result?.clientSecret) {
+          setClientSecret(result.clientSecret);
+          setStep('payment');
+        } else {
+          setStep('plan_select');
+        }
+      })();
+    } else {
+      console.error('[upgrade-modal] could not resolve priceId for', { tier, interval, tierData });
+      setStep('plan_select');
+    }
+  }, [isOpen, defaultPriceId, pricing, createSubscription, onClose, refreshSubscription, showToast]);
 
   const handleSelectPlan = useCallback(async (priceId: string, priceLabel: string) => {
     setStep('loading');

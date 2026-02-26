@@ -7,7 +7,7 @@ import { Headphones, Music, Disc3, Tv, Sparkles, Heart, Trophy, TrendingUp, Mail
 const TOTAL_STEPS = 4;
 
 interface OnboardingWizardProps {
-  onComplete: (startAction?: 'scan' | 'explore', selectedTier?: 'collector' | 'curator' | 'enthusiast') => void;
+  onComplete: (startAction?: 'scan' | 'explore', selectedTier?: 'collector' | 'curator' | 'enthusiast', priceId?: string) => void;
   previewMode?: boolean;
 }
 
@@ -18,6 +18,7 @@ interface ProfileData {
   collectingGoal: string;
   emailDigestOptin: boolean;
   selectedTier: 'collector' | 'curator' | 'enthusiast';
+  billingInterval: 'monthly' | 'annual';
   startAction: 'scan' | 'explore';
 }
 
@@ -218,136 +219,201 @@ const StepHabits: React.FC<StepHabitsProps> = ({
 const PLAN_OPTIONS: {
   id: ProfileData['selectedTier'];
   name: string;
-  price: string;
+  monthlyPrice: string;
+  annualPrice: string;
   Icon: typeof Archive;
   badge?: string;
   features: string[];
+  selectedBg: string;
+  selectedBorder: string;
+  selectedRing: string;
+  selectedAccent: string;
 }[] = [
   {
     id: 'collector',
     name: 'Collector',
-    price: 'Free',
+    monthlyPrice: 'Free',
+    annualPrice: 'Free',
     Icon: Archive,
-    features: ['Up to 50 albums', 'AI identification', 'Basic collection stats'],
+    features: ['Up to 100 albums', 'AI identification', 'Basic collection stats'],
+    selectedBg: 'bg-slate-500/15',
+    selectedBorder: 'border-slate-400',
+    selectedRing: 'ring-slate-400/50',
+    selectedAccent: 'text-slate-300',
   },
   {
     id: 'curator',
     name: 'Curator',
-    price: '$4.99/mo',
+    monthlyPrice: '$4.99/mo',
+    annualPrice: '$49.99/yr',
     Icon: Crown,
     badge: 'Most Popular',
-    features: ['Up to 500 albums', 'Playlist Studio', 'Advanced analytics', 'Priority AI'],
+    features: [
+      'Unlimited albums',
+      'Unlimited AI scans',
+      'AI playlist generation',
+      'Lyrics for all tracks',
+      'Multi-source cover art',
+      'Stakkd \u2014 unlimited gear',
+      'AI gear identification',
+      'Manual finder & setup guides',
+    ],
+    selectedBg: 'bg-emerald-500/15',
+    selectedBorder: 'border-emerald-400',
+    selectedRing: 'ring-emerald-400/50',
+    selectedAccent: 'text-emerald-400',
   },
   {
     id: 'enthusiast',
     name: 'Enthusiast',
-    price: '$9.99/mo',
+    monthlyPrice: '$9.99/mo',
+    annualPrice: '$99.99/yr',
     Icon: Gem,
-    features: ['Unlimited albums', 'Everything in Curator', 'Discogs sync', 'Early access features'],
+    features: [
+      'Everything in Curator',
+      'Bulk import & export',
+      'API access',
+      'Advanced analytics',
+      'PDF collection catalogs',
+      'Early beta access',
+      'Priority support',
+    ],
+    selectedBg: 'bg-violet-500/15',
+    selectedBorder: 'border-violet-400',
+    selectedRing: 'ring-violet-400/50',
+    selectedAccent: 'text-violet-400',
   },
 ];
 
 interface StepPlanSelectionProps {
   emailDigestOptin: boolean;
   selectedTier: ProfileData['selectedTier'];
+  isAnnual: boolean;
   onToggleEmailDigest: () => void;
   onSelectTier: (tier: ProfileData['selectedTier']) => void;
+  onToggleAnnual: () => void;
 }
 
 const StepPlanSelection: React.FC<StepPlanSelectionProps> = ({
-  emailDigestOptin, selectedTier, onToggleEmailDigest, onSelectTier,
-}) => (
-  <div className="w-full flex flex-col items-center">
-    <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3 text-center">
-      Choose your plan
-    </h2>
-    <p className="text-th-text3 text-lg mb-10 text-center">
-      Start free, upgrade anytime. All paid plans include a 7-day free trial.
-    </p>
+  emailDigestOptin, selectedTier, isAnnual, onToggleEmailDigest, onSelectTier, onToggleAnnual,
+}) => {
 
-    {/* Email digest toggle */}
-    <div className="w-full max-w-md flex items-center justify-between glass-morphism rounded-xl px-5 py-4 mb-8 border border-white/10">
-      <div className="flex items-center gap-3">
-        <Mail size={20} className="text-[#dd6e42]" />
-        <div>
-          <p className="text-sm text-th-text">Monthly collection digest</p>
-          <p className="text-xs text-th-text3">Stats, new features &amp; collecting tips</p>
-        </div>
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={emailDigestOptin}
-        onClick={onToggleEmailDigest}
-        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer border-none shrink-0 ${
-          emailDigestOptin ? 'bg-[#dd6e42]' : 'bg-th-surface/20'
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
-            emailDigestOptin ? 'translate-x-5' : 'translate-x-0'
+  return (
+    <div className="w-full flex flex-col items-center">
+      <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3 text-center">
+        Choose your plan
+      </h2>
+      <p className="text-th-text3 text-lg mb-6 text-center">
+        Start free, upgrade anytime. All paid plans include a 7-day free trial.
+      </p>
+
+      {/* Monthly / Annual toggle */}
+      <div className="flex items-center justify-center gap-3 mb-6">
+        <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${!isAnnual ? 'text-th-text' : 'text-th-text3'}`}>
+          Monthly
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isAnnual}
+          onClick={onToggleAnnual}
+          className={`relative w-12 h-6 rounded-full border-2 transition-all cursor-pointer ${
+            isAnnual
+              ? 'bg-[#dd6e42] border-[#dd6e42]'
+              : 'bg-th-surface/[0.15] border-th-surface/[0.25]'
           }`}
-        />
-      </button>
-    </div>
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${
+              isAnnual ? 'translate-x-6' : ''
+            }`}
+          />
+        </button>
+        <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${isAnnual ? 'text-th-text' : 'text-th-text3'}`}>
+          Annual
+        </span>
+        {isAnnual && (
+          <span className="text-[10px] font-bold uppercase tracking-widest bg-[#dd6e42]/10 text-[#dd6e42] px-2 py-0.5 rounded-full">
+            Save 18%
+          </span>
+        )}
+      </div>
 
-    {/* Divider */}
-    <div className="w-full flex items-center gap-3 mb-8">
-      <div className="flex-1 h-px bg-th-surface/10" />
-      <span className="font-label text-[10px] tracking-widest text-th-text3 uppercase">
-        Select a plan
-      </span>
-      <div className="flex-1 h-px bg-th-surface/10" />
-    </div>
+      {/* Email digest toggle */}
+      <div className="w-full max-w-md flex items-center justify-between glass-morphism rounded-xl px-5 py-4 mb-8 border border-white/10">
+        <div className="flex items-center gap-3">
+          <Mail size={20} className="text-[#dd6e42]" />
+          <div>
+            <p className="text-sm text-th-text">Monthly collection digest</p>
+            <p className="text-xs text-th-text3">Stats, new features &amp; collecting tips</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={emailDigestOptin}
+          onClick={onToggleEmailDigest}
+          className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer border-none shrink-0 ${
+            emailDigestOptin ? 'bg-[#dd6e42]' : 'bg-th-surface/20'
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+              emailDigestOptin ? 'translate-x-5' : 'translate-x-0'
+            }`}
+          />
+        </button>
+      </div>
 
-    {/* Plan cards */}
-    <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
-      {PLAN_OPTIONS.map(({ id, name, price, Icon, badge, features }) => {
-        const selected = selectedTier === id;
-        const isCurator = id === 'curator';
-        return (
-          <button
-            key={id}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onSelectTier(id)}
-            className={`relative glass-morphism rounded-xl p-5 flex flex-col items-center text-center transition-all duration-200 cursor-pointer border ${
-              selected
-                ? 'border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/50'
-                : 'border-white/10 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10'
-            } ${isCurator && selected ? 'shadow-[0_0_20px_rgba(221,110,66,0.15)]' : ''}`}
-          >
-            {badge && (
-              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#dd6e42] text-white text-[10px] font-label tracking-wider uppercase px-3 py-0.5 rounded-full">
-                {badge}
-              </span>
-            )}
-            <Icon size={28} className={selected ? 'text-[#dd6e42]' : 'text-th-text3'} />
-            <h3 className={`font-display text-lg font-bold mt-3 mb-1 ${selected ? 'text-th-text' : 'text-th-text2'}`}>
-              {name}
-            </h3>
-            <p className={`text-sm font-label mb-4 ${selected ? 'text-[#dd6e42]' : 'text-th-text3'}`}>
-              {price}
-            </p>
-            <ul className="text-xs text-th-text3 space-y-1.5 text-left w-full">
-              {features.map(f => (
-                <li key={f} className="flex items-start gap-2">
-                  <span className={`mt-0.5 shrink-0 ${selected ? 'text-[#dd6e42]' : 'text-th-text3'}`}>&bull;</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </button>
-        );
-      })}
-    </div>
+      {/* Plan cards */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+        {PLAN_OPTIONS.map(({ id, name, monthlyPrice, annualPrice, Icon, badge, features, selectedBg, selectedBorder, selectedRing, selectedAccent }) => {
+          const selected = selectedTier === id;
+          const price = isAnnual ? annualPrice : monthlyPrice;
+          return (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onSelectTier(id)}
+              className={`relative rounded-xl p-5 flex flex-col items-center text-center transition-all duration-200 cursor-pointer border ${
+                selected
+                  ? `${selectedBorder} ${selectedBg} ring-1 ${selectedRing}`
+                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+              }`}
+            >
+              {badge && (
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#dd6e42] text-white text-[10px] font-label tracking-wider uppercase px-3 py-0.5 rounded-full">
+                  {badge}
+                </span>
+              )}
+              <Icon size={28} className={selected ? selectedAccent : 'text-th-text3'} />
+              <h3 className={`font-display text-lg font-bold mt-3 mb-1 ${selected ? 'text-th-text' : 'text-th-text2'}`}>
+                {name}
+              </h3>
+              <p className={`text-sm font-label mb-4 ${selected ? selectedAccent : 'text-th-text3'}`}>
+                {price}
+              </p>
+              <ul className="text-xs text-th-text3 space-y-1.5 text-left w-full">
+                {features.map(f => (
+                  <li key={f} className="flex items-start gap-2">
+                    <span className={`mt-0.5 shrink-0 ${selected ? selectedAccent : 'text-th-text3'}`}>&bull;</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </button>
+          );
+        })}
+      </div>
 
-    <p className="text-th-text3 text-xs text-center mt-6 max-w-md">
-      Paid plans start with a 7-day free trial. Cancel anytime. You won't be charged during onboarding.
-    </p>
-  </div>
-);
+      <p className="text-th-text3 text-xs text-center mt-6 max-w-md">
+        All paid plans start with a 7-day free trial. Cancel anytime.
+      </p>
+    </div>
+  );
+};
 
 /* ─── Step 4: Get Started ─── */
 
@@ -438,6 +504,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
     collectingGoal: '',
     emailDigestOptin: true,
     selectedTier: 'collector',
+    billingInterval: 'monthly',
     startAction: 'explore',
   });
   const [fadeState, setFadeState] = useState<'in' | 'out'>('in');
@@ -478,12 +545,21 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
     }
   }, [fadeState]);
 
-  const saveAndComplete = useCallback(async (fullSave: boolean) => {
+  const saveAndComplete = useCallback(async (fullSave: boolean, overrides?: { selectedTier?: ProfileData['selectedTier'] }) => {
+    const tier = overrides?.selectedTier ?? profileData.selectedTier;
+    const action = profileData.startAction;
+    const interval = profileData.billingInterval;
+    const selectedPriceId = (tier === 'curator' || tier === 'enthusiast') ? `${tier}:${interval}` : undefined;
+    console.log('[onboarding] saveAndComplete called', { fullSave, tier, action, interval, selectedPriceId, hasUser: !!user });
+
     if (previewMode) {
-      onComplete(profileData.startAction, profileData.selectedTier);
+      onComplete(action, tier, selectedPriceId);
       return;
     }
-    if (!user) return;
+    if (!user) {
+      console.error('[onboarding] saveAndComplete: no user — cannot save');
+      return;
+    }
     setSaving(true);
     try {
       await updateProfile(user.id, {
@@ -492,10 +568,12 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
           favorite_genres: profileData.favoriteGenres,
           listening_setup: profileData.listeningSetup || null,
           collecting_goal: profileData.collectingGoal || null,
-          onboarding_selected_tier: profileData.selectedTier,
+          email_digest_optin: profileData.emailDigestOptin,
+          onboarding_selected_tier: tier,
         } : {}),
         onboarding_completed: true,
       } as Parameters<typeof updateProfile>[1]);
+      console.log('[onboarding] profile saved successfully');
 
       // Fire-and-forget: welcome email on onboarding completion
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -504,11 +582,13 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
       }
       fetch('/api/onboarding/complete', { method: 'POST', headers }).catch(() => {});
 
-      onComplete(profileData.startAction, profileData.selectedTier);
+      console.log('[onboarding] calling onComplete with', { action, tier, selectedPriceId });
+      onComplete(action, tier, selectedPriceId);
     } catch (err) {
-      console.error('Failed to save onboarding profile:', err);
+      console.error('[onboarding] Failed to save profile:', err);
       // Still proceed — profile can be updated later
-      onComplete(profileData.startAction, profileData.selectedTier);
+      console.log('[onboarding] calling onComplete despite error with', { action, tier, selectedPriceId });
+      onComplete(action, tier, selectedPriceId);
     } finally {
       setSaving(false);
     }
@@ -519,10 +599,13 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
     prepareStepData();
     if (isLast) {
       saveAndComplete(true);
+    } else if (currentStep === 2 && (profileData.selectedTier === 'curator' || profileData.selectedTier === 'enthusiast')) {
+      // Paid plan selected — skip step 4 and complete immediately
+      saveAndComplete(true);
     } else {
       transitionToStep(currentStep + 1);
     }
-  }, [canAdvance, prepareStepData, isLast, currentStep, saveAndComplete, transitionToStep]);
+  }, [canAdvance, prepareStepData, isLast, currentStep, profileData.selectedTier, saveAndComplete, transitionToStep]);
 
   const handleBack = useCallback(() => {
     if (!isFirst) {
@@ -573,10 +656,14 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
           <StepPlanSelection
             emailDigestOptin={profileData.emailDigestOptin}
             selectedTier={profileData.selectedTier}
+            isAnnual={profileData.billingInterval === 'annual'}
             onToggleEmailDigest={() =>
               setProfileData(prev => ({ ...prev, emailDigestOptin: !prev.emailDigestOptin }))
             }
             onSelectTier={tier => setProfileData(prev => ({ ...prev, selectedTier: tier }))}
+            onToggleAnnual={() =>
+              setProfileData(prev => ({ ...prev, billingInterval: prev.billingInterval === 'monthly' ? 'annual' : 'monthly' }))
+            }
           />
         );
       case 3:

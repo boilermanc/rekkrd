@@ -69,6 +69,7 @@ const App: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
+  const [pendingPriceId, setPendingPriceId] = useState<string | null>(null);
   const [showPricingPage, setShowPricingPage] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
@@ -854,13 +855,21 @@ const App: React.FC = () => {
   if (showOnboarding) {
     return (
       <OnboardingWizard
-        onComplete={(startAction, selectedTier) => {
+        onComplete={(startAction, selectedTier, priceId) => {
+          console.log('[onboarding] onComplete fired', { startAction, selectedTier, priceId });
           setShowOnboarding(false);
           setCurrentView('landing');
+
           if (selectedTier === 'curator' || selectedTier === 'enthusiast') {
-            setUpgradeFeature('plan_upgrade');
+            setPendingPriceId(priceId ?? null);
+            setTimeout(() => {
+              console.log('[onboarding] paid tier selected → opening UpgradeModal', { priceId });
+              setUpgradeFeature('plan_upgrade');
+            }, 100);
           } else if (startAction === 'scan') {
-            setIsCameraOpen(true);
+            setTimeout(() => {
+              setIsCameraOpen(true);
+            }, 100);
           }
         }}
       />
@@ -1785,8 +1794,9 @@ const App: React.FC = () => {
       {upgradeFeature && (
         <UpgradeModal
           isOpen={!!upgradeFeature}
-          onClose={() => setUpgradeFeature(null)}
+          onClose={() => { setUpgradeFeature(null); setPendingPriceId(null); }}
           feature={upgradeFeature}
+          defaultPriceId={pendingPriceId ?? undefined}
         />
       )}
       {duplicatePending && (
