@@ -253,6 +253,21 @@ router.post(
         } else if (typeof expandedPI === 'string') {
           paymentIntent = await stripe.paymentIntents.retrieve(expandedPI);
         }
+
+        // New Stripe API (2025+) doesn't auto-create PaymentIntent — create one explicitly
+        if (!paymentIntent && expandedInvoice?.amount_due) {
+          paymentIntent = await stripe.paymentIntents.create({
+            amount: expandedInvoice.amount_due,
+            currency: expandedInvoice.currency ?? 'usd',
+            customer: customerId,
+            payment_method_types: ['card'],
+            metadata: {
+              subscription_id: subscription.id,
+              invoice_id: expandedInvoice.id,
+              supabase_user_id: userId,
+            },
+          });
+        }
       }
 
       // Debug log — remove after confirmed working
