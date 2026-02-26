@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import AddGearFlow from './AddGearFlow';
 import AddGearManualModal from './AddGearManualModal';
+import AddGearMethodModal from './AddGearMethodModal';
 import GearCard from './GearCard';
 import GearDetailModal from './GearDetailModal';
 import SetupGuideModal from './SetupGuideModal';
@@ -56,6 +57,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [uploadFlowOpen, setUploadFlowOpen] = useState(false);
+  const [methodModalOpen, setMethodModalOpen] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [activeCategory, setActiveCategory] = useState<GearCategory | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('position');
@@ -208,29 +210,25 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
 
   // ── Gear limit gate ────────────────────────────────────────────
 
-  const handleAddGear = useCallback(() => {
+  const handleOpenMethodModal = useCallback(() => {
     if (gearLimitReached) {
       onUpgradeRequired?.('gear_limit');
       return;
     }
+    setMethodModalOpen(true);
+  }, [gearLimitReached, onUpgradeRequired]);
+
+  const handleSelectCamera = useCallback(() => {
     setAddFlowOpen(true);
-  }, [gearLimitReached, onUpgradeRequired]);
+  }, []);
 
-  const handleAddManual = useCallback(() => {
-    if (gearLimitReached) {
-      onUpgradeRequired?.('gear_limit');
-      return;
-    }
-    setManualModalOpen(true);
-  }, [gearLimitReached, onUpgradeRequired]);
-
-  const handleUploadGear = useCallback(() => {
-    if (gearLimitReached) {
-      onUpgradeRequired?.('gear_limit');
-      return;
-    }
+  const handleSelectUpload = useCallback(() => {
     setUploadFlowOpen(true);
-  }, [gearLimitReached, onUpgradeRequired]);
+  }, []);
+
+  const handleSelectManual = useCallback(() => {
+    setManualModalOpen(true);
+  }, []);
 
   // ── Setup Guide ─────────────────────────────────────────────────
 
@@ -339,35 +337,16 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
           Document your audio gear, get setup guides, and find manuals — all powered by AI
         </p>
 
-        {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 mb-10">
+        {/* Action button */}
+        <div className="mb-10">
           <button
-            onClick={handleAddGear}
+            onClick={handleOpenMethodModal}
             className="bg-[#dd6e42] text-th-text font-bold py-3 px-8 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            Scan Gear
-          </button>
-          <button
-            onClick={handleUploadGear}
-            className="border border-th-surface/[0.2] text-th-text2 font-bold py-3 px-8 rounded-xl hover:bg-th-surface/[0.08] hover:text-th-text transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-            </svg>
-            Upload Image
-          </button>
-          <button
-            onClick={handleAddManual}
-            className="border border-th-surface/[0.2] text-th-text2 font-bold py-3 px-8 rounded-xl hover:bg-th-surface/[0.08] hover:text-th-text transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-            </svg>
-            Add Manually
+            Add Gear
           </button>
         </div>
 
@@ -407,6 +386,14 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
             </div>
           </div>
         </div>
+
+        <AddGearMethodModal
+          isOpen={methodModalOpen}
+          onClose={() => setMethodModalOpen(false)}
+          onSelectCamera={handleSelectCamera}
+          onSelectUpload={handleSelectUpload}
+          onSelectManual={handleSelectManual}
+        />
 
         <AddGearFlow
           isOpen={addFlowOpen}
@@ -482,33 +469,13 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
             How to Connect
           </button>
           <button
-            onClick={handleAddGear}
+            onClick={handleOpenMethodModal}
             className="bg-[#dd6e42] text-th-text font-bold py-2.5 px-5 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             Add Gear
-          </button>
-          <button
-            onClick={handleUploadGear}
-            className="border border-th-surface/[0.2] text-th-text2 font-bold py-2.5 px-4 rounded-xl hover:bg-th-surface/[0.08] hover:text-th-text transition-all uppercase tracking-[0.2em] text-[10px]"
-            aria-label="Upload gear image"
-            title="Upload a photo for AI identification"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-            </svg>
-          </button>
-          <button
-            onClick={handleAddManual}
-            className="border border-th-surface/[0.2] text-th-text2 font-bold py-2.5 px-4 rounded-xl hover:bg-th-surface/[0.08] hover:text-th-text transition-all uppercase tracking-[0.2em] text-[10px]"
-            aria-label="Add gear manually"
-            title="Add gear without AI scan"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-            </svg>
           </button>
         </div>
       </div>
@@ -671,6 +638,14 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
           <p className="text-th-text3 text-sm">No gear in this category</p>
         </div>
       )}
+
+      <AddGearMethodModal
+        isOpen={methodModalOpen}
+        onClose={() => setMethodModalOpen(false)}
+        onSelectCamera={handleSelectCamera}
+        onSelectUpload={handleSelectUpload}
+        onSelectManual={handleSelectManual}
+      />
 
       <AddGearFlow
         isOpen={addFlowOpen}
