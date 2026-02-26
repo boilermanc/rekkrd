@@ -228,6 +228,13 @@ router.post(
 
       // If subscription is already active (e.g. $0 invoice), treat as success
       if (subscription.status === 'active') {
+        const billingInterval = subscription.items.data[0]?.price?.recurring?.interval || null;
+        if (billingInterval) {
+          await supabase
+            .from('subscriptions')
+            .update({ billing_interval: billingInterval })
+            .eq('user_id', userId);
+        }
         res.status(200).json({ alreadyActive: true, subscriptionId: subscription.id });
         return;
       }

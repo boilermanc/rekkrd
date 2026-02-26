@@ -129,6 +129,7 @@ router.post('/api/stripe-webhook', async (req, res) => {
 
         // Update subscriptions table (source of truth for plan/status)
         const userId = profile.id;
+        const billingInterval = subscription.items.data[0]?.price?.recurring?.interval || null;
         await supabase
           .from('subscriptions')
           .update({
@@ -136,6 +137,7 @@ router.post('/api/stripe-webhook', async (req, res) => {
             plan,
             status: subscription.status === 'trialing' ? 'trialing' : 'active',
             ...(periodEnd && { current_period_end: periodEnd }),
+            ...(billingInterval && { billing_interval: billingInterval }),
           })
           .eq('user_id', userId);
 
@@ -190,6 +192,7 @@ router.post('/api/stripe-webhook', async (req, res) => {
         }
 
         // Update subscriptions table (source of truth for plan/status)
+        const billingInterval2 = subscription.items.data[0]?.price?.recurring?.interval || null;
         await supabase
           .from('subscriptions')
           .update({
@@ -197,6 +200,7 @@ router.post('/api/stripe-webhook', async (req, res) => {
             plan,
             status: mapStatus(subscription.status),
             ...(periodEnd && { current_period_end: periodEnd }),
+            ...(billingInterval2 && { billing_interval: billingInterval2 }),
           })
           .eq('user_id', profile.id);
 

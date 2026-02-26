@@ -151,11 +151,19 @@ const PlanBadge: React.FC<PlanBadgeProps> = ({ albumCount, onUpgrade }) => {
   const styles = PLAN_STYLES[plan];
   const label = `${plan}${isTrialing ? ' Trial' : ''}`;
 
+  const badgeClasses = isTrialing
+    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+    : plan === 'curator'
+      ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+      : plan === 'enthusiast'
+        ? 'bg-violet-500/20 border-violet-500/50 text-violet-300'
+        : 'bg-slate-500/20 border-slate-500/50 text-slate-300';
+
   return (
     <div ref={panelRef} className="relative flex items-center">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative px-2.5 py-1 rounded-full text-[8px] font-label tracking-widest uppercase border transition-all hover:brightness-110 cursor-pointer ${styles.bg} ${styles.text} ${styles.border}`}
+        className={`relative px-2.5 py-1 rounded-full font-semibold text-xs tracking-widest uppercase border transition-all hover:brightness-110 cursor-pointer ${badgeClasses}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >

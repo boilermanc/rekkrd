@@ -39,12 +39,12 @@ const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> = ({ isO
         style={{
           backgroundColor: '#1a1916',
           border: '1px solid rgba(200, 135, 42, 0.15)',
-          padding: '2.5rem 2rem',
+          padding: '1.5rem 2rem',
         }}
       >
 
         {/* Spinning vinyl */}
-        <div className="mx-auto mb-8 relative" style={{ width: 120, height: 120 }}>
+        <div className="mx-auto mb-4 relative" style={{ width: 100, height: 100 }}>
           <div
             className="absolute inset-0 rounded-full animate-[spin_8s_linear_infinite]"
             style={{
@@ -88,7 +88,7 @@ const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> = ({ isO
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', fontWeight: 700, color: '#f2ede6', marginBottom: 4 }}>
             Welcome to Rekkrd <em style={{ fontStyle: 'italic', color: '#c8872a' }}>{displayName}</em>
           </h2>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.68rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b6459', marginBottom: '2rem' }}>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.68rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b6459', marginBottom: '1rem' }}>
             Your subscription is now active
           </p>
         </div>
@@ -96,21 +96,21 @@ const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> = ({ isO
         {/* Personal note */}
         <div className={`transition-all duration-500 delay-200 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <div
-            className="text-left mb-6"
-            style={{ backgroundColor: '#232118', border: '1px solid rgba(200,135,42,0.15)', padding: '1.5rem' }}
+            className="text-left mb-4"
+            style={{ backgroundColor: '#232118', border: '1px solid rgba(200,135,42,0.15)', padding: '1.25rem' }}
           >
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', color: '#e8e0d4', lineHeight: 1.8, fontStyle: 'italic' }}>
-              "Thanks for supporting Rekkrd. This project started because I wanted a better way to catalog my own records, and every subscriber helps me keep building it. You now have the full toolkit &mdash; go scan something."
+              "Hey, thanks for joining — seriously. I built Rekkrd because I needed it, and every person who signs up tells me I wasn't the only one. Enjoy the collection. Spin something good tonight."
             </p>
-            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#6b6459', marginTop: '1rem' }}>
-              &mdash; Clint Crowe, Founder
+            <p className="text-white/40" style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: '0.75rem' }}>
+              — Clint
             </p>
           </div>
         </div>
 
         {/* Quick-start tips */}
         <div className={`transition-all duration-500 delay-300 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="grid grid-cols-1 gap-0 mb-8 text-left" style={{ border: '1px solid rgba(200,135,42,0.15)', background: 'rgba(200,135,42,0.15)' }}>
+          <div className="grid grid-cols-1 gap-0 mb-4 text-left" style={{ border: '1px solid rgba(200,135,42,0.15)', background: 'rgba(200,135,42,0.15)' }}>
             {[
               {
                 num: '01',
@@ -130,7 +130,7 @@ const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> = ({ isO
             ].map((tip) => (
               <div
                 key={tip.num}
-                style={{ backgroundColor: '#1a1916', padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(200,135,42,0.15)' }}
+                style={{ backgroundColor: '#1a1916', padding: '0.85rem 1.25rem', borderBottom: '1px solid rgba(200,135,42,0.15)' }}
               >
                 <div className="flex items-start gap-3">
                   <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', letterSpacing: '0.25em', color: '#c8872a', opacity: 0.6, marginTop: 2 }}>
@@ -163,7 +163,7 @@ const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> = ({ isO
               fontWeight: 500,
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              padding: '1rem 2rem',
+              padding: '0.85rem 2rem',
               border: 'none',
               cursor: 'pointer',
               transition: 'background 0.2s, transform 0.15s',

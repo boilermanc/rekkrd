@@ -392,9 +392,19 @@ const StepPlanSelection: React.FC<StepPlanSelectionProps> = ({
               <h3 className={`font-display text-lg font-bold mt-3 mb-1 ${selected ? 'text-th-text' : 'text-th-text2'}`}>
                 {name}
               </h3>
-              <p className={`text-sm font-label mb-4 ${selected ? selectedAccent : 'text-th-text3'}`}>
-                {price}
-              </p>
+              {price === 'Free' ? (
+                <p className={`text-2xl font-bold mb-4 ${selected ? selectedAccent : 'text-th-text2'}`}>Free</p>
+              ) : (
+                <div className="flex items-baseline gap-0.5 mb-4">
+                  <span className={`text-sm font-semibold ${selected ? selectedAccent : 'text-th-text3'}`}>$</span>
+                  <span className={`text-2xl font-bold ${selected ? 'text-th-text' : 'text-th-text2'}`}>
+                    {price.slice(1, price.indexOf('/'))}
+                  </span>
+                  <span className={`text-sm ${selected ? selectedAccent : 'text-th-text3'}`}>
+                    {price.slice(price.indexOf('/'))}
+                  </span>
+                </div>
+              )}
               <ul className="text-xs text-th-text3 space-y-1.5 text-left w-full">
                 {features.map(f => (
                   <li key={f} className="flex items-start gap-2">

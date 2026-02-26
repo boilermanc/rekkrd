@@ -396,7 +396,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
               </button>
               <div>
                 <h2 className="text-lg font-bold text-th-text">Payment details</h2>
-                <p className="text-xs text-th-text3">{selectedPriceLabel}</p>
+                <p className="text-sm font-medium text-th-text2">{selectedPriceLabel}</p>
               </div>
             </div>
 
