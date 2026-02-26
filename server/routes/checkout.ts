@@ -277,18 +277,6 @@ router.post(
         }
       }
 
-      // Debug log — remove after confirmed working
-      console.log('Subscribe debug:', JSON.stringify({
-        subscriptionId: subscription.id,
-        subscriptionStatus: subscription.status,
-        invoiceId: invoice?.id,
-        rawPIType: typeof rawPI,
-        rawPIValue: typeof rawPI === 'string' ? rawPI : undefined,
-        paymentIntentId: paymentIntent?.id,
-        paymentIntentStatus: paymentIntent?.status,
-        clientSecretExists: !!paymentIntent?.client_secret,
-      }, null, 2));
-
       const clientSecret = paymentIntent?.client_secret;
 
       if (!clientSecret) {

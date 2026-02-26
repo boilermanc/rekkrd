@@ -52,6 +52,8 @@ import sellrAccountRouter from './routes/sellrAccount.js';
 import sellrDashboardRouter from './routes/sellrDashboard.js';
 import sellrImportRouter from './routes/sellrImport.js';
 import sellrLotRouter from './routes/sellrLot.js';
+import adminGearCatalogRouter from './routes/adminGearCatalog.js';
+import adminGearIdentifyRouter from './routes/adminGearIdentify.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 import { validateDiscogsConfig } from './lib/discogs.js';
 import { startSellrCron } from './sellrCron.js';
@@ -69,6 +71,7 @@ const _routerMap: Record<string, unknown> = {
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
   sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
   sellrAdminRouter, sellrAccountRouter, sellrDashboardRouter, sellrImportRouter, sellrLotRouter, integrationsRouter,
+  adminGearCatalogRouter, adminGearIdentifyRouter,
 };
 for (const [name, r] of Object.entries(_routerMap)) {
   if (typeof r !== 'function') {
@@ -181,6 +184,10 @@ mountRouter('sellrDashboardRouter', sellrDashboardRouter);
 mountRouter('sellrImportRouter', sellrImportRouter);
 mountRouter('sellrLotRouter', sellrLotRouter);
 mountRouter('integrationsRouter', integrationsRouter);
+// Admin gear identify endpoint
+mountRouter('adminGearIdentifyRouter', adminGearIdentifyRouter);
+// Admin gear catalog routes
+mountRouter('adminGearCatalogRouter', adminGearCatalogRouter);
 console.log('[boot] All routes registered');
 
 // Start Sellr cron jobs
