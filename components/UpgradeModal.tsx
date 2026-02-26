@@ -5,6 +5,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useCheckout } from '../hooks/useCheckout';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useToast } from '../contexts/ToastContext';
+import { supabase } from '../services/supabaseService';
 
 // ── Stripe setup ────────────────────────────────────────────────────
 
@@ -201,6 +202,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [selectedPriceLabel, setSelectedPriceLabel] = useState('');
   const [selectedTierName, setSelectedTierName] = useState('');
+  const [currentSubscriptionId, setCurrentSubscriptionId] = useState<string | null>(null);
 
   // Context-aware button labels
   const alreadyHasPlan = isTrialing || plan !== 'collector';
@@ -225,6 +227,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
       setStep(defaultPriceId ? 'loading' : 'plan_select');
       setClientSecret(null);
       setSelectedPriceLabel('');
+      setCurrentSubscriptionId(null);
     }
   }, [isOpen, defaultPriceId]);
 
@@ -273,6 +276,9 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
         setSelectedPriceLabel(label);
         setSelectedTierName(tier);
         const result = await createSubscription(priceObj.priceId);
+        if (result?.subscriptionId) {
+          setCurrentSubscriptionId(result.subscriptionId);
+        }
         if (result?.alreadyActive) {
           refreshSubscription().then(() => {
             if (onSuccess) {
@@ -295,7 +301,27 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
     }
   }, [isOpen, defaultPriceId, pricing, createSubscription, onClose, refreshSubscription, showToast, onSuccess]);
 
-  const handlePaymentSuccess = useCallback(() => {
+  const handlePaymentSuccess = useCallback(async () => {
+    // Tell the server to activate immediately (don't wait for webhook)
+    if (currentSubscriptionId) {
+      try {
+        const session = await supabase?.auth.getSession();
+        const token = session?.data?.session?.access_token;
+        if (token) {
+          await fetch('/api/subscription/activate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ subscriptionId: currentSubscriptionId }),
+          });
+        }
+      } catch (err) {
+        console.warn('[upgrade-modal] activate call failed, webhook will handle it:', err);
+      }
+    }
+
     refreshSubscription().then(() => {
       if (onSuccess) {
         onSuccess(selectedTierName);
@@ -304,7 +330,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
         showToast('Welcome! Your subscription is now active.', 'success');
       }
     });
-  }, [onClose, refreshSubscription, showToast, onSuccess, selectedTierName]);
+  }, [onClose, refreshSubscription, showToast, onSuccess, selectedTierName, currentSubscriptionId]);
 
   const handleSelectPlan = useCallback(async (priceId: string, priceLabel: string, tierName: string) => {
     setStep('loading');
@@ -312,6 +338,9 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
     setSelectedTierName(tierName);
 
     const result = await createSubscription(priceId);
+    if (result?.subscriptionId) {
+      setCurrentSubscriptionId(result.subscriptionId);
+    }
     if (result?.alreadyActive) {
       // Subscription activated without payment (e.g. $0 or saved method)
       handlePaymentSuccess();

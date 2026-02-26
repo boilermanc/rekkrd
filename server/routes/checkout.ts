@@ -312,4 +312,55 @@ router.post(
   }
 );
 
+// ── Activate subscription (client-side fallback when webhook is slow) ─
+router.post(
+  '/api/subscription/activate',
+  requireAuthWithUser,
+  async (req, res) => {
+    const { userId } = (req as typeof req & { auth: AuthResult }).auth;
+    const { subscriptionId } = req.body;
+
+    if (!subscriptionId || typeof subscriptionId !== 'string') {
+      res.status(400).json({ error: 'Missing subscriptionId' });
+      return;
+    }
+
+    try {
+      const supabase = getSupabaseAdmin();
+
+      // Verify the subscription exists and belongs to this user
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('stripe_subscription_id, plan')
+        .eq('user_id', userId)
+        .single();
+
+      if (!sub || sub.stripe_subscription_id !== subscriptionId) {
+        res.status(403).json({ error: 'Unauthorized' });
+        return;
+      }
+
+      // Verify with Stripe that it's actually active or has a successful payment
+      const stripe = await getStripe();
+      const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+
+      if (!['active', 'incomplete'].includes(stripeSub.status)) {
+        res.status(400).json({ error: 'Subscription not active' });
+        return;
+      }
+
+      // Activate in DB
+      await supabase.from('subscriptions').update({
+        status: 'active',
+      }).eq('user_id', userId);
+
+      console.log(`[activate] user ${userId} → active`);
+      res.json({ success: true });
+    } catch (err) {
+      console.error('[activate] error:', err);
+      res.status(500).json({ error: 'Failed to activate' });
+    }
+  }
+);
+
 export default router;
