@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../../services/supabaseService';
 import GearCatalogEditor from '../../src/components/GearCatalogEditor';
+import { getGearImage } from '../../src/constants/gearCategoryImages';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -493,15 +494,18 @@ const GearCatalogPage: React.FC = () => {
                 <tr key={entry.id} className="hover:bg-[rgb(249,250,251)] transition-colors">
                   {/* Thumbnail */}
                   <td className="px-5 py-3">
-                    {entry.image_url ? (
-                      <img src={entry.image_url} alt="" className="w-12 h-12 object-cover rounded-lg" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgb(243,244,246)' }}>
-                        <svg className="w-5 h-5" style={{ color: 'rgb(156,163,175)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
+                    {(() => {
+                      const imgSrc = getGearImage(entry.image_url, entry.category);
+                      return imgSrc ? (
+                        <img src={imgSrc} alt={entry.model} className="w-12 h-12 object-cover rounded-lg" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-5 py-3 font-medium" style={{ color: 'rgb(17,24,39)' }}>{entry.brand}</td>
                   <td className="px-5 py-3" style={{ color: 'rgb(17,24,39)' }}>{entry.model}</td>
