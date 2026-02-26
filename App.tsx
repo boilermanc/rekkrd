@@ -20,11 +20,12 @@ import { useAuthContext } from './contexts/AuthContext';
 import { useSubscription } from './contexts/SubscriptionContext';
 import { useTheme } from './contexts/ThemeContext';
 import { getProfile, createProfile, hasCompletedOnboarding } from './services/profileService';
-import { ScanLimitError, UpgradeRequiredError, AlbumLimitError, checkAlbumLimit } from './services/geminiService';
+import { ScanLimitError, UpgradeRequiredError, AlbumLimitError, IdentificationFailedError, checkAlbumLimit } from './services/geminiService';
 import OnboardingWizard from './components/OnboardingWizard';
 import UpgradeModal from './components/UpgradeModal';
 import DuplicateAlbumModal from './components/DuplicateAlbumModal';
 import ScanConfirmModal from './components/ScanConfirmModal';
+import ScanFailedModal from './components/ScanFailedModal';
 import SubscriptionBanner from './components/SubscriptionBanner';
 import PlanBadge from './components/PlanBadge';
 import ErrorPage from './components/ErrorPage';
@@ -72,6 +73,11 @@ const App: React.FC = () => {
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [sessionSeedAlbum, setSessionSeedAlbum] = useState<Album | null>(null);
   const [processingStatus, setProcessingStatus] = useState<string | null>(null);
+  const [scanElapsed, setScanElapsed] = useState(0);
+  const [scanTimedOut, setScanTimedOut] = useState(false);
+  const scanAbortRef = useRef<AbortController | null>(null);
+  const scanTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -79,6 +85,7 @@ const App: React.FC = () => {
   const [heroBg, setHeroBg] = useState(DEFAULT_BG);
   const [duplicatePending, setDuplicatePending] = useState<DuplicatePendingData | null>(null);
   const [pendingScan, setPendingScan] = useState<{ scan: ScanConfirmation; base64: string } | null>(null);
+  const [showScanFailed, setShowScanFailed] = useState(false);
   const [discogsReleaseId, setDiscogsReleaseId] = useState<number | null>(null);
   const [discogsConnected, setDiscogsConnected] = useState(false);
   const [wantlistCount, setWantlistCount] = useState(0);
@@ -445,20 +452,21 @@ const App: React.FC = () => {
     discogsReleaseIdParam?: number,
     barcodeParam?: string,
     formatParam?: string,
+    discogsCoverUrl?: string,
   ) => {
     setProcessingStatus(`Appraising ${identity.title}...`);
     try {
       // Server-side album limit enforcement
       await checkAlbumLimit();
 
-      const metadata = await geminiService.fetchAlbumMetadata(identity.artist, identity.title);
+      const metadata = await geminiService.fetchAlbumMetadata(identity.artist, identity.title, discogsCoverUrl);
       const { artist: mArtist, title: mTitle, cover_url: mCover, ...rest } = metadata;
       const saved = await supabaseService.saveAlbum({
         ...rest,
         original_photo_url: base64,
         artist: mArtist || identity.artist,
         title: mTitle || identity.title,
-        cover_url: mCover || '',
+        cover_url: mCover || discogsCoverUrl || '',
         tags: metadata.tags || [],
         isFavorite: false,
         condition: 'Near Mint',
@@ -504,6 +512,39 @@ const App: React.FC = () => {
     }
   };
 
+  const clearScanTimers = () => {
+    if (scanTimerRef.current) { clearInterval(scanTimerRef.current); scanTimerRef.current = null; }
+    if (scanTimeoutRef.current) { clearTimeout(scanTimeoutRef.current); scanTimeoutRef.current = null; }
+    setScanElapsed(0);
+    setScanTimedOut(false);
+  };
+
+  const startScanTimers = () => {
+    clearScanTimers();
+    const startTime = Date.now();
+    scanTimerRef.current = setInterval(() => {
+      setScanElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    scanTimeoutRef.current = setTimeout(() => {
+      setScanTimedOut(true);
+    }, 30_000);
+  };
+
+  const handleCancelScan = () => {
+    scanAbortRef.current?.abort();
+    clearScanTimers();
+    setProcessingStatus(null);
+    showToast('Scan cancelled', 'info');
+  };
+
+  const handleKeepWaiting = () => {
+    setScanTimedOut(false);
+    if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
+    scanTimeoutRef.current = setTimeout(() => {
+      setScanTimedOut(true);
+    }, 30_000);
+  };
+
   const processImage = async (base64: string, scanMode?: ScanMode) => {
     if (!isSupabaseReady) {
       showToast("Database not configured. Check your Supabase environment variables.", "error");
@@ -522,9 +563,13 @@ const App: React.FC = () => {
       return;
     }
 
+    const abortController = new AbortController();
+    scanAbortRef.current = abortController;
     setProcessingStatus(scanMode === 'barcode' ? "Reading Barcode..." : "Identifying Record...");
+    startScanTimers();
     try {
-      const identity = await geminiService.identifyAlbum(base64, scanMode);
+      const identity = await geminiService.identifyAlbum(base64, scanMode, abortController.signal);
+      clearScanTimers();
       if (!identity) {
         showToast("Couldn't identify that album. Try a clearer photo or different angle!", "error");
         setProcessingStatus(null);
@@ -559,7 +604,9 @@ const App: React.FC = () => {
         base64,
       });
     } catch (err) {
-      if (err instanceof ScanLimitError) {
+      if (err instanceof IdentificationFailedError) {
+        setShowScanFailed(true);
+      } else if (err instanceof ScanLimitError) {
         setUpgradeFeature('scan');
       } else if (err instanceof UpgradeRequiredError) {
         setUpgradeFeature(err.requiredPlan === 'curator' ? 'scan' : 'scan');
@@ -672,11 +719,12 @@ const App: React.FC = () => {
     confirmedDiscogsReleaseId?: number,
     barcode?: string,
     format?: string,
+    discogsCoverUrl?: string,
   ) => {
     if (!pendingScan) return;
     const { base64 } = pendingScan;
     setPendingScan(null);
-    await saveIdentifiedAlbum({ artist, title }, base64, confirmedDiscogsReleaseId, barcode, format);
+    await saveIdentifiedAlbum({ artist, title }, base64, confirmedDiscogsReleaseId, barcode, format, discogsCoverUrl);
   };
 
   const handleScanCancel = () => {
@@ -799,10 +847,12 @@ const App: React.FC = () => {
   if (showOnboarding) {
     return (
       <OnboardingWizard
-        onComplete={(startAction) => {
+        onComplete={(startAction, selectedTier) => {
           setShowOnboarding(false);
           setCurrentView('landing');
-          if (startAction === 'scan') {
+          if (selectedTier === 'curator' || selectedTier === 'enthusiast') {
+            setUpgradeFeature('plan_upgrade');
+          } else if (startAction === 'scan') {
             setIsCameraOpen(true);
           }
         }}
@@ -1687,6 +1737,13 @@ const App: React.FC = () => {
           scan={pendingScan.scan}
           onConfirm={handleScanConfirm}
           onCancel={handleScanCancel}
+        />
+      )}
+      {showScanFailed && (
+        <ScanFailedModal
+          onTryAgain={() => { setShowScanFailed(false); setIsCameraOpen(true); }}
+          onSearchManually={() => { setShowScanFailed(false); setCurrentView('discogs'); }}
+          onClose={() => setShowScanFailed(false)}
         />
       )}
       {discogsReleaseId !== null && (

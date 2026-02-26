@@ -230,23 +230,35 @@ router.post(
       }
 
       const invoice = subscription.latest_invoice as Stripe.Invoice;
-      let paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent | null;
+      const rawPI = invoice?.payment_intent;
+      let paymentIntent: Stripe.PaymentIntent | null = null;
 
-      // If PaymentIntent not expanded on subscription create, retrieve invoice directly
-      if (!paymentIntent && invoice?.id) {
+      if (rawPI && typeof rawPI === 'object') {
+        // Expansion worked — we have the full PaymentIntent object
+        paymentIntent = rawPI as Stripe.PaymentIntent;
+      } else if (typeof rawPI === 'string') {
+        // Got a string ID instead of expanded object — retrieve directly
+        paymentIntent = await stripe.paymentIntents.retrieve(rawPI);
+      } else if (invoice?.id) {
+        // No payment_intent at all — re-fetch the invoice with expansion
         const expandedInvoice = await stripe.invoices.retrieve(invoice.id, {
           expand: ['payment_intent'],
         });
-        paymentIntent = expandedInvoice.payment_intent as Stripe.PaymentIntent | null;
+        const expandedPI = expandedInvoice.payment_intent;
+        if (expandedPI && typeof expandedPI === 'object') {
+          paymentIntent = expandedPI as Stripe.PaymentIntent;
+        } else if (typeof expandedPI === 'string') {
+          paymentIntent = await stripe.paymentIntents.retrieve(expandedPI);
+        }
       }
 
       // Debug log — remove after confirmed working
-      const debugInvoice = subscription.latest_invoice as any;
       console.log('Subscribe debug:', JSON.stringify({
         subscriptionId: subscription.id,
         subscriptionStatus: subscription.status,
-        invoiceId: debugInvoice?.id,
-        invoiceAmountDue: debugInvoice?.amount_due,
+        invoiceId: invoice?.id,
+        rawPIType: typeof rawPI,
+        rawPIValue: typeof rawPI === 'string' ? rawPI : undefined,
         paymentIntentId: paymentIntent?.id,
         paymentIntentStatus: paymentIntent?.status,
         clientSecretExists: !!paymentIntent?.client_secret,
@@ -257,8 +269,9 @@ router.post(
       if (!clientSecret) {
         console.error('Subscribe: missing client_secret after fallback', {
           subscriptionId: subscription.id,
-          invoiceId: debugInvoice?.id,
+          invoiceId: invoice?.id,
           paymentIntentId: paymentIntent?.id,
+          rawPIType: typeof rawPI,
         });
         return res.status(500).json({ error: 'Failed to create payment intent' });
       }

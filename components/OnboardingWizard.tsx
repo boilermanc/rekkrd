@@ -7,7 +7,7 @@ import { Headphones, Music, Disc3, Tv, Sparkles, Heart, Trophy, TrendingUp, Mail
 const TOTAL_STEPS = 4;
 
 interface OnboardingWizardProps {
-  onComplete: (startAction?: 'scan' | 'explore') => void;
+  onComplete: (startAction?: 'scan' | 'explore', selectedTier?: 'collector' | 'curator' | 'enthusiast') => void;
   previewMode?: boolean;
 }
 
@@ -480,7 +480,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
 
   const saveAndComplete = useCallback(async (fullSave: boolean) => {
     if (previewMode) {
-      onComplete(profileData.startAction);
+      onComplete(profileData.startAction, profileData.selectedTier);
       return;
     }
     if (!user) return;
@@ -504,11 +504,11 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
       }
       fetch('/api/onboarding/complete', { method: 'POST', headers }).catch(() => {});
 
-      onComplete(profileData.startAction);
+      onComplete(profileData.startAction, profileData.selectedTier);
     } catch (err) {
       console.error('Failed to save onboarding profile:', err);
       // Still proceed — profile can be updated later
-      onComplete(profileData.startAction);
+      onComplete(profileData.startAction, profileData.selectedTier);
     } finally {
       setSaving(false);
     }
