@@ -207,6 +207,31 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
     fetchSavedGuides();
   }, [setupGuide, gear, fetchSavedGuides]);
 
+  const handleDownloadPdf = useCallback(async () => {
+    if (!setupGuide) throw new Error('No guide to download');
+    const headers = await getAuthHeaders();
+    const resp = await fetch('/api/setup-guides/pdf', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        guide: setupGuide,
+        name: 'My Setup Guide',
+        gear: gear.map(g => ({ brand: g.brand, model: g.model })),
+      }),
+    });
+    if (!resp.ok) {
+      showToast('Failed to generate PDF', 'error');
+      throw new Error(`HTTP ${resp.status}`);
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'rekkrd-setup-guide.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [setupGuide, gear, showToast]);
+
   const handleDeleteSavedGuide = useCallback(async (id: string) => {
     try {
       const headers = await getAuthHeaders();
@@ -847,6 +872,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         isOpen={isGuideModalOpen}
         onClose={() => { setIsGuideModalOpen(false); setSetupGuide(null); }}
         onSave={handleSaveGuide}
+        onDownloadPdf={handleDownloadPdf}
       />
 
       {/* Upgrade banner for free-tier users */}

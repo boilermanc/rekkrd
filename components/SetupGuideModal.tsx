@@ -10,9 +10,10 @@ interface SetupGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave?: (name: string) => Promise<void>;
+  onDownloadPdf?: () => Promise<void>;
 }
 
-const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpen, onClose, onSave }) => {
+const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpen, onClose, onSave, onDownloadPdf }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const stableOnClose = useCallback(onClose, [onClose]);
   useFocusTrap(modalRef, stableOnClose);
@@ -23,6 +24,7 @@ const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpe
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const handleSave = async () => {
     if (!onSave || !saveName.trim()) return;
@@ -39,6 +41,18 @@ const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpe
       setSaveError(true);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!onDownloadPdf || downloading) return;
+    setDownloading(true);
+    try {
+      await onDownloadPdf();
+    } catch {
+      // error handling is in the parent
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -82,16 +96,39 @@ const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpe
                 Setup Guide
               </p>
             </div>
-            {onSave && !loading && guide && !showSaveInput && !saveSuccess && (
-              <button
-                onClick={() => setShowSaveInput(true)}
-                className="ml-auto mr-12 inline-flex items-center gap-1.5 border border-th-surface/[0.15] text-th-text3 font-bold py-1.5 px-3 rounded-lg hover:border-th-surface/[0.3] hover:text-th-text2 transition-all uppercase tracking-[0.15em] text-[9px]"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                </svg>
-                Save
-              </button>
+            {!loading && guide && !showSaveInput && !saveSuccess && (
+              <div className="ml-auto mr-12 flex items-center gap-2">
+                {onDownloadPdf && (
+                  <button
+                    onClick={handleDownloadPdf}
+                    disabled={downloading}
+                    className="inline-flex items-center gap-1.5 border border-th-surface/[0.15] text-th-text3 font-bold py-1.5 px-3 rounded-lg hover:border-th-surface/[0.3] hover:text-th-text2 transition-all uppercase tracking-[0.15em] text-[9px] disabled:opacity-40"
+                  >
+                    {downloading ? (
+                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>
+                    )}
+                    PDF
+                  </button>
+                )}
+                {onSave && (
+                  <button
+                    onClick={() => setShowSaveInput(true)}
+                    className="inline-flex items-center gap-1.5 border border-th-surface/[0.15] text-th-text3 font-bold py-1.5 px-3 rounded-lg hover:border-th-surface/[0.3] hover:text-th-text2 transition-all uppercase tracking-[0.15em] text-[9px]"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                    </svg>
+                    Save
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>

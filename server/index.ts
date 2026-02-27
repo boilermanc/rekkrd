@@ -28,6 +28,7 @@ import identifyGearRouter from './routes/identifyGear.js';
 import findManualRouter from './routes/findManual.js';
 import setupGuideRouter from './routes/setupGuide.js';
 import setupGuideSaveRouter from './routes/setupGuideSave.js';
+import setupGuidePdfRouter from './routes/setupGuidePdf.js';
 import supportRouter from './routes/support.js';
 import sitemapRouter from './routes/sitemap.js';
 import emailRouter from './routes/email.js';
@@ -67,7 +68,7 @@ const _routerMap: Record<string, unknown> = {
   lyricsRouter, uploadCoverRouter, imageProxyRouter, subscriptionRouter,
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
-  findManualRouter, setupGuideRouter, setupGuideSaveRouter, supportRouter, sitemapRouter, emailRouter,
+  findManualRouter, setupGuideRouter, setupGuideSaveRouter, setupGuidePdfRouter, supportRouter, sitemapRouter, emailRouter,
   onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsWantlistRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
   sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
@@ -162,6 +163,8 @@ mountRouter('findManualRouter', findManualRouter);
 mountRouter('setupGuideRouter', setupGuideRouter);
 // Setup guide save routes
 mountRouter('setupGuideSaveRouter', setupGuideSaveRouter);
+// Setup guide PDF export
+mountRouter('setupGuidePdfRouter', setupGuidePdfRouter);
 mountRouter('supportRouter', supportRouter);
 mountRouter('sitemapRouter', sitemapRouter);
 mountRouter('emailRouter', emailRouter);
