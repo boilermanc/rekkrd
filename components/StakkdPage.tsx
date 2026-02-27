@@ -12,6 +12,7 @@ import AddGearMethodModal from './AddGearMethodModal';
 import GearCard from './GearCard';
 import GearDetailModal from './GearDetailModal';
 import SetupGuideModal from './SetupGuideModal';
+import SignalChainGuideModal from './SignalChainGuideModal';
 import SpinningRecord from './SpinningRecord';
 
 interface SavedGuide {
@@ -99,6 +100,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
   const [hintDismissed, setHintDismissed] = useState(false);
   const [activeCategory, setActiveCategory] = useState<GearCategory | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('position');
+  const [signalChainGuideOpen, setSignalChainGuideOpen] = useState(false);
 
   // Saved guides state
   const [savedGuides, setSavedGuides] = useState<SavedGuide[]>([]);
@@ -600,6 +602,15 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
+            onClick={() => setSignalChainGuideOpen(true)}
+            className="border border-th-surface/[0.3] text-th-text2 font-bold py-2.5 px-5 rounded-xl hover:bg-th-surface/[0.1] hover:text-th-text transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+            Signal Chain Guide
+          </button>
+          <button
             onClick={gear.length >= 2 ? handleGenerateGuide : undefined}
             disabled={gear.length < 2 || isGuideLoading}
             title={gear.length === 0
@@ -876,6 +887,11 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         onClose={() => { setIsGuideModalOpen(false); setSetupGuide(null); }}
         onSave={isViewingSavedGuide ? undefined : handleSaveGuide}
         onDownloadPdf={handleDownloadPdf}
+      />
+
+      <SignalChainGuideModal
+        isOpen={signalChainGuideOpen}
+        onClose={() => setSignalChainGuideOpen(false)}
       />
 
       {/* Upgrade banner for free-tier users */}
