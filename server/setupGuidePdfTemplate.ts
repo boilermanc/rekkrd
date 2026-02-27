@@ -133,9 +133,8 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     @page {

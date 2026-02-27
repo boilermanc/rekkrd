@@ -60,7 +60,7 @@ router.post('/api/setup-guides/pdf', requireAuthWithUser, async (req: Request, r
     try {
       browser = await puppeteer.launch({ headless: 'shell', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
       await page.emulateMediaType('screen');
 
       const pdfBuffer = await page.pdf({
