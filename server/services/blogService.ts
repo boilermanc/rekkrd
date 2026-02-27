@@ -10,6 +10,7 @@ export interface BlogPost {
   excerpt: string | null;
   featured_image: string | null;
   tags: string[];
+  category: string;
   author: string | null;
   status: 'draft' | 'published';
   published_at: string | null;
@@ -69,6 +70,8 @@ export async function getPublishedPosts(options?: {
   limit?: number;
   offset?: number;
   tag?: string;
+  category?: string;
+  search?: string;
 }): Promise<{ posts: BlogPost[]; total: number }> {
   const limit = options?.limit ?? 10;
   const offset = options?.offset ?? 0;
@@ -82,6 +85,14 @@ export async function getPublishedPosts(options?: {
 
   if (options?.tag) {
     query = query.contains('tags', [options.tag]);
+  }
+
+  if (options?.category) {
+    query = query.eq('category', options.category);
+  }
+
+  if (options?.search) {
+    query = query.textSearch('search_vector', options.search, { type: 'websearch' });
   }
 
   query = query.range(offset, offset + limit - 1);
@@ -109,6 +120,26 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   }
 
   return data as BlogPost;
+}
+
+export async function getCategories(): Promise<{ category: string; count: number }[]> {
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase.rpc('get_blog_categories');
+
+  if (error) throw error;
+
+  return (data || []) as { category: string; count: number }[];
+}
+
+export async function getPopularTags(limit: number = 20): Promise<{ tag: string; count: number }[]> {
+  const supabase = getSupabaseAdmin();
+
+  const { data, error } = await supabase.rpc('get_popular_blog_tags', { tag_limit: limit });
+
+  if (error) throw error;
+
+  return (data || []) as { tag: string; count: number }[];
 }
 
 // ── Admin queries ──────────────────────────────────────────────────

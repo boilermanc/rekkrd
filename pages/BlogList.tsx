@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuthContext } from '../contexts/AuthContext';
+import BlogFilterBar from '../src/components/blog/BlogFilterBar';
 import './Blog.css';
 
 interface BlogPost {
@@ -45,12 +46,64 @@ const BlogList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter state
+  const [categories, setCategories] = useState<{ category: string; count: number }[]>([]);
+  const [popularTags, setPopularTags] = useState<{ tag: string; count: number }[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
+  // Fetch filter options on mount
+  useEffect(() => {
+    fetch(`${API_BASE}/api/blog/categories`)
+      .then(res => res.ok ? res.json() : { categories: [] })
+      .then(data => setCategories(data.categories || []))
+      .catch(() => {});
+
+    fetch(`${API_BASE}/api/blog/tags`)
+      .then(res => res.ok ? res.json() : { tags: [] })
+      .then(data => setPopularTags(data.tags || []))
+      .catch(() => {});
+  }, []);
+
+  // Reset to page 1 when filters change
+  const handleCategoryChange = useCallback((cat: string | null) => {
+    setActiveCategory(cat);
+    setPage(1);
+  }, []);
+
+  const handleTagChange = useCallback((tag: string | null) => {
+    setActiveTag(tag);
+    setPage(1);
+  }, []);
+
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  }, []);
+
+  const hasActiveFilters = activeCategory !== null || activeTag !== null || searchQuery !== '';
+
+  function clearFilters() {
+    setActiveCategory(null);
+    setActiveTag(null);
+    setSearchQuery('');
+    setPage(1);
+  }
+
+  // Fetch posts when page or filters change
   useEffect(() => {
     setLoading(true);
     setError(null);
     const offset = (page - 1) * PAGE_SIZE;
-    fetch(`${API_BASE}/api/blog?limit=${PAGE_SIZE}&offset=${offset}`)
+    const params = new URLSearchParams();
+    params.set('limit', String(PAGE_SIZE));
+    params.set('offset', String(offset));
+    if (activeCategory) params.set('category', activeCategory);
+    if (activeTag) params.set('tag', activeTag);
+    if (searchQuery) params.set('search', searchQuery);
+
+    fetch(`${API_BASE}/api/blog?${params.toString()}`)
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -63,7 +116,7 @@ const BlogList: React.FC = () => {
         setError(err.message || 'Failed to load posts');
       })
       .finally(() => setLoading(false));
-  }, [page]);
+  }, [page, activeCategory, activeTag, searchQuery]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -105,6 +158,17 @@ const BlogList: React.FC = () => {
 
       {/* Content */}
       <main className="container">
+        <BlogFilterBar
+          categories={categories}
+          popularTags={popularTags}
+          activeCategory={activeCategory}
+          activeTag={activeTag}
+          searchQuery={searchQuery}
+          onCategoryChange={handleCategoryChange}
+          onTagChange={handleTagChange}
+          onSearchChange={handleSearchChange}
+        />
+
         {loading ? (
           <div className="blog-loading">
             <div className="blog-spinner" />
@@ -117,8 +181,30 @@ const BlogList: React.FC = () => {
           </div>
         ) : posts.length === 0 ? (
           <div className="blog-empty">
-            <h2>No posts yet</h2>
-            <p>Check back soon — we're warming up the turntable.</p>
+            <h2>No posts found</h2>
+            {hasActiveFilters ? (
+              <>
+                <p>No articles match your current filters.</p>
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    marginTop: '12px',
+                    padding: '8px 20px',
+                    background: '#E8927C',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Clear filters
+                </button>
+              </>
+            ) : (
+              <p>Check back soon — we're warming up the turntable.</p>
+            )}
           </div>
         ) : (
           <>

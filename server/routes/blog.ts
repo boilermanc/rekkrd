@@ -10,6 +10,8 @@ import {
   deletePost,
   createIdea,
   getAllIdeas,
+  getCategories,
+  getPopularTags,
 } from '../services/blogService.js';
 
 const router = Router();
@@ -146,12 +148,35 @@ router.get('/api/blog', async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = parseInt(req.query.offset as string) || 0;
     const tag = req.query.tag as string | undefined;
+    const category = req.query.category as string | undefined;
+    const search = req.query.search as string | undefined;
 
-    const { posts, total } = await getPublishedPosts({ limit, offset, tag });
+    const { posts, total } = await getPublishedPosts({ limit, offset, tag, category, search });
     res.json({ posts, total, limit, offset });
   } catch (error) {
     console.error('Blog list error:', error);
     res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
+router.get('/api/blog/categories', async (_req, res) => {
+  try {
+    const categories = await getCategories();
+    res.json({ categories });
+  } catch (error) {
+    console.error('Blog categories error:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+router.get('/api/blog/tags', async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+    const tags = await getPopularTags(limit);
+    res.json({ tags });
+  } catch (error) {
+    console.error('Blog tags error:', error);
+    res.status(500).json({ error: 'Failed to fetch tags' });
   }
 });
 

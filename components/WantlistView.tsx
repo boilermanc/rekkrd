@@ -31,9 +31,11 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
   const { showToast } = useToast();
 
   const importModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(importModalRef, () => setShowImportBrowser(false));
+  const closeImportBrowser = useCallback(() => setShowImportBrowser(false), []);
+  useFocusTrap(importModalRef, closeImportBrowser);
   const addModalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(addModalRef, () => setShowAddModal(false));
+  const closeAddModal = useCallback(() => setShowAddModal(false), []);
+  useFocusTrap(addModalRef, closeAddModal);
 
   const alertedReleaseIds = useMemo(
     () => new Set(alerts.filter((a) => a.is_active).map((a) => a.discogs_release_id)),
