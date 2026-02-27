@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type Stripe from 'stripe';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { getStripe, getWebhookSecret } from '../lib/stripe.js';
+import { getStripe, getConfig } from '../lib/stripe.js';
 import { getPlanFromPriceId } from '../lib/stripeConfig.js';
 import { sendTemplatedEmail } from '../services/emailService.js';
 
@@ -70,8 +70,16 @@ router.post('/api/stripe/webhook', async (req, res) => {
 
   let event: Stripe.Event;
   try {
+    const rawPayload = (req.body as Buffer).toString('utf8');
+    const parsed = JSON.parse(rawPayload);
+    const isLiveEvent = parsed.livemode === true;
+
+    const config = await getConfig();
+    const webhookSecret = isLiveEvent
+      ? config.liveWebhookSecret
+      : config.testWebhookSecret;
+
     const stripe = await getStripe();
-    const webhookSecret = await getWebhookSecret();
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err);

@@ -28,6 +28,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
+  const [backfillStatus, setBackfillStatus] = useState<string | null>(null);
   const { showToast } = useToast();
 
   const importModalRef = useRef<HTMLDivElement>(null);
@@ -115,7 +116,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       const sessionUserId = session?.data?.session?.user?.id;
       if (!token || !sessionUserId) return;
 
-      showToast(`Searching for "${title}" details...`, 'info', { duration: 0 });
+      setBackfillStatus('Searching for album details...');
 
       const res = await fetch('/api/metadata', {
         method: 'POST',
@@ -128,7 +129,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
 
       if (!res.ok) {
         console.warn('[wantlist-backfill] metadata request failed:', res.status);
-        showToast(`Added "${title}" — couldn't fetch details automatically`, 'info');
+        setBackfillStatus(null);
         return;
       }
 
@@ -140,7 +141,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       };
       console.log('[wantlist-backfill] metadata response:', { cover_url: !!data.cover_url, year: data.year, genre: data.genre, discogs_url: data.discogs_url });
 
-      showToast('Found! Updating cover art and details...', 'info', { duration: 0 });
+      setBackfillStatus('Found! Updating cover art and details...');
 
       // Parse discogs_release_id from discogs_url (e.g. /release/12345-...)
       let discogsReleaseId: number | null = null;
@@ -194,19 +195,44 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       // If we got a discogs_release_id, fetch pricing (which also re-fetches the list)
       if (discogsReleaseId) {
         console.log('[wantlist-backfill] fetching pricing for release:', discogsReleaseId);
-        showToast('Fetching marketplace pricing...', 'info', { duration: 0 });
+        setBackfillStatus('Fetching marketplace pricing...');
         await backfillPricing([discogsReleaseId]);
-        showToast(`"${title}" fully enriched with cover art and pricing`, 'success');
       } else {
         // Re-fetch to show cover/year/genre updates
         const updated = await wantlistService.getWantlist();
         setWantlist(updated);
-        showToast(`"${title}" updated with cover art and details`, 'success');
       }
+
+      // Brief pause so user sees the final state before dismissing
+      setBackfillStatus('Done!');
+      await new Promise(r => setTimeout(r, 1500));
+      setBackfillStatus(null);
     } catch (err) {
       console.error('[wantlist-backfill] error:', err);
-      // Non-fatal — item stays as manual entry, dismiss the persistent toast
-      showToast(`Added "${title}" to wantlist`, 'success');
+      setBackfillStatus(null);
+    }
+  }
+
+  async function handleCoverChange(id: string, coverUrl: string) {
+    // Optimistic update
+    setWantlist(prev => prev.map(item =>
+      item.id === id ? { ...item, cover_url: coverUrl } : item,
+    ));
+
+    try {
+      const sessionUserId = (await supabase?.auth.getSession())?.data?.session?.user?.id;
+      if (!sessionUserId) return;
+
+      await supabase!
+        .from('wantlist')
+        .update({ cover_url: coverUrl })
+        .eq('id', id)
+        .eq('user_id', sessionUserId);
+    } catch {
+      showToast('Failed to update cover art', 'error');
+      // Re-fetch to revert
+      const updated = await wantlistService.getWantlist();
+      setWantlist(updated);
     }
   }
 
@@ -439,6 +465,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
               isInCollection={item.discogs_release_id ? collectionDiscogsIds.has(item.discogs_release_id) : false}
               hasAlert={alertedReleaseIds.has(item.discogs_release_id ?? -1)}
               onSetAlert={handleSetAlert}
+              onCoverChange={handleCoverChange}
             />
           ))}
         </div>
@@ -589,6 +616,18 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
                 }}
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Backfill status overlay */}
+      {backfillStatus && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-6 p-8 rounded-3xl glass-morphism border border-th-surface/[0.10] shadow-2xl max-w-sm mx-4">
+            <SpinningRecord size="w-20 h-20" />
+            <p className="text-th-text text-center text-sm font-medium">
+              {backfillStatus}
+            </p>
           </div>
         </div>
       )}

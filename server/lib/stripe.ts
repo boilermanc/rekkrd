@@ -10,6 +10,8 @@ interface StripeConfig {
   secretKey: string;
   publishableKey: string;
   webhookSecret: string;
+  liveWebhookSecret: string;
+  testWebhookSecret: string;
   sellrWebhookSecret: string;
   prices: {
     curator: { monthly: string; annual: string };
@@ -43,6 +45,8 @@ function envFallbackConfig(): StripeConfig {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
     publishableKey: process.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    liveWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    testWebhookSecret: process.env.STRIPE_TEST_WEBHOOK_SECRET || '',
     sellrWebhookSecret: process.env.STRIPE_SELLR_WEBHOOK_SECRET || '',
     prices: {
       curator: {
@@ -93,6 +97,8 @@ async function loadConfigFromDB(): Promise<StripeConfig | null> {
       secretKey: kv[`${prefix}secret_key`] || env.secretKey,
       publishableKey: kv[`${prefix}publishable_key`] || env.publishableKey,
       webhookSecret: kv[`${prefix}webhook_secret`] || env.webhookSecret,
+      liveWebhookSecret: kv['stripe_live_webhook_secret'] || env.liveWebhookSecret,
+      testWebhookSecret: kv['stripe_test_webhook_secret'] || env.testWebhookSecret,
       sellrWebhookSecret: kv[`${prefix}sellr_webhook_secret`] || env.sellrWebhookSecret,
       prices: {
         curator: {
@@ -113,7 +119,7 @@ async function loadConfigFromDB(): Promise<StripeConfig | null> {
 
 // ── Public API ───────────────────────────────────────────────────────
 
-async function getConfig(): Promise<StripeConfig> {
+export async function getConfig(): Promise<StripeConfig> {
   const now = Date.now();
   if (_cache && now - _cacheLoadedAt < CACHE_TTL_MS) return _cache;
 

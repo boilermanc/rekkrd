@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Bell, BellRing, CheckCircle, Disc3, Loader2, Trash2 } from 'lucide-react';
+import { Bell, BellRing, CheckCircle, Disc3, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { WantlistItem } from '../types';
 import { proxyImageUrl } from '../services/imageProxy';
+import CoverPicker from './CoverPicker';
 
 const CONDITION_OPTIONS = ['M', 'NM', 'VG+', 'VG', 'G+', 'G', 'F', 'P'] as const;
 
@@ -13,6 +14,7 @@ interface WantlistCardProps {
   isInCollection?: boolean;
   hasAlert?: boolean;
   onSetAlert?: (item: WantlistItem, targetPrice: number, conditionMinimum: string) => Promise<void>;
+  onCoverChange?: (id: string, coverUrl: string) => void;
 }
 
 function formatRelativeDate(dateString: string): string {
@@ -29,10 +31,11 @@ function formatRelativeDate(dateString: string): string {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwned, isInCollection, hasAlert, onSetAlert }) => {
+const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwned, isInCollection, hasAlert, onSetAlert, onCoverChange }) => {
   const hasPrices = item.price_low !== null || item.price_median !== null || item.price_high !== null;
   const [confirmingOwned, setConfirmingOwned] = useState(false);
   const [alertMode, setAlertMode] = useState(false);
+  const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [alertSaving, setAlertSaving] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
   const [conditionMinimum, setConditionMinimum] = useState('VG');
@@ -95,7 +98,18 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
           </div>
         )}
 
-        <div className="absolute inset-0 bg-[#c45a30]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {onCoverChange && (
+          <button
+            onClick={() => setShowCoverPicker(true)}
+            className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-th-bg/70 backdrop-blur-sm text-th-text3 hover:text-th-text hover:bg-th-bg/90 flex items-center justify-center transition-all z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+            aria-label="Change cover art"
+            title="Change cover art"
+          >
+            <ImagePlus className="w-4 h-4" />
+          </button>
+        )}
+
+        <div className="absolute inset-0 bg-[#c45a30]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
       <div className="p-4 relative">
@@ -246,6 +260,16 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
           </div>
         </div>
       </div>
+
+      {showCoverPicker && onCoverChange && (
+        <CoverPicker
+          artist={item.artist}
+          title={item.title}
+          currentCoverUrl={item.cover_url || undefined}
+          onSelectCover={(url) => onCoverChange(item.id, url)}
+          onClose={() => setShowCoverPicker(false)}
+        />
+      )}
     </div>
   );
 };
