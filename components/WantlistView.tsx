@@ -143,17 +143,21 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
 
       setBackfillStatus('Found! Updating cover art and details...');
 
-      // Parse discogs_release_id from discogs_url (e.g. /release/12345-...)
+      // Parse discogs_release_id from discogs_url — handles both /release/ and /master/ URLs
       let discogsReleaseId: number | null = null;
       if (data.discogs_url) {
-        const urlMatch = data.discogs_url.match(/\/release\/(\d+)/);
-        if (urlMatch) discogsReleaseId = parseInt(urlMatch[1], 10);
+        const urlMatch = data.discogs_url.match(/\/(release|master)\/(\d+)/);
+        if (urlMatch && urlMatch[1] === 'release') {
+          discogsReleaseId = parseInt(urlMatch[2], 10);
+        } else if (urlMatch && urlMatch[1] === 'master') {
+          console.log('[wantlist-backfill] detected master URL, using search fallback for release ID');
+        }
       }
       console.log('[wantlist-backfill] parsed release_id:', discogsReleaseId, 'from url:', data.discogs_url);
 
-      // Fallback: if Gemini didn't return a discogs_url, try Discogs search with a timeout
+      // Fallback: if no release ID (master URL, no URL, or unparseable), try Discogs search
       if (!discogsReleaseId) {
-        console.log('[wantlist-backfill] no release_id from metadata, trying Discogs search fallback');
+        console.log('[wantlist-backfill] no release_id, trying Discogs search fallback');
         try {
           const params = new URLSearchParams({ q: `${artist} ${title}`, type: 'release', format: 'Vinyl', per_page: '1' });
           const searchRes = await fetch(`/api/discogs/search?${params}`, { signal: AbortSignal.timeout(10_000) });
