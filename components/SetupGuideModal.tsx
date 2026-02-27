@@ -102,7 +102,7 @@ const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpe
                   <button
                     onClick={handleDownloadPdf}
                     disabled={downloading}
-                    className="inline-flex items-center gap-1.5 border border-th-surface/[0.15] text-th-text3 font-bold py-1.5 px-3 rounded-lg hover:border-th-surface/[0.3] hover:text-th-text2 transition-all uppercase tracking-[0.15em] text-[9px] disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 bg-[#dd6e42] text-th-text font-bold py-1.5 px-3 rounded-lg hover:bg-[#c45e38] transition-all uppercase tracking-[0.15em] text-[9px] disabled:opacity-40"
                   >
                     {downloading ? (
                       <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">

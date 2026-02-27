@@ -91,6 +91,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
   const [setupGuide, setSetupGuide] = useState<SetupGuide | null>(null);
   const [isGuideLoading, setIsGuideLoading] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [isViewingSavedGuide, setIsViewingSavedGuide] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [uploadFlowOpen, setUploadFlowOpen] = useState(false);
@@ -256,6 +257,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
       setSetupGuide(data.guide as SetupGuide);
+      setIsViewingSavedGuide(true);
       setIsGuideModalOpen(true);
     } catch (err) {
       console.error('Failed to load saved guide:', err);
@@ -385,6 +387,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
     setIsGuideLoading(true);
     setIsGuideModalOpen(true);
     setSetupGuide(null);
+    setIsViewingSavedGuide(false);
 
     try {
       const payload = gear.map(g => ({
@@ -871,7 +874,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
         loading={isGuideLoading}
         isOpen={isGuideModalOpen}
         onClose={() => { setIsGuideModalOpen(false); setSetupGuide(null); }}
-        onSave={handleSaveGuide}
+        onSave={isViewingSavedGuide ? undefined : handleSaveGuide}
         onDownloadPdf={handleDownloadPdf}
       />
 
