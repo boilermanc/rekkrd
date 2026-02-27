@@ -1,5 +1,4 @@
 import { Router, type Request, type Response } from 'express';
-import { Type } from '@google/genai';
 import { requireAdmin } from '../middleware/adminAuth.js';
 import { ai } from '../lib/gemini.js';
 import { retryWithBackoff, isRetryableError } from '../utils/retry.js';
@@ -46,44 +45,45 @@ Return a JSON object with:
 - category: one of: turntable, cartridge, phono_preamp, preamp, amplifier, receiver, speakers, headphones, dac, subwoofer, cables_other
 - year: release year or approximate era as string e.g. '1978' or 'Late 1970s'
 - description: 2-3 sentences about this gear — when it was made, what it's known for, its reputation in the audiophile community
-- specs: object with category-appropriate key/value pairs (all values as strings):
-  turntable: drive_type, speeds, tonearm, platter_material, motor_type
-  amplifier/receiver: power_output, amplifier_type, inputs, outputs, thd
-  speakers: type, driver_size, impedance, sensitivity, frequency_response
-  headphones: type, driver_size, impedance, sensitivity, frequency_response
-  cartridge: type, output_voltage, stylus_type, frequency_response, tracking_force
-  dac: inputs, outputs, sample_rate, bit_depth, chip
-  phono_preamp/preamp: gain, inputs, outputs, impedance, snr
-  subwoofer: driver_size, power, frequency_response, inputs
-  Use your judgment for other categories.
+- specs: YOU MUST populate this object with real technical specifications found via web search. Do not return an empty object. Search for the actual manufacturer specs for this exact model and include ALL of the following that apply:
+
+  For receivers/amplifiers: power_output, thd, frequency_response, snr, damping_factor, inputs, speaker_impedance, dimensions, weight
+
+  For turntables: drive_type, speeds, wow_flutter, signal_to_noise, channel_separation, tonearm, cartridge_weight_range, dimensions, weight
+
+  For speakers: type, impedance, sensitivity, frequency_response, power_handling, driver_configuration, dimensions, weight
+
+  For headphones: type, impedance, sensitivity, frequency_response, driver_size, cable_length, weight
+
+  For cartridges: type, output_voltage, frequency_response, channel_separation, tracking_force, stylus_type, impedance
+
+  For DACs: inputs, outputs, sample_rate, bit_depth, snr, thd, chip
+
+  For phono preamps: gain, riaa_accuracy, input_impedance, output_impedance, snr, thd, inputs, outputs
+
+  Use real values from manufacturer documentation or spec sheets. All values must be strings. Never return an empty specs object.
 - confidence: 0.0 to 1.0
 
-If you don't recognize the equipment, return confidence: 0 and empty/null fields.`,
+If you don't recognize the equipment, return confidence: 0 and empty/null fields.
+
+Respond with ONLY a raw JSON object — no markdown, no code fences, no explanation.
+Start your response with { and end with }`,
         },
       ],
     },
     config: {
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          category: { type: Type.STRING, nullable: true },
-          year: { type: Type.STRING, nullable: true },
-          description: { type: Type.STRING, nullable: true },
-          specs: { type: Type.OBJECT, nullable: true },
-          confidence: { type: Type.NUMBER },
-        },
-        required: ['category', 'year', 'description', 'specs', 'confidence'],
-      },
+      tools: [{ googleSearch: {} }],
     },
   })), GEMINI_TIMEOUT_MS);
 
-  const raw = response.text || '{}';
+  const rawText = response.text || '';
+  // Strip markdown code fences if present (```json ... ``` or ``` ... ```)
+  const stripped = rawText.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
   let data: Record<string, unknown>;
   try {
-    data = JSON.parse(raw);
+    data = JSON.parse(stripped || '{}');
   } catch {
-    console.error('[admin-gear-enrich] Failed to parse Gemini response:', raw);
+    console.error('[admin-gear-enrich] Failed to parse Gemini response:', rawText);
     res.status(500).json({ error: 'Failed to parse AI response' });
     return;
   }
