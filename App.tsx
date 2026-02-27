@@ -930,7 +930,7 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'wantlist' && currentView !== 'value-dashboard' && currentView !== 'profile' && currentView !== 'price-alerts' && currentView !== 'spins' && <div className="flex-1 max-w-xl flex items-center gap-2">
+          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'value-dashboard' && currentView !== 'profile' && currentView !== 'price-alerts' && currentView !== 'spins' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button
               onClick={() => setShowStats(!showStats)}
               className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
@@ -1376,6 +1376,27 @@ const App: React.FC = () => {
               <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Browse Discogs</h3>
               <p className="text-th-text3/70 text-xs leading-relaxed">Search the Discogs database for releases, labels, and artists.</p>
             </button>
+
+            {/* Wantlist */}
+            {albums.length > 0 && (
+              <button
+                onClick={() => setCurrentView('wantlist')}
+                className="glass-morphism rounded-3xl p-6 md:p-8 text-left group hover:border-[#dd6e42]/30 hover:bg-[#dd6e42]/5 transition-all duration-300 cursor-pointer relative"
+              >
+                {wantlistCount > 0 && (
+                  <span className="absolute top-4 right-4 bg-[#dd6e42] text-th-text text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {wantlistCount}
+                  </span>
+                )}
+                <div className="w-12 h-12 rounded-2xl bg-[#dd6e42]/10 flex items-center justify-center mb-5 group-hover:bg-[#dd6e42]/20 transition-colors">
+                  <svg className="w-6 h-6 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                  </svg>
+                </div>
+                <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Wantlist</h3>
+                <p className="text-th-text3/70 text-xs leading-relaxed">Records you're hunting for — track prices and availability.</p>
+              </button>
+            )}
 
             {/* Upload a Cover — shown when crate is empty */}
             {albums.length === 0 && (

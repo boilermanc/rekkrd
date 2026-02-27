@@ -79,6 +79,32 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
     fetchAlerts();
   }, [fetchWantlist, fetchAlerts, userId]);
 
+  // Fire-and-forget: fetch prices + cover art for newly added items, then refresh the list.
+  async function backfillPricing(releaseIds: number[]) {
+    if (releaseIds.length === 0) return;
+    try {
+      const session = await supabase?.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      if (!token) return;
+
+      const res = await fetch('/api/discogs-pricing', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ release_ids: releaseIds }),
+      });
+
+      if (res.ok) {
+        const updated = await wantlistService.getWantlist();
+        setWantlist(updated);
+      }
+    } catch {
+      // Non-fatal — prices will populate on next manual refresh
+    }
+  }
+
   async function handleRemove(id: string) {
     const previous = wantlist;
     setWantlist((prev) => prev.filter((item) => item.id !== id));
@@ -438,10 +464,18 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto p-3 sm:p-6">
               <DiscogsWantlistBrowser
-                onImportComplete={() => {
+                onImportComplete={async () => {
                   setShowImportBrowser(false);
-                  fetchWantlist();
+                  const data = await wantlistService.getWantlist();
+                  setWantlist(data);
+                  setLoading(false);
                   onRefreshCount();
+
+                  // Backfill pricing + cover art for items missing prices
+                  const needsPricing = data
+                    .filter(item => item.discogs_release_id !== null && item.price_median === null)
+                    .map(item => item.discogs_release_id!);
+                  backfillPricing(needsPricing);
                 }}
               />
             </div>
