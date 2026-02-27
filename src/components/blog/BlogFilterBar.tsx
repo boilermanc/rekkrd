@@ -71,12 +71,12 @@ const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
   }, []);
 
   return (
-    <div className="blog-filter-bar" style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+    <div className="blog-filter-bar" style={{ background: '#fff', borderRadius: '12px', padding: '16px', marginBottom: '24px', border: '1px solid rgba(79,109,122,0.08)', boxShadow: '0 4px 20px rgba(79,109,122,0.08)' }}>
       {/* Search */}
       <div style={{ position: 'relative', marginBottom: categories.length > 0 || popularTags.length > 0 ? '12px' : 0 }}>
         <Search
           size={16}
-          style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }}
+          style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#7d9199', pointerEvents: 'none' }}
         />
         <input
           type="text"
@@ -87,11 +87,12 @@ const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
           style={{
             width: '100%',
             padding: '10px 36px 10px 36px',
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: '#f7f4ef',
+            border: '1px solid rgba(79,109,122,0.15)',
             borderRadius: '8px',
-            color: '#e5e7eb',
+            color: '#2d3a3e',
             fontSize: '14px',
+            fontFamily: 'inherit',
             outline: 'none',
             boxSizing: 'border-box',
           }}
@@ -107,7 +108,7 @@ const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
               transform: 'translateY(-50%)',
               background: 'none',
               border: 'none',
-              color: '#9ca3af',
+              color: '#7d9199',
               cursor: 'pointer',
               padding: '4px',
               display: 'flex',
@@ -141,13 +142,13 @@ const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
               flexShrink: 0,
               padding: '6px 14px',
               borderRadius: '9999px',
-              border: 'none',
+              border: activeCategory === null ? '1px solid #dd6e42' : '1px solid rgba(79,109,122,0.15)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: 'background 0.15s, color 0.15s',
-              background: activeCategory === null ? '#E8927C' : 'rgba(255,255,255,0.1)',
-              color: activeCategory === null ? '#fff' : '#d1d5db',
+              transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+              background: activeCategory === null ? '#dd6e42' : '#efe9dd',
+              color: activeCategory === null ? '#fff' : '#4f6d7a',
             }}
           >
             All
@@ -161,14 +162,14 @@ const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
                 flexShrink: 0,
                 padding: '6px 14px',
                 borderRadius: '9999px',
-                border: 'none',
+                border: activeCategory === category ? '1px solid #dd6e42' : '1px solid rgba(79,109,122,0.15)',
                 fontSize: '13px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                transition: 'background 0.15s, color 0.15s',
+                transition: 'background 0.15s, color 0.15s, border-color 0.15s',
                 whiteSpace: 'nowrap',
-                background: activeCategory === category ? '#E8927C' : 'rgba(255,255,255,0.1)',
-                color: activeCategory === category ? '#fff' : '#d1d5db',
+                background: activeCategory === category ? '#dd6e42' : '#efe9dd',
+                color: activeCategory === category ? '#fff' : '#4f6d7a',
               }}
             >
               {capitalizeCategory(category)} ({count})
@@ -199,14 +200,17 @@ const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
                 flexShrink: 0,
                 padding: '4px 10px',
                 borderRadius: '9999px',
-                border: 'none',
-                fontSize: '11px',
+                border: activeTag === tag ? '1px solid #4f6d7a' : '1px solid rgba(79,109,122,0.12)',
+                fontFamily: "'Space Mono', monospace",
+                fontSize: '10px',
                 fontWeight: 500,
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
                 cursor: 'pointer',
-                transition: 'background 0.15s, color 0.15s',
+                transition: 'background 0.15s, color 0.15s, border-color 0.15s',
                 whiteSpace: 'nowrap',
-                background: activeTag === tag ? '#64748b' : 'rgba(255,255,255,0.1)',
-                color: activeTag === tag ? '#fff' : '#d1d5db',
+                background: activeTag === tag ? '#4f6d7a' : '#f7f4ef',
+                color: activeTag === tag ? '#fff' : '#7d9199',
               }}
             >
               #{tag}
