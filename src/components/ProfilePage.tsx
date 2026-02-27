@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Disc3, Heart, Calendar, Pencil, ChevronRight, User, Lock, Link2,
+  Disc3, Heart, ClipboardList, Calendar, Pencil, ChevronRight, User, Lock, Link2,
   AlertTriangle, Crown, Gem, Sparkles, Headphones, Music, Tv, Trophy,
   TrendingUp, Mail, Eye, EyeOff, Check, Bell, LogOut, Trash2,
 } from 'lucide-react';
@@ -681,7 +681,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, albumCount, onClose }
                   <span className="text-th-text3 text-xs">Records</span>
                 </div>
                 <div className="flex items-center gap-2 glass-morphism rounded-full px-4 py-2 border border-th-surface/[0.10]">
-                  <Heart className="w-4 h-4 text-[#dd6e42]" />
+                  <ClipboardList className="w-4 h-4 text-[#dd6e42]" />
                   <span className="text-[#dd6e42] font-bold text-sm">{wantlistCount}</span>
                   <span className="text-th-text3 text-xs">Wanted</span>
                 </div>

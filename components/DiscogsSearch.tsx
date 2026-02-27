@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Heart } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { wantlistService } from '../services/wantlistService';
 import { NewWantlistItem } from '../types';
@@ -309,7 +309,7 @@ const ResultCard: React.FC<{
               : 'text-th-text3 hover:text-[#dd6e42] hover:bg-[#dd6e42]/10'
           }`}
         >
-          <Heart className="w-3.5 h-3.5" fill={isAdded ? 'currentColor' : 'none'} />
+          <ClipboardList className="w-3.5 h-3.5" />
           {isAdded ? 'Added' : 'Wantlist'}
         </button>
 

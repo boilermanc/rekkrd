@@ -108,7 +108,12 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             }`}
           >
             <svg className="w-5 h-5 text-th-nav-text/80 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+              <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <path d="M12 11h4" />
+              <path d="M12 16h4" />
+              <path d="M8 11h.01" />
+              <path d="M8 16h.01" />
             </svg>
             <span className={`text-sm font-label tracking-wide ${currentView === 'wantlist' ? 'text-[#dd6e42]' : 'text-th-nav-text'}`}>Wantlist</span>
             {wantlistCount > 0 && (

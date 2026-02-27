@@ -930,7 +930,7 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'value-dashboard' && currentView !== 'profile' && currentView !== 'price-alerts' && currentView !== 'spins' && <div className="flex-1 max-w-xl flex items-center gap-2">
+          {currentView !== 'landing' && currentView !== 'stakkd' && currentView !== 'discogs' && currentView !== 'profile' && currentView !== 'price-alerts' && currentView !== 'spins' && <div className="flex-1 max-w-xl flex items-center gap-2">
             <button
               onClick={() => setShowStats(!showStats)}
               className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${showStats ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
@@ -1008,7 +1008,12 @@ const App: React.FC = () => {
               title="Wantlist"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <path d="M12 11h4" />
+                <path d="M12 16h4" />
+                <path d="M8 11h.01" />
+                <path d="M8 16h.01" />
               </svg>
               {wantlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#dd6e42] text-th-text text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
@@ -1390,7 +1395,12 @@ const App: React.FC = () => {
                 )}
                 <div className="w-12 h-12 rounded-2xl bg-[#dd6e42]/10 flex items-center justify-center mb-5 group-hover:bg-[#dd6e42]/20 transition-colors">
                   <svg className="w-6 h-6 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                    <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <path d="M12 11h4" />
+                    <path d="M12 16h4" />
+                    <path d="M8 11h.01" />
+                    <path d="M8 16h.01" />
                   </svg>
                 </div>
                 <h3 className="font-label text-[10px] md:text-xs tracking-widest uppercase font-bold text-th-text mb-2">Wantlist</h3>

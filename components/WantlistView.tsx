@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Heart, Plus, RefreshCw } from 'lucide-react';
+import { ClipboardList, Plus, RefreshCw } from 'lucide-react';
 import { WantlistItem, PriceAlert } from '../types';
 import { wantlistService } from '../services/wantlistService';
 import { supabase } from '../services/supabaseService';
@@ -476,7 +476,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       {/* Empty state */}
       {wantlist.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-32 text-center px-6">
-          <Heart className="w-16 h-16 text-th-text3/30 mb-6" />
+          <ClipboardList className="w-16 h-16 text-th-text3/30 mb-6" />
           <h3 className="text-xl font-bold text-th-text mb-2">Your wantlist is empty</h3>
           <p className="text-th-text3 text-sm max-w-md">
             Add records you're hunting for and track their market prices.
