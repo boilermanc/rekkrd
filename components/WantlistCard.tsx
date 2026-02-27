@@ -32,7 +32,7 @@ function formatRelativeDate(dateString: string): string {
 }
 
 const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwned, isInCollection, hasAlert, onSetAlert, onCoverChange }) => {
-  const hasPrices = item.price_low !== null || item.price_median !== null || item.price_high !== null;
+  const hasPrices = (item.price_low != null && item.price_low > 0) || (item.price_median != null && item.price_median > 0) || (item.price_high != null && item.price_high > 0);
   const [confirmingOwned, setConfirmingOwned] = useState(false);
   const [alertMode, setAlertMode] = useState(false);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
@@ -92,7 +92,7 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
           </div>
         )}
 
-        {item.price_median !== null && (
+        {item.price_median != null && item.price_median > 0 && (
           <div className="absolute bottom-2 left-2 bg-[#dd6e42]/90 backdrop-blur-sm text-th-text px-2 py-0.5 rounded text-[10px] font-bold shadow-lg z-10 border border-[#f0a882]/50">
             ${Math.round(item.price_median)}
           </div>
@@ -124,19 +124,19 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
         {hasPrices && (
           <div className="mt-3 pt-3 border-t border-th-surface/[0.08]">
             <div className="flex items-center justify-between text-[10px]">
-              {item.price_low !== null && (
+              {item.price_low != null && item.price_low > 0 && (
                 <div className="text-center">
                   <span className="block text-th-text3 uppercase tracking-wider">Low</span>
                   <span className="block text-[#dd6e42] font-bold">${Math.round(item.price_low)}</span>
                 </div>
               )}
-              {item.price_median !== null && (
+              {item.price_median != null && item.price_median > 0 && (
                 <div className="text-center">
                   <span className="block text-th-text3 uppercase tracking-wider">Med</span>
                   <span className="block text-[#dd6e42] font-bold">${Math.round(item.price_median)}</span>
                 </div>
               )}
-              {item.price_high !== null && (
+              {item.price_high != null && item.price_high > 0 && (
                 <div className="text-center">
                   <span className="block text-th-text3 uppercase tracking-wider">High</span>
                   <span className="block text-[#dd6e42] font-bold">${Math.round(item.price_high)}</span>

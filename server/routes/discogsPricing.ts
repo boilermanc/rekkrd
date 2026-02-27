@@ -128,15 +128,23 @@ router.post(
             ?? release?.images?.[0]?.resource_url
             ?? null;
 
-          const updateFields: Record<string, unknown> = {
-            price_low: priceLow,
-            price_median: priceMedian,
-            price_high: priceHigh,
-            prices_updated_at: new Date().toISOString(),
-          };
+          const hasValidPrices = (priceLow && priceLow > 0) || (priceMedian && priceMedian > 0) || (priceHigh && priceHigh > 0);
+
+          // Only include pricing fields that are > 0 — don't overwrite Gemini estimates with zeros
+          const updateFields: Record<string, unknown> = {};
+          if (priceLow && priceLow > 0) updateFields.price_low = priceLow;
+          if (priceMedian && priceMedian > 0) updateFields.price_median = priceMedian;
+          if (priceHigh && priceHigh > 0) updateFields.price_high = priceHigh;
+          if (hasValidPrices) updateFields.prices_updated_at = new Date().toISOString();
 
           if (coverUrl) {
             updateFields.cover_url = coverUrl;
+          }
+
+          // Skip DB update if there's nothing to write
+          if (Object.keys(updateFields).length === 0) {
+            console.log(`${LOG_PREFIX} skipping ${releaseId} — no marketplace data`);
+            continue;
           }
 
           const { error: updateError } = await supabase
