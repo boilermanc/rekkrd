@@ -115,6 +115,8 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       const sessionUserId = session?.data?.session?.user?.id;
       if (!token || !sessionUserId) return;
 
+      showToast(`Searching for "${title}" details...`, 'info', { duration: 0 });
+
       const res = await fetch('/api/metadata', {
         method: 'POST',
         headers: {
@@ -123,7 +125,12 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
         },
         body: JSON.stringify({ artist, title }),
       });
-      if (!res.ok) return;
+
+      if (!res.ok) {
+        console.warn('[wantlist-backfill] metadata request failed:', res.status);
+        showToast(`Added "${title}" — couldn't fetch details automatically`, 'info');
+        return;
+      }
 
       const data = await res.json() as {
         cover_url?: string;
@@ -131,12 +138,38 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
         genre?: string;
         discogs_url?: string;
       };
+      console.log('[wantlist-backfill] metadata response:', { cover_url: !!data.cover_url, year: data.year, genre: data.genre, discogs_url: data.discogs_url });
+
+      showToast('Found! Updating cover art and details...', 'info', { duration: 0 });
 
       // Parse discogs_release_id from discogs_url (e.g. /release/12345-...)
       let discogsReleaseId: number | null = null;
       if (data.discogs_url) {
-        const match = data.discogs_url.match(/\/release\/(\d+)/);
-        if (match) discogsReleaseId = parseInt(match[1], 10);
+        const urlMatch = data.discogs_url.match(/\/release\/(\d+)/);
+        if (urlMatch) discogsReleaseId = parseInt(urlMatch[1], 10);
+      }
+      console.log('[wantlist-backfill] parsed release_id:', discogsReleaseId, 'from url:', data.discogs_url);
+
+      // Fallback: if Gemini didn't return a discogs_url, try Discogs search with a timeout
+      if (!discogsReleaseId) {
+        console.log('[wantlist-backfill] no release_id from metadata, trying Discogs search fallback');
+        try {
+          const params = new URLSearchParams({ q: `${artist} ${title}`, type: 'release', format: 'Vinyl', per_page: '1' });
+          const searchRes = await fetch(`/api/discogs/search?${params}`, { signal: AbortSignal.timeout(10_000) });
+          if (searchRes.ok) {
+            const searchData = await searchRes.json() as { results?: { id: number; cover_image?: string }[] };
+            const searchMatch = searchData.results?.[0];
+            if (searchMatch?.id) {
+              discogsReleaseId = searchMatch.id;
+              if (!data.cover_url && searchMatch.cover_image) {
+                data.cover_url = searchMatch.cover_image;
+              }
+              console.log('[wantlist-backfill] Discogs fallback found release_id:', discogsReleaseId);
+            }
+          }
+        } catch {
+          console.warn('[wantlist-backfill] Discogs search fallback timed out or failed');
+        }
       }
 
       // Build update with only fields that add new information
@@ -145,7 +178,10 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       if (!existingYear && data.year) update.year = data.year;
       if (!existingGenre && data.genre) update.genre = data.genre;
       if (data.discogs_url) update.discogs_url = data.discogs_url;
-      if (discogsReleaseId) update.discogs_release_id = discogsReleaseId;
+      if (discogsReleaseId) {
+        update.discogs_release_id = discogsReleaseId;
+        if (!data.discogs_url) update.discogs_url = `https://www.discogs.com/release/${discogsReleaseId}`;
+      }
 
       if (Object.keys(update).length > 0) {
         await supabase!
@@ -157,14 +193,20 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
 
       // If we got a discogs_release_id, fetch pricing (which also re-fetches the list)
       if (discogsReleaseId) {
+        console.log('[wantlist-backfill] fetching pricing for release:', discogsReleaseId);
+        showToast('Fetching marketplace pricing...', 'info', { duration: 0 });
         await backfillPricing([discogsReleaseId]);
+        showToast(`"${title}" fully enriched with cover art and pricing`, 'success');
       } else {
         // Re-fetch to show cover/year/genre updates
         const updated = await wantlistService.getWantlist();
         setWantlist(updated);
+        showToast(`"${title}" updated with cover art and details`, 'success');
       }
-    } catch {
-      // Non-fatal — item stays as manual entry
+    } catch (err) {
+      console.error('[wantlist-backfill] error:', err);
+      // Non-fatal — item stays as manual entry, dismiss the persistent toast
+      showToast(`Added "${title}" to wantlist`, 'success');
     }
   }
 
@@ -277,13 +319,16 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
     const title = addForm.title.trim();
     if (!artist || !title) return;
 
+    const year = addForm.year.trim() || null;
+    const genre = addForm.genre.trim() || null;
+
     setAddSubmitting(true);
     try {
       const newItem = await wantlistService.addToWantlist({
         artist,
         title,
-        year: addForm.year.trim() || null,
-        genre: addForm.genre.trim() || null,
+        year,
+        genre,
         cover_url: null,
         discogs_release_id: null,
         discogs_url: null,
@@ -291,7 +336,6 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
         price_median: null,
         price_high: null,
       });
-      showToast(`Added "${title}" by ${artist} to wantlist`, 'success');
       setAddForm({ artist: '', title: '', year: '', genre: '' });
       setShowAddModal(false);
       const updated = await wantlistService.getWantlist();
@@ -299,7 +343,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
       onRefreshCount();
 
       // Background: enrich with metadata, cover art, and pricing
-      backfillManualAdd(newItem.id, artist, title, addForm.year.trim() || null, addForm.genre.trim() || null);
+      backfillManualAdd(newItem.id, artist, title, year, genre);
     } catch {
       showToast('Failed to add to wantlist', 'error');
     } finally {
