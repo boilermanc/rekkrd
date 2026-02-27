@@ -142,8 +142,8 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
     }
 
     body {
-      background: #0f0f1a;
-      color: #e8e8f0;
+      background: #ffffff;
+      color: #1a1a2e;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 13px;
       line-height: 1.6;
@@ -156,7 +156,7 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       text-align: center;
       margin-bottom: 32px;
       padding-bottom: 24px;
-      border-bottom: 1px solid rgba(221, 110, 66, 0.25);
+      border-bottom: 1px solid #e8e8f0;
     }
 
     .logo-mark {
@@ -167,7 +167,7 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       height: 48px;
       border-radius: 50%;
       background: #dd6e42;
-      color: #0f0f1a;
+      color: #ffffff;
       font-family: 'Playfair Display', Georgia, serif;
       font-weight: 700;
       font-size: 24px;
@@ -179,7 +179,7 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       font-size: 9px;
       letter-spacing: 0.4em;
       text-transform: uppercase;
-      color: #f0a882;
+      color: #dd6e42;
       margin-bottom: 20px;
     }
 
@@ -187,19 +187,19 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 28px;
       font-weight: 700;
-      color: #e8e8f0;
+      color: #1a1a2e;
       margin-bottom: 6px;
     }
 
     .header .subtitle {
       font-size: 14px;
-      color: #f0a882;
+      color: #dd6e42;
       font-weight: 600;
     }
 
     .header .date {
       font-size: 10px;
-      color: rgba(232, 232, 240, 0.4);
+      color: #888899;
       text-transform: uppercase;
       letter-spacing: 0.15em;
       margin-top: 8px;
@@ -214,20 +214,20 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       font-size: 10px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
-      color: rgba(232, 232, 240, 0.5);
+      color: #888899;
       margin-bottom: 12px;
       font-weight: 600;
     }
 
     /* ── Warnings ── */
     .warning-card {
-      background: rgba(26, 26, 46, 0.7);
-      border-left: 3px solid #f59e0b;
+      background: #fff8f0;
+      border-left: 3px solid #dd6e42;
       border-radius: 8px;
       padding: 10px 14px;
       margin-bottom: 8px;
       font-size: 13px;
-      color: rgba(232, 232, 240, 0.8);
+      color: #664422;
       line-height: 1.5;
     }
 
@@ -239,8 +239,8 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
     }
 
     .chain-item {
-      background: #1a1a2e;
-      border: 1px solid rgba(232, 232, 240, 0.06);
+      background: #f5f5fa;
+      border: 1px solid #e0e0ee;
       border-radius: 10px;
       padding: 10px 14px;
       display: flex;
@@ -259,19 +259,20 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
     .chain-label {
       font-weight: 500;
       font-size: 13px;
+      color: #1a1a2e;
     }
 
     .chain-arrow {
       text-align: center;
-      color: rgba(232, 232, 240, 0.2);
+      color: #ccccdd;
       font-size: 14px;
       padding: 2px 0;
     }
 
     /* ── Connections ── */
     .conn-card {
-      background: #1a1a2e;
-      border: 1px solid rgba(232, 232, 240, 0.06);
+      background: #f5f5fa;
+      border: 1px solid #e0e0ee;
       border-radius: 10px;
       padding: 12px 14px;
       margin-bottom: 10px;
@@ -287,6 +288,7 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
     .conn-endpoint {
       font-weight: 700;
       font-size: 13px;
+      color: #1a1a2e;
     }
 
     .conn-arrow {
@@ -303,9 +305,9 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
 
     .conn-cable {
       display: inline-block;
-      background: rgba(221, 110, 66, 0.15);
-      border: 1px solid rgba(221, 110, 66, 0.25);
-      color: #f0a882;
+      background: #fde8dc;
+      border: 1px solid #f0a882;
+      color: #dd6e42;
       font-size: 9px;
       font-weight: 700;
       text-transform: uppercase;
@@ -318,12 +320,12 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      color: rgba(232, 232, 240, 0.4);
+      color: #888899;
     }
 
     .conn-notes {
       font-size: 12px;
-      color: rgba(232, 232, 240, 0.5);
+      color: #555566;
       line-height: 1.5;
       margin-top: 4px;
     }
@@ -334,8 +336,8 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       border-collapse: collapse;
       border-radius: 10px;
       overflow: hidden;
-      background: #1a1a2e;
-      border: 1px solid rgba(232, 232, 240, 0.06);
+      background: #ffffff;
+      border: 1px solid #e0e0ee;
     }
 
     .settings-table th {
@@ -343,10 +345,10 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      color: rgba(232, 232, 240, 0.5);
+      color: #1a1a2e;
       padding: 10px 12px;
-      background: rgba(221, 110, 66, 0.08);
-      border-bottom: 1px solid rgba(232, 232, 240, 0.06);
+      background: #f0f0f8;
+      border-bottom: 1px solid #e0e0ee;
       font-weight: 600;
     }
 
@@ -354,7 +356,7 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       padding: 10px 12px;
       font-size: 12px;
       vertical-align: top;
-      border-bottom: 1px solid rgba(232, 232, 240, 0.04);
+      border-bottom: 1px solid #e8e8f0;
     }
 
     .settings-table tr:last-child td {
@@ -362,23 +364,23 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
     }
 
     .alt-row {
-      background: rgba(232, 232, 240, 0.02);
+      background: #f8f8fc;
     }
 
     .td-gear {
       font-weight: 700;
-      color: #e8e8f0;
+      color: #1a1a2e;
       white-space: nowrap;
     }
 
     .td-value {
-      color: #f0a882;
+      color: #dd6e42;
       font-weight: 700;
       white-space: nowrap;
     }
 
     .td-why {
-      color: rgba(232, 232, 240, 0.5);
+      color: #555566;
       font-size: 11px;
       line-height: 1.5;
     }
@@ -394,7 +396,7 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       display: flex;
       gap: 10px;
       font-size: 13px;
-      color: rgba(232, 232, 240, 0.7);
+      color: #333344;
       line-height: 1.5;
     }
 
@@ -408,9 +410,9 @@ export function buildSetupGuidePdfHtml(guide: SetupGuide, gearName: string): str
       text-align: center;
       margin-top: 36px;
       padding-top: 16px;
-      border-top: 1px solid rgba(232, 232, 240, 0.08);
+      border-top: 1px solid #e8e8f0;
       font-size: 10px;
-      color: rgba(232, 232, 240, 0.3);
+      color: #aaaabb;
       letter-spacing: 0.1em;
     }
   </style>

@@ -99,8 +99,8 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
       </div>
 
       <div className="p-4 relative">
-        <h3 className="font-bold text-th-text truncate w-full" title={item.title}>{item.title}</h3>
-        <p className="text-[#dd6e42] text-sm font-medium truncate">{item.artist}</p>
+        <h3 className="font-bold text-th-text line-clamp-2 w-full" title={item.title}>{item.title}</h3>
+        <p className="text-[#dd6e42] text-sm font-medium line-clamp-1">{item.artist}</p>
 
         <div className="mt-2 flex items-center justify-between text-[10px] text-th-text3 uppercase tracking-widest">
           <span>{item.year || 'No Date'}</span>
@@ -156,14 +156,20 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
                 Cancel
               </button>
             </>
+          ) : isInCollection ? (
+            <button
+              onClick={() => onRemove(item.id)}
+              className="flex-1 text-gray-400 hover:text-red-400 text-sm underline transition-colors py-2"
+              aria-label="Remove from wantlist — already in collection"
+            >
+              Remove from Wantlist
+            </button>
           ) : (
             <>
               <button
                 onClick={() => setConfirmingOwned(true)}
-                disabled={isInCollection}
-                className={`flex-1 flex items-center justify-center gap-1.5 bg-[#dd6e42] text-th-text text-xs font-medium py-2 px-3 rounded-lg transition-colors ${isInCollection ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#c45a30]'}`}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-[#dd6e42] text-th-text text-xs font-medium py-2 px-3 rounded-lg transition-colors hover:bg-[#c45a30]"
                 aria-label={`Mark ${item.artist} - ${item.title} as owned`}
-                title={isInCollection ? 'Already in your collection' : undefined}
               >
                 <Disc3 className="w-3.5 h-3.5" />
                 Mark as Owned
@@ -172,7 +178,8 @@ const WantlistCard: React.FC<WantlistCardProps> = ({ item, onRemove, onMarkAsOwn
                 <button
                   onClick={openAlertMode}
                   className="flex items-center justify-center transition-colors p-2 rounded-lg hover:bg-th-surface/[0.08]"
-                  aria-label="Set price alert"
+                  aria-label={hasAlert ? 'Price alert active' : 'Set price alert'}
+                  title={hasAlert ? 'Price alert active' : 'Set price alert'}
                 >
                   {hasAlert ? (
                     <BellRing className="w-4 h-4 text-[#dd6e42]" />

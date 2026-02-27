@@ -680,7 +680,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
 
       {/* Saved Guides */}
       {savedGuides.length > 0 && (
-        <div className="mb-6 rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.03] p-4">
+        <div className="mb-6 rounded-xl border border-th-surface/[0.25] bg-th-surface/[0.08] p-4">
           <h4 className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase mb-3">Saved Guides</h4>
           <div className="space-y-2">
             {savedGuides.map((g) => (
@@ -691,7 +691,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
                 <button
                   onClick={() => handleOpenSavedGuide(g.id)}
                   disabled={loadingSavedGuideId === g.id}
-                  className="flex-1 flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-th-surface/[0.06] transition-all text-left disabled:opacity-50"
+                  className="flex-1 flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-th-surface/[0.12] transition-all text-left disabled:opacity-50"
                 >
                   {loadingSavedGuideId === g.id ? (
                     <svg className="w-3.5 h-3.5 text-[#dd6e42] animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
@@ -699,12 +699,12 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired }) => {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
                   ) : (
-                    <svg className="w-3.5 h-3.5 text-[#dd6e42]/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <svg className="w-3.5 h-3.5 text-[#dd6e42]/90 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                     </svg>
                   )}
-                  <span className="text-th-text text-sm font-medium truncate">{g.name}</span>
-                  <span className="text-th-text3/40 text-[10px] tracking-widest ml-auto shrink-0">{formatTimeAgo(g.created_at)}</span>
+                  <span className="text-th-text text-sm font-semibold truncate">{g.name}</span>
+                  <span className="text-th-text3/70 text-[10px] tracking-widest ml-auto shrink-0">{formatTimeAgo(g.created_at)}</span>
                 </button>
                 <button
                   onClick={() => handleDeleteSavedGuide(g.id)}
