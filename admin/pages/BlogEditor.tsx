@@ -1,7 +1,41 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Markdown from 'react-markdown';
+import { Sparkles } from 'lucide-react';
 import { adminService, BlogPostAdmin } from '../../services/adminService';
 import '../../pages/Blog.css';
+
+const CATEGORIES = [
+  { value: 'general', label: 'General' },
+  { value: 'gear', label: 'Gear' },
+  { value: 'collecting', label: 'Collecting' },
+  { value: 'culture', label: 'Culture' },
+  { value: 'how-to', label: 'How-To' },
+  { value: 'news', label: 'News' },
+  { value: 'reviews', label: 'Reviews' },
+] as const;
+
+type ScheduleStatus = 'draft' | 'published' | 'scheduled';
+
+function getDefaultScheduleDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(9, 0, 0, 0);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function getInitialScheduleStatus(post?: BlogPostAdmin): ScheduleStatus {
+  if (!post) return 'draft';
+  if (post.status === 'published') return 'published';
+  if (post.status === 'draft' && post.published_at) return 'scheduled';
+  return 'draft';
+}
 
 interface BlogEditorProps {
   post?: BlogPostAdmin;
@@ -16,10 +50,17 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, onSave, onCancel }) => {
   const [tags, setTags] = useState<string[]>(post?.tags || []);
   const [tagInput, setTagInput] = useState('');
   const [author, setAuthor] = useState(post?.author || 'Rekkrd');
+  const [category, setCategory] = useState((post as any)?.category || 'general');
   const [featuredImage, setFeaturedImage] = useState(post?.featured_image || '');
-  const [status, setStatus] = useState<'draft' | 'published'>(post?.status || 'draft');
+  const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>(getInitialScheduleStatus(post));
+  const [scheduledDate, setScheduledDate] = useState(
+    post?.published_at && post.status === 'draft' ? toDatetimeLocal(post.published_at) : getDefaultScheduleDate()
+  );
   const [saving, setSaving] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState<string | null>(null);
+  const [showImageUrl, setShowImageUrl] = useState(false);
+  const [showImagePrompt, setShowImagePrompt] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,21 +91,28 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, onSave, onCancel }) => {
     setSaving(true);
     setStatusMsg(null);
 
-    const formData = {
+    const formData: Record<string, unknown> = {
       title: title.trim(),
       body: body,
       excerpt: excerpt.trim() || undefined,
       featured_image: featuredImage.trim() || undefined,
       tags,
       author: author.trim() || 'Rekkrd',
-      status,
+      category,
+      status: scheduleStatus === 'published' ? 'published' : 'draft',
+      published_at:
+        scheduleStatus === 'published'
+          ? new Date().toISOString()
+          : scheduleStatus === 'scheduled'
+            ? new Date(scheduledDate).toISOString()
+            : null,
     };
 
     try {
       if (post) {
-        await adminService.updateBlogPost(post.id, formData);
+        await adminService.updateBlogPost(post.id, formData as any);
       } else {
-        await adminService.createBlogPost(formData);
+        await adminService.createBlogPost(formData as any);
       }
       setStatusMsg({ text: post ? 'Post updated successfully.' : 'Post created successfully.', isError: false });
       setTimeout(() => onSave(), 600);
@@ -74,61 +122,29 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, onSave, onCancel }) => {
     }
   };
 
-  // Poll for updated image after generation is triggered
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, []);
-
   const handleGenerateImage = async () => {
     if (!post) return;
     setGeneratingImage(true);
     setStatusMsg(null);
+    setImagePrompt(null);
     try {
-      const resp = await fetch('https://n8n.sproutify.app/webhook/blog-image', {
+      const resp = await fetch('/api/blog/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           post_id: post.id,
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt,
+          title: title,
+          excerpt: excerpt,
         }),
       });
-      if (!resp.ok) throw new Error(`Webhook returned ${resp.status}`);
-      setStatusMsg({ text: 'Image generation started — polling for update...', isError: false });
-
-      // Poll every 5s for up to 90s to detect updated featured_image
-      const originalImage = featuredImage;
-      let elapsed = 0;
-      if (pollRef.current) clearInterval(pollRef.current);
-      pollRef.current = setInterval(async () => {
-        elapsed += 5;
-        if (elapsed > 90) {
-          if (pollRef.current) clearInterval(pollRef.current);
-          pollRef.current = null;
-          setStatusMsg({ text: 'Image may still be generating. Close and reopen the editor to check.', isError: false });
-          setGeneratingImage(false);
-          return;
-        }
-        try {
-          const updated = await adminService.getBlogPost(post.slug);
-          if (updated.featured_image && updated.featured_image !== originalImage) {
-            setFeaturedImage(updated.featured_image);
-            setStatusMsg({ text: 'Image updated successfully.', isError: false });
-            setGeneratingImage(false);
-            if (pollRef.current) clearInterval(pollRef.current);
-            pollRef.current = null;
-          }
-        } catch {
-          // Silently continue polling
-        }
-      }, 5000);
+      if (!resp.ok) throw new Error(`Image generation failed: ${resp.status}`);
+      const data = await resp.json();
+      setFeaturedImage(data.featured_image);
+      if (data.image_prompt) setImagePrompt(data.image_prompt);
+      setStatusMsg({ text: 'Hero image generated successfully.', isError: false });
     } catch (err) {
-      setStatusMsg({ text: err instanceof Error ? err.message : 'Failed to trigger image generation', isError: true });
+      setStatusMsg({ text: err instanceof Error ? err.message : 'Failed to generate image', isError: true });
+    } finally {
       setGeneratingImage(false);
     }
   };
@@ -208,6 +224,22 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, onSave, onCancel }) => {
             />
           </div>
 
+          {/* Category */}
+          <div>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Category</label>
+            <select
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              className={inputClass}
+              style={{ borderColor: 'rgb(229,231,235)' }}
+              aria-label="Post category"
+            >
+              {CATEGORIES.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Author */}
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Author</label>
@@ -225,94 +257,141 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, onSave, onCancel }) => {
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Status</label>
             <select
-              value={status}
-              onChange={e => setStatus(e.target.value as 'draft' | 'published')}
+              value={scheduleStatus}
+              onChange={e => setScheduleStatus(e.target.value as ScheduleStatus)}
               className={inputClass}
               style={{ borderColor: 'rgb(229,231,235)' }}
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
+              <option value="scheduled">Scheduled</option>
             </select>
+            {scheduleStatus === 'scheduled' && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Publish Date</label>
+                <input
+                  type="datetime-local"
+                  value={scheduledDate}
+                  onChange={e => setScheduledDate(e.target.value)}
+                  className={inputClass}
+                  style={{ borderColor: 'rgb(229,231,235)' }}
+                  aria-label="Scheduled publish date"
+                />
+                <p className="text-xs mt-1.5" style={{ color: 'rgb(156,163,175)' }}>
+                  Scheduled posts will be published automatically at the selected time.
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Featured Image URL */}
+          {/* Hero Image */}
           <div className="lg:col-span-2">
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Featured Image URL</label>
-            <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={featuredImage}
-                onChange={e => setFeaturedImage(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className={`${inputClass} flex-1`}
-                style={{ borderColor: 'rgb(229,231,235)' }}
-              />
-              {featuredImage && (
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Hero Image</label>
+            {featuredImage ? (
+              <div>
                 <img
-                  src={featuredImage}
-                  alt="Preview"
-                  className="w-10 h-10 rounded-lg object-cover shrink-0 border"
-                  style={{ borderColor: 'rgb(229,231,235)' }}
+                  src={featuredImage.replace(/^=+/, '')}
+                  alt={`Hero image for ${title || 'blog post'}`}
+                  className="w-full rounded-lg object-cover border mb-3"
+                  style={{ aspectRatio: '16/9', maxWidth: '100%', borderColor: 'rgb(229,231,235)' }}
                   loading="lazy"
                   onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
-              )}
-            </div>
-          </div>
-
-          {/* Image preview & generate */}
-          {post && (
-            <div className="lg:col-span-2">
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgb(107,114,128)' }}>Image</label>
-              {featuredImage ? (
-                <div className="flex items-start gap-3">
-                  <img
-                    src={featuredImage.replace(/^=+/, '')}
-                    alt={`Hero image for ${title}`}
-                    className="rounded-lg object-cover border"
-                    style={{ maxHeight: 200, maxWidth: '100%', borderColor: 'rgb(229,231,235)' }}
-                    loading="lazy"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={handleGenerateImage}
-                    disabled={generatingImage}
-                    aria-label="Regenerate blog image"
-                    className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                    style={{ backgroundColor: 'rgb(243,244,246)', color: 'rgb(107,114,128)' }}
+                    disabled={generatingImage || !post}
+                    title={!post ? 'Save as draft first to generate an image' : undefined}
+                    aria-label="Generate hero image with AI"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg text-white transition-colors disabled:opacity-50"
+                    style={{ backgroundColor: 'rgb(99,102,241)' }}
                   >
                     {generatingImage ? (
-                      <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
+                      <Sparkles className="w-3.5 h-3.5" />
                     )}
-                    {generatingImage ? 'Generating...' : 'Regenerate'}
+                    {generatingImage ? 'Generating hero image...' : 'Generate Hero Image'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowImageUrl(v => !v)}
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                    style={{ backgroundColor: 'rgb(243,244,246)', color: 'rgb(107,114,128)' }}
+                  >
+                    {showImageUrl ? 'Hide URL' : 'Edit URL'}
                   </button>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div
+                className="w-full rounded-lg flex flex-col items-center justify-center gap-3 border-2 border-dashed"
+                style={{ aspectRatio: '16/9', maxWidth: '100%', borderColor: 'rgb(209,213,219)', backgroundColor: 'rgb(249,250,251)' }}
+              >
                 <button
                   type="button"
                   onClick={handleGenerateImage}
-                  disabled={generatingImage}
-                  aria-label="Regenerate blog image"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg text-white transition-colors disabled:opacity-50"
+                  disabled={generatingImage || !post}
+                  title={!post ? 'Save as draft first to generate an image' : undefined}
+                  aria-label="Generate hero image with AI"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50"
                   style={{ backgroundColor: 'rgb(99,102,241)' }}
                 >
                   {generatingImage ? (
-                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <Sparkles className="w-3.5 h-3.5" />
                   )}
-                  {generatingImage ? 'Generating...' : 'Generate Image'}
+                  {generatingImage ? 'Generating hero image...' : 'Generate Hero Image'}
                 </button>
-              )}
-            </div>
-          )}
+                {!post && (
+                  <p className="text-xs" style={{ color: 'rgb(156,163,175)' }}>Save as draft first to generate an image</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowImageUrl(v => !v)}
+                  className="text-xs font-medium transition-colors"
+                  style={{ color: 'rgb(107,114,128)' }}
+                >
+                  {showImageUrl ? 'Hide URL input' : 'Or enter URL manually'}
+                </button>
+              </div>
+            )}
+
+            {/* Collapsible URL input */}
+            {showImageUrl && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={featuredImage}
+                  onChange={e => setFeaturedImage(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className={inputClass}
+                  style={{ borderColor: 'rgb(229,231,235)' }}
+                />
+              </div>
+            )}
+
+            {/* Collapsible image prompt */}
+            {imagePrompt && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowImagePrompt(v => !v)}
+                  className="text-xs font-medium transition-colors"
+                  style={{ color: 'rgb(107,114,128)' }}
+                >
+                  {showImagePrompt ? 'Hide prompt' : 'Show image prompt'}
+                </button>
+                {showImagePrompt && (
+                  <p className="mt-1 text-xs rounded-lg px-3 py-2" style={{ backgroundColor: 'rgb(249,250,251)', color: 'rgb(107,114,128)' }}>
+                    {imagePrompt}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Tags */}
           <div className="lg:col-span-2">
