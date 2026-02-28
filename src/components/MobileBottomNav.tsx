@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, TrendingUp } from 'lucide-react';
+import { BarChart3, Bell, TrendingUp } from 'lucide-react';
 
 type ViewMode = 'public-landing' | 'landing' | 'grid' | 'list' | 'stakkd'
-  | 'discogs' | 'wantlist' | 'value-dashboard' | 'profile' | 'price-alerts' | 'spins' | 'shelves' | 'bulk-import';
+  | 'discogs' | 'wantlist' | 'value-dashboard' | 'profile' | 'price-alerts' | 'spins' | 'shelves' | 'bulk-import' | 'analytics';
 
 interface MobileBottomNavProps {
   currentView: ViewMode;
@@ -36,7 +36,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     setIsMoreOpen(false);
   }, [currentView]);
 
-  const isMoreActive = isMoreOpen || currentView === 'discogs' || currentView === 'wantlist' || currentView === 'price-alerts' || currentView === 'value-dashboard' || currentView === 'shelves' || currentView === 'bulk-import';
+  const isMoreActive = isMoreOpen || currentView === 'discogs' || currentView === 'wantlist' || currentView === 'price-alerts' || currentView === 'value-dashboard' || currentView === 'shelves' || currentView === 'bulk-import' || currentView === 'analytics';
 
   return (
     <>
@@ -82,6 +82,17 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           >
             <TrendingUp className="w-5 h-5 text-th-nav-text/80 flex-shrink-0" />
             <span className={`text-sm font-label tracking-wide ${currentView === 'value-dashboard' ? 'text-[#dd6e42]' : 'text-th-nav-text'}`}>Collection Value</span>
+          </button>
+
+          {/* Analytics */}
+          <button
+            onClick={() => { onNavigate('analytics'); setIsMoreOpen(false); }}
+            className={`flex items-center gap-4 w-full px-5 py-3.5 text-left active:bg-th-nav-text/[0.10] transition-colors border-t border-th-nav-text/[0.08] ${
+              currentView === 'analytics' ? 'bg-th-nav-text/[0.08]' : ''
+            }`}
+          >
+            <BarChart3 className="w-5 h-5 text-th-nav-text/80 flex-shrink-0" />
+            <span className={`text-sm font-label tracking-wide ${currentView === 'analytics' ? 'text-[#dd6e42]' : 'text-th-nav-text'}`}>Analytics</span>
           </button>
 
           {/* Browse Discogs */}

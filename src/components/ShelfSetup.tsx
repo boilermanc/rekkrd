@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { HelpCircle } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import { supabase } from '../../services/supabaseService';
@@ -10,6 +11,8 @@ import {
   upsertSortPreference,
 } from '../helpers/shelfHelpers';
 import ShelfView from './ShelfView';
+import ShelfOnboarding from './ShelfOnboarding';
+import ShelfGuideModal from './ShelfGuideModal';
 import type { Album } from '../../types';
 import type { ShelfConfig } from '../../types/shelf';
 import type { SortScheme } from '../../types/shelf';
@@ -64,6 +67,12 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
 
   // Selected shelf for the Shelf View tab
   const [viewShelfId, setViewShelfId] = useState<string | null>(null);
+
+  // Onboarding + Guide state
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('rekkrd_shelf_onboarding_seen');
+  });
+  const [showGuide, setShowGuide] = useState(false);
 
   // ── Fetch data ────────────────────────────────────────────────
   const fetchShelves = useCallback(async () => {
@@ -208,6 +217,11 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
     }
   };
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('rekkrd_shelf_onboarding_seen', '1');
+    setShowOnboarding(false);
+  };
+
   // ── Render ────────────────────────────────────────────────────
 
   // Gate: Enthusiast-only feature
@@ -265,8 +279,17 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-th-surface/[0.04] rounded-lg p-1 self-start" role="tablist" aria-label="Shelf page tabs">
+        {/* Tabs + Help */}
+        <div className="flex items-center gap-3 self-start">
+        <button
+          onClick={() => setShowGuide(true)}
+          className="p-2 rounded-lg text-th-text3/50 hover:text-th-text hover:bg-th-surface/[0.06] transition-colors"
+          aria-label="Open shelf organizer guide"
+          title="Shelf Organizer Guide"
+        >
+          <HelpCircle size={20} />
+        </button>
+        <div className="flex gap-1 bg-th-surface/[0.04] rounded-lg p-1" role="tablist" aria-label="Shelf page tabs">
           <button
             role="tab"
             aria-selected={activeTab === 'setup'}
@@ -291,6 +314,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
           >
             Shelf View
           </button>
+        </div>
         </div>
       </div>
 
@@ -614,6 +638,14 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
       )}
 
       </>}
+
+      {/* Onboarding overlay (first visit only) */}
+      {showOnboarding && (
+        <ShelfOnboarding onComplete={handleOnboardingComplete} />
+      )}
+
+      {/* User guide modal (always accessible) */}
+      <ShelfGuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
     </main>
   );
 };
