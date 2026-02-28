@@ -64,6 +64,8 @@ function formatShortDate(dateStr: string): string {
 
 const PEACH = '#dd6e42';
 const PEACH_DARK = '#c4714a';
+const SLATE = '#4f6d7a';
+const SLATE_DARK = '#3a525d';
 const BATCH_SIZE = 50;
 const BATCH_DELAY_MS = 500;
 
@@ -344,7 +346,7 @@ const CollectionValueDashboard: React.FC = () => {
       {/* Value Over Time */}
       {history.length >= 2 && (
         <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
+          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#4f6d7a] pl-2">
             Collection Value Over Time
           </h2>
           <ResponsiveContainer width="100%" height={220}>
@@ -367,10 +369,10 @@ const CollectionValueDashboard: React.FC = () => {
               <Line
                 type="monotone"
                 dataKey="median"
-                stroke={PEACH}
+                stroke={SLATE}
                 strokeWidth={2}
                 dot={<LastDotOnly total={history.length} />}
-                activeDot={{ r: 4, fill: PEACH, stroke: PEACH }}
+                activeDot={{ r: 4, fill: SLATE, stroke: SLATE }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -380,7 +382,7 @@ const CollectionValueDashboard: React.FC = () => {
       {/* Top 10 Most Valuable */}
       {data.topRecords.length > 0 && (
         <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
+          <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#4f6d7a] pl-2">
             Top {data.topRecords.length} Most Valuable
           </h2>
           <ol className="space-y-2">
@@ -388,7 +390,7 @@ const CollectionValueDashboard: React.FC = () => {
               const price = rec.price_median ?? rec.price_high ?? 0;
               const rankColor = i === 0 ? 'text-[#dd6e42]' : i <= 2 ? 'text-[#f0a882]' : 'text-th-text3';
               return (
-                <li key={`${rec.artist}-${rec.title}-${i}`} className="flex items-baseline gap-3 border-l-2 border-transparent hover:border-[#dd6e42] pl-2 -ml-2 transition-colors">
+                <li key={`${rec.artist}-${rec.title}-${i}`} className="flex items-baseline gap-3 border-l-2 border-transparent hover:border-[#4f6d7a] pl-2 -ml-2 transition-colors">
                   <span className={`${rankColor} text-sm font-mono w-6 text-right shrink-0 font-semibold`}>
                     {i + 1}
                   </span>
@@ -410,7 +412,7 @@ const CollectionValueDashboard: React.FC = () => {
         {/* By Genre — horizontal bar */}
         {data.byGenre.length > 0 && (
           <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
+            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#4f6d7a] pl-2">
               Value by Genre
             </h2>
             <ResponsiveContainer width="100%" height={data.byGenre.length * 40 + 20}>
@@ -437,7 +439,7 @@ const CollectionValueDashboard: React.FC = () => {
                 <Tooltip content={<GenreTooltip />} cursor={false} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {data.byGenre.map((_, idx) => (
-                    <Cell key={idx} fill={PEACH} />
+                    <Cell key={idx} fill={SLATE} />
                   ))}
                 </Bar>
               </BarChart>
@@ -448,7 +450,7 @@ const CollectionValueDashboard: React.FC = () => {
         {/* By Decade — vertical bar */}
         {data.byDecade.length > 0 && (
           <section className="glass-morphism rounded-3xl p-5 md:p-6 border border-th-surface/[0.10]">
-            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#dd6e42] pl-2">
+            <h2 className="font-label text-[10px] tracking-widest text-th-text3 uppercase mb-4 border-l-2 border-[#4f6d7a] pl-2">
               Value by Decade
             </h2>
             <ResponsiveContainer width="100%" height={260}>
@@ -471,7 +473,7 @@ const CollectionValueDashboard: React.FC = () => {
                 <Tooltip content={<DecadeTooltip />} cursor={false} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                   {data.byDecade.map((_, idx) => (
-                    <Cell key={idx} fill={idx % 2 === 0 ? PEACH : PEACH_DARK} />
+                    <Cell key={idx} fill={idx % 2 === 0 ? SLATE : SLATE_DARK} />
                   ))}
                 </Bar>
               </BarChart>
@@ -568,7 +570,7 @@ interface DotProps {
 
 function LastDotOnly({ total, cx, cy, index }: DotProps & { total: number }) {
   if (index !== total - 1 || cx === undefined || cy === undefined) return null;
-  return <circle cx={cx} cy={cy} r={4} fill={PEACH} stroke={PEACH} />;
+  return <circle cx={cx} cy={cy} r={4} fill={SLATE} stroke={SLATE} />;
 }
 
 export default CollectionValueDashboard;

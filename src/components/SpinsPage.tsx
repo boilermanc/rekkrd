@@ -220,7 +220,7 @@ const SpinsPage: React.FC<SpinsPageProps> = ({ allAlbums, onSelectAlbum }) => {
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[500px]"
         style={{
-          background: `radial-gradient(ellipse 70% 50% at 50% 0%, rgba(212,160,84,${gradientOpacity}), transparent)`,
+          background: `radial-gradient(ellipse 70% 50% at 50% 0%, rgba(79,109,122,${gradientOpacity}), transparent)`,
         }}
       />
 

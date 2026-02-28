@@ -102,12 +102,12 @@ const CollectionExport: React.FC<CollectionExportProps> = ({ albums, userEmail }
             disabled={exporting}
             className={`text-left p-4 rounded-xl border-2 transition-all ${
               format === 'csv'
-                ? 'border-[#dd6e42] bg-[#dd6e42]/[0.06]'
+                ? 'border-[#4f6d7a] bg-[#4f6d7a]/[0.06]'
                 : 'border-th-surface/[0.12] bg-th-surface/[0.04] hover:border-th-surface/[0.25]'
             } ${exporting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg ${format === 'csv' ? 'bg-[#dd6e42]/[0.15] text-[#dd6e42]' : 'bg-th-surface/[0.08] text-th-text3'}`}>
+              <div className={`p-2 rounded-lg ${format === 'csv' ? 'bg-[#4f6d7a]/[0.15] text-[#4f6d7a]' : 'bg-th-surface/[0.08] text-th-text3'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                   <polyline points="14 2 14 8 20 8" />
@@ -116,7 +116,7 @@ const CollectionExport: React.FC<CollectionExportProps> = ({ albums, userEmail }
                 </svg>
               </div>
               <div>
-                <span className={`font-label text-sm font-bold tracking-wide ${format === 'csv' ? 'text-[#dd6e42]' : 'text-th-text'}`}>CSV</span>
+                <span className={`font-label text-sm font-bold tracking-wide ${format === 'csv' ? 'text-[#4f6d7a]' : 'text-th-text'}`}>CSV</span>
                 <p className="text-xs text-th-text3 mt-0.5">Compatible with Excel, Google Sheets, Discogs</p>
               </div>
             </div>
@@ -128,12 +128,12 @@ const CollectionExport: React.FC<CollectionExportProps> = ({ albums, userEmail }
             disabled={exporting}
             className={`text-left p-4 rounded-xl border-2 transition-all ${
               format === 'pdf'
-                ? 'border-[#dd6e42] bg-[#dd6e42]/[0.06]'
+                ? 'border-[#4f6d7a] bg-[#4f6d7a]/[0.06]'
                 : 'border-th-surface/[0.12] bg-th-surface/[0.04] hover:border-th-surface/[0.25]'
             } ${exporting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg ${format === 'pdf' ? 'bg-[#dd6e42]/[0.15] text-[#dd6e42]' : 'bg-th-surface/[0.08] text-th-text3'}`}>
+              <div className={`p-2 rounded-lg ${format === 'pdf' ? 'bg-[#4f6d7a]/[0.15] text-[#4f6d7a]' : 'bg-th-surface/[0.08] text-th-text3'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                   <polyline points="14 2 14 8 20 8" />
@@ -141,7 +141,7 @@ const CollectionExport: React.FC<CollectionExportProps> = ({ albums, userEmail }
                 </svg>
               </div>
               <div>
-                <span className={`font-label text-sm font-bold tracking-wide ${format === 'pdf' ? 'text-[#dd6e42]' : 'text-th-text'}`}>PDF Catalog</span>
+                <span className={`font-label text-sm font-bold tracking-wide ${format === 'pdf' ? 'text-[#4f6d7a]' : 'text-th-text'}`}>PDF Catalog</span>
                 <p className="text-xs text-th-text3 mt-0.5">Styled catalog — perfect for sharing or printing</p>
               </div>
             </div>
@@ -209,7 +209,7 @@ const CollectionExport: React.FC<CollectionExportProps> = ({ albums, userEmail }
                       disabled={required || exporting}
                       className={`px-3 py-1.5 rounded-lg text-xs font-label tracking-wide transition-all ${
                         checked
-                          ? 'bg-[#dd6e42]/[0.15] text-[#dd6e42] border border-[#dd6e42]/30'
+                          ? 'bg-[#4f6d7a]/[0.15] text-[#4f6d7a] border border-[#4f6d7a]/30'
                           : 'bg-th-surface/[0.04] text-th-text3 border border-th-surface/[0.10] hover:border-th-surface/[0.20]'
                       } ${required || exporting ? 'opacity-70 cursor-default' : 'cursor-pointer'}`}
                     >

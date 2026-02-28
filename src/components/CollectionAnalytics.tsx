@@ -108,7 +108,7 @@ function DecadeBarChart({ data }: { data: DecadeData[] }) {
         <XAxis dataKey="decade" tick={AXIS_TICK_STYLE} axisLine={false} tickLine={false} />
         <YAxis allowDecimals={false} tick={AXIS_TICK_STYLE} axisLine={false} tickLine={false} />
         <Tooltip content={<DecadeTooltip />} cursor={{ fill: 'rgb(var(--color-surface) / 0.06)' }} />
-        <Bar dataKey="count" fill="#dd6e42" radius={[4, 4, 0, 0]} maxBarSize={48} />
+        <Bar dataKey="count" fill="#4f6d7a" radius={[4, 4, 0, 0]} maxBarSize={48} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -170,7 +170,7 @@ function GrowthAreaChart({ data }: { data: GrowthData[] }) {
 
 // ── Donut Chart ─────────────────────────────────────────────────────
 
-const DONUT_PALETTE = ['#dd6e42', '#4f6d7a', '#e8dab2', '#c0d6df', '#8b5e3c', '#a7c4bc', '#d4927a', '#6b8f71', '#c9b1d0', '#e0c097'];
+const DONUT_PALETTE = ['#4f6d7a', '#dd6e42', '#e8dab2', '#c0d6df', '#8b5e3c', '#a7c4bc', '#d4927a', '#6b8f71', '#c9b1d0', '#e0c097'];
 
 interface DonutEntry {
   name: string;

@@ -354,7 +354,7 @@ const BulkImport: React.FC<BulkImportProps> = ({ onUpgradeRequired, albums, onIm
               aria-label="Drop a CSV file here or click to browse"
               className={`relative flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-10 md:p-14 transition-all cursor-pointer ${
                 dragOver
-                  ? 'border-[#dd6e42] bg-[#dd6e42]/[0.06]'
+                  ? 'border-[#4f6d7a] bg-[#4f6d7a]/[0.06]'
                   : 'border-th-surface/[0.15] hover:border-th-surface/[0.30]'
               }`}
               onClick={() => fileInputRef.current?.click()}
@@ -842,7 +842,7 @@ const BulkImport: React.FC<BulkImportProps> = ({ onUpgradeRequired, albums, onIm
             {/* Progress bar */}
             <div className="w-full max-w-md h-2 rounded-full bg-th-surface/[0.10] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#dd6e42] transition-all duration-300"
+                className="h-full rounded-full bg-[#4f6d7a] transition-all duration-300"
                 style={{ width: importProgress.total > 0 ? `${(importProgress.inserted / importProgress.total) * 100}%` : '0%' }}
               />
             </div>
