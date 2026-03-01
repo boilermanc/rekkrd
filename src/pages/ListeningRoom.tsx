@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -27,6 +27,8 @@ const ListeningRoom: React.FC = () => {
   const [nowSpinningId, setNowSpinningId] = useState<string | null>(null);
   const [ambientMode, setAmbientMode] = useState(false);
   const [allAlbums, setAllAlbums] = useState<Album[]>([]);
+  const [initialSessionName, setInitialSessionName] = useState<string | undefined>();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Load all albums for suggestions
   useEffect(() => {
@@ -41,6 +43,77 @@ const ListeningRoom: React.FC = () => {
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Load playlist from query param (e.g. /listening-room?playlist=xxx)
+  const playlistParam = searchParams.get('playlist');
+  useEffect(() => {
+    if (!playlistParam || allAlbums.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const playlist = await playlistService.getById(playlistParam);
+        if (cancelled) return;
+
+        if (!playlist) {
+          showToast('Playlist not found', 'error');
+          setSearchParams({}, { replace: true });
+          return;
+        }
+
+        const albumMap = new Map(allAlbums.map((a) => [a.id, a]));
+        const matched = playlist.items
+          .map((item) => albumMap.get(item.albumId))
+          .filter((a): a is Album => a != null);
+
+        if (matched.length === 0) {
+          showToast('No matching albums found in your collection', 'error');
+        } else {
+          setSessionAlbums(matched);
+          setInitialSessionName(playlist.name);
+          setActiveTab('Session');
+        }
+
+        setSearchParams({}, { replace: true });
+      } catch {
+        if (!cancelled) {
+          showToast('Failed to load playlist', 'error');
+          setSearchParams({}, { replace: true });
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [playlistParam, allAlbums, showToast, setSearchParams]);
+
+  // Load albums from query param (e.g. /listening-room?albums=id1,id2&name=My%20Playlist)
+  const albumsParam = searchParams.get('albums');
+  const nameParam = searchParams.get('name');
+  useEffect(() => {
+    if (!albumsParam || allAlbums.length === 0) return;
+
+    const albumIds = albumsParam.split(',').filter(Boolean);
+    if (albumIds.length === 0) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    const albumMap = new Map(allAlbums.map((a) => [a.id, a]));
+    const matched = albumIds
+      .map((id) => albumMap.get(id))
+      .filter((a): a is Album => a != null);
+
+    if (matched.length === 0) {
+      showToast('No matching albums found in your collection', 'error');
+    } else {
+      setSessionAlbums(matched);
+      if (nameParam) {
+        setInitialSessionName(nameParam);
+      }
+      setActiveTab('Session');
+    }
+
+    setSearchParams({}, { replace: true });
+  }, [albumsParam, nameParam, allAlbums, showToast, setSearchParams]);
 
   const handleAddToSession = useCallback((album: Album) => {
     setSessionAlbums((prev) => {
@@ -291,6 +364,7 @@ const ListeningRoom: React.FC = () => {
             onSetNowSpinning={handleSetNowSpinning}
             onSelectAlbum={setSelectedAlbum}
             onQuickAdd={handleQuickAdd}
+            initialSessionName={initialSessionName}
             ambientMode={ambientMode}
           />
         </div>
@@ -302,6 +376,7 @@ const ListeningRoom: React.FC = () => {
           album={selectedAlbum}
           onClose={() => setSelectedAlbum(null)}
           onAddToSession={handleAddToSession}
+          sessionAlbumIds={sessionAlbumIds}
           ambientMode={ambientMode}
         />
       )}

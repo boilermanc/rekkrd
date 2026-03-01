@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Maximize2 } from 'lucide-react';
+import { Check, Maximize2 } from 'lucide-react';
 import { Album } from '../../../types';
 import { proxyImageUrl } from '../../../services/imageProxy';
 import { useFocusTrap } from '../../../hooks/useFocusTrap';
@@ -9,6 +9,7 @@ interface ListeningRoomAlbumDetailProps {
   album: Album;
   onClose: () => void;
   onAddToSession?: (album: Album) => void;
+  sessionAlbumIds?: Set<string>;
   ambientMode?: boolean;
 }
 
@@ -19,6 +20,7 @@ const ListeningRoomAlbumDetail: React.FC<ListeningRoomAlbumDetailProps> = ({
   album,
   onClose,
   onAddToSession,
+  sessionAlbumIds,
   ambientMode,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -299,13 +301,24 @@ const ListeningRoomAlbumDetail: React.FC<ListeningRoomAlbumDetailProps> = ({
         <div className={`p-4 border-t transition-colors duration-500 ${
           ambientMode ? 'border-[#c4b5a0]/10' : 'border-th-surface/[0.10]'
         }`}>
-          <button
-            type="button"
-            onClick={handleAddToSession}
-            className="w-full py-3 rounded-xl bg-[#dd6e42] text-white font-label text-sm font-bold tracking-wide hover:bg-[#c45a30] active:scale-[0.98] transition-all"
-          >
-            Add to Session
-          </button>
+          {sessionAlbumIds?.has(album.id) ? (
+            <button
+              type="button"
+              disabled
+              className="w-full py-3 rounded-xl bg-th-surface/[0.08] text-th-text3 font-label text-sm font-bold tracking-wide cursor-default flex items-center justify-center gap-2"
+            >
+              <Check className="w-4 h-4" />
+              In Session
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToSession}
+              className="w-full py-3 rounded-xl bg-[#dd6e42] text-white font-label text-sm font-bold tracking-wide hover:bg-[#c45a30] active:scale-[0.98] transition-all"
+            >
+              Add to Session
+            </button>
+          )}
         </div>
       </div>
 

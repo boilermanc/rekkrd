@@ -16,6 +16,7 @@ interface ListeningRoomSessionProps {
   onSetNowSpinning: (albumId: string) => void;
   onSelectAlbum: (album: Album) => void;
   onQuickAdd: (album: Album) => void;
+  initialSessionName?: string;
   ambientMode?: boolean;
 }
 
@@ -32,6 +33,7 @@ const ListeningRoomSession: React.FC<ListeningRoomSessionProps> = ({
   onSetNowSpinning,
   onSelectAlbum,
   onQuickAdd,
+  initialSessionName,
   ambientMode,
 }) => {
   const [sessionName, setSessionName] = useState('Listening Session');
@@ -46,6 +48,10 @@ const ListeningRoomSession: React.FC<ListeningRoomSessionProps> = ({
   // Live region announcements
   const [announcement, setAnnouncement] = useState('');
   const [spinAnnouncement, setSpinAnnouncement] = useState('');
+
+  useEffect(() => {
+    if (initialSessionName) setSessionName(initialSessionName);
+  }, [initialSessionName]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -316,7 +322,10 @@ const ListeningRoomSession: React.FC<ListeningRoomSessionProps> = ({
                       aria-roledescription="sortable"
                       aria-label={isSpinning ? `Stop spinning ${album.title}` : `Set ${album.title} as now spinning`}
                       draggable={false}
-                      onClick={() => onSetNowSpinning(album.id)}
+                      onClick={() => {
+                        onSetNowSpinning(album.id);
+                        onSelectAlbum(album);
+                      }}
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, index)}

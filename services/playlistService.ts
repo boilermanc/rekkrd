@@ -62,6 +62,27 @@ export const playlistService = {
     }
   },
 
+  async getById(playlistId: string): Promise<SavedPlaylist | null> {
+    try {
+      if (!supabase) return null;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('saved_playlists')
+        .select('*')
+        .eq('id', playlistId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data ? { ...data, items: typeof data.items === 'string' ? JSON.parse(data.items) : data.items } : null;
+    } catch (error) {
+      console.error('Load playlist failed:', error);
+      return null;
+    }
+  },
+
   async getPublic(playlistId: string): Promise<SavedPlaylist | null> {
     try {
       if (!supabase) return null;

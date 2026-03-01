@@ -1,5 +1,7 @@
 
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Headphones } from 'lucide-react';
 import { Album, Playlist, PlaylistItem } from '../types';
 import { geminiService } from '../services/geminiService';
 import SpinningRecord from './SpinningRecord';
@@ -7,6 +9,8 @@ import { proxyImageUrl } from '../services/imageProxy';
 import { useToast } from '../contexts/ToastContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { playlistService, SavedPlaylist } from '../services/playlistService';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import UpgradePrompt from './UpgradePrompt';
 
 const DURATION_OPTIONS = [
   { label: '30 min', minutes: 30 },
@@ -44,6 +48,9 @@ interface PlaylistStudioProps {
 
 const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAlbum }) => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
+  const { canUse } = useSubscription();
+  const hasListeningRoom = canUse('listening_room');
   const modalRef = useRef<HTMLDivElement>(null);
   const stableOnClose = useCallback(onClose, [onClose]);
   useFocusTrap(modalRef, stableOnClose);
@@ -61,6 +68,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
   const [showLibrary, setShowLibrary] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -287,7 +295,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
       <div className="relative z-10 max-w-4xl mx-auto min-h-screen flex flex-col p-4 md:p-6 print:hidden">
         <header className="flex justify-between items-center py-4 md:py-6 border-b border-white/5">
           <h2 className="font-label font-bold text-rose-400/80 tracking-widest text-[10px] md:text-xs uppercase">PLAYLIST STUDIO</h2>
-          <button onClick={onClose} className="p-2 text-white/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 md:p-3 text-white/40 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </header>
@@ -304,6 +312,52 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
               </button>
             </div>
           )}
+          {/* Listening Room card */}
+          <div
+            role="region"
+            aria-label="Listening Room"
+            className="mt-4 rounded-2xl border border-[#dd6e42]/15 bg-[#1a1614] p-5 md:p-6 flex items-center gap-5"
+          >
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#dd6e42]/10 flex items-center justify-center flex-shrink-0">
+              <Headphones className="w-7 h-7 md:w-8 md:h-8 text-[#dd6e42]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-lg text-[#c4b5a0] leading-tight">Listening Room</h3>
+                {!hasListeningRoom && (
+                  <span className="px-1.5 py-0.5 rounded text-[8px] font-label font-bold uppercase tracking-wider bg-[#dd6e42]/15 text-[#dd6e42]">
+                    Enthusiast
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] md:text-xs text-[#c4b5a0]/50 mt-1 leading-relaxed">
+                Take your playlists to the chair. Browse, build sessions, and vibe in an immersive tablet-optimized experience.
+              </p>
+            </div>
+            {hasListeningRoom ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  navigate('/listening-room');
+                }}
+                aria-label="Enter Listening Room"
+                className="px-4 py-2.5 rounded-xl bg-[#dd6e42] text-white font-label text-[10px] md:text-xs font-bold tracking-wide hover:bg-[#c45a30] active:scale-[0.97] transition-all flex-shrink-0 whitespace-nowrap"
+              >
+                Enter
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowUpgradePrompt(true)}
+                aria-label="Upgrade to unlock Listening Room"
+                className="px-4 py-2.5 rounded-xl border border-[#dd6e42]/30 text-[#dd6e42] font-label text-[10px] md:text-xs font-bold tracking-wide hover:bg-[#dd6e42]/10 active:scale-[0.97] transition-all flex-shrink-0 whitespace-nowrap"
+              >
+                Upgrade to Unlock
+              </button>
+            )}
+          </div>
+
           {showLibrary ? (
             <div className="flex-1 py-8 animate-in fade-in slide-in-from-left-4 duration-500">
               <div className="flex justify-between items-center mb-8">
@@ -322,9 +376,22 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                       <h4 className="text-lg font-bold text-white truncate">{sp.name}</h4>
                       <p className="text-xs text-white/40">{sp.mood} · {sp.items.length} {sp.focus}s · {new Date(sp.created_at).toLocaleDateString()}</p>
                     </button>
+                    {hasListeningRoom && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          navigate(`/listening-room?playlist=${sp.id}`);
+                        }}
+                        className="ml-2 p-2 md:p-3 text-white/30 hover:text-[#dd6e42] transition-colors flex-shrink-0"
+                        aria-label={`Open ${sp.name} in Listening Room`}
+                        title="Open in Listening Room"
+                      >
+                        <Headphones className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDeleteSaved(sp.id)}
-                      className="ml-4 p-2 text-white/30 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="ml-2 p-2 md:p-3 text-white/30 hover:text-red-400 transition-colors flex-shrink-0"
                       aria-label={`Delete ${sp.name}`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -340,13 +407,13 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                 <div className="rounded-full bg-white/5 backdrop-blur-sm border border-white/10 p-1 flex">
                   <button
                     onClick={() => handleModeSwitch('quick')}
-                    className={`rounded-full px-6 py-2 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'quick' ? 'bg-gradient-to-r from-rose-900 to-red-950 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
+                    className={`rounded-full px-6 py-2 md:px-8 md:py-3 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'quick' ? 'bg-gradient-to-r from-rose-900 to-red-950 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
                   >
                     Quick Spin
                   </button>
                   <button
                     onClick={() => handleModeSwitch('custom')}
-                    className={`rounded-full px-6 py-2 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'custom' ? 'bg-gradient-to-r from-rose-900 to-red-950 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
+                    className={`rounded-full px-6 py-2 md:px-8 md:py-3 font-label text-[10px] tracking-widest uppercase transition-all ${mode === 'custom' ? 'bg-gradient-to-r from-rose-900 to-red-950 text-white shadow-md' : 'text-white/50 hover:text-white/80'}`}
                   >
                     Custom Session
                   </button>
@@ -365,7 +432,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                         key={key}
                         onClick={() => toggleSource(key)}
                         aria-pressed={selectedSources.includes(key)}
-                        className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${selectedSources.includes(key) ? 'bg-purple-600/70 border-purple-400/50 text-white shadow-lg shadow-purple-600/20' : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'}`}
+                        className={`rounded-full px-4 py-2 md:px-5 md:py-3 text-sm font-medium border transition-all ${selectedSources.includes(key) ? 'bg-purple-600/70 border-purple-400/50 text-white shadow-lg shadow-purple-600/20' : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'}`}
                       >
                         {label}
                       </button>
@@ -387,7 +454,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                       key={chip}
                       onClick={() => { setMood(chip); setShowCustomMood(false); }}
                       aria-pressed={mood === chip}
-                      className={`rounded-full px-5 py-2.5 text-sm font-medium border transition-all duration-300 ${
+                      className={`rounded-full px-5 py-2.5 md:px-6 md:py-3 text-sm font-medium border transition-all duration-300 ${
                         chip === 'Surprise Me'
                           ? mood === chip
                             ? 'bg-gradient-to-r from-rose-900 to-teal-700 border-transparent text-white shadow-lg shadow-rose-900/20'
@@ -415,7 +482,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                     value={MOOD_CHIPS.includes(mood) ? '' : mood}
                     onChange={(e) => setMood(e.target.value)}
                     placeholder="e.g. Late Night Jazz, 80s Disco..."
-                    className="mt-4 w-full bg-white/5 border-b-2 border-white/10 text-xl md:text-3xl font-bold text-white focus:border-rose-700 transition-all outline-none py-3 placeholder:text-white/30"
+                    className="mt-4 w-full bg-white/5 border-b-2 border-white/10 text-xl md:text-3xl font-bold text-white focus:border-rose-700 transition-all outline-none py-3 md:py-4 placeholder:text-white/30"
                   />
                 )}
               </section>
@@ -432,7 +499,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                           prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
                         )}
                         aria-pressed={selectedGenres.includes(genre)}
-                        className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${selectedGenres.includes(genre) ? 'bg-teal-600/70 border-teal-400/50 text-white shadow-lg shadow-teal-600/20' : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'}`}
+                        className={`rounded-full px-4 py-2 md:px-5 md:py-3 text-sm font-medium border transition-all ${selectedGenres.includes(genre) ? 'bg-teal-600/70 border-teal-400/50 text-white shadow-lg shadow-teal-600/20' : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'}`}
                       >
                         {genre} ({count})
                       </button>
@@ -450,7 +517,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
                         key={label}
                         onClick={() => setTargetMinutes(minutes)}
                         aria-pressed={targetMinutes === minutes}
-                        className={`rounded-full px-4 py-2 text-sm font-medium border transition-all ${targetMinutes === minutes ? 'bg-rose-600/70 border-rose-400/50 text-white shadow-lg shadow-rose-600/20' : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'}`}
+                        className={`rounded-full px-4 py-2 md:px-5 md:py-3 text-sm font-medium border transition-all ${targetMinutes === minutes ? 'bg-rose-600/70 border-rose-400/50 text-white shadow-lg shadow-rose-600/20' : 'bg-white/5 border-white/10 text-white/60 backdrop-blur-sm hover:bg-white/10 hover:text-white'}`}
                       >
                         {label}
                       </button>
@@ -544,10 +611,32 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
               </div>
             </div>
 
-            <div className="mt-auto pt-8 md:pt-12 flex gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (hasListeningRoom) {
+                  const albumIds = [...new Set(playlist.items.map(item => item.albumId))];
+                  const params = new URLSearchParams({
+                    albums: albumIds.join(','),
+                    name: playlist.name,
+                  });
+                  onClose();
+                  navigate(`/listening-room?${params.toString()}`);
+                } else {
+                  setShowUpgradePrompt(true);
+                }
+              }}
+              aria-label="Open generated playlist in Listening Room"
+              className="mt-6 md:mt-8 px-6 py-3 md:py-4 rounded-full bg-[#dd6e42] text-white font-label text-[9px] md:text-[11px] tracking-[0.2em] font-bold hover:bg-[#c45a30] active:scale-95 transition-all shadow-lg shadow-[#dd6e42]/20 flex items-center gap-2"
+            >
+              <Headphones className="w-4 h-4" />
+              LISTEN NOW
+            </button>
+
+            <div className="mt-auto pt-8 md:pt-12 flex gap-4 md:gap-6">
               <button
                 onClick={() => setStep('manifest')}
-                className="text-white/30 font-label text-[9px] tracking-widest uppercase hover:text-white/60 transition-colors"
+                className="text-white/30 font-label text-[9px] md:text-[11px] tracking-widest uppercase hover:text-white/60 transition-colors md:py-2 md:px-2"
               >
                 Manifest
               </button>
@@ -555,7 +644,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
               <button
                 onClick={handleSave}
                 disabled={isSaving || isSaved}
-                className={`font-label text-[9px] tracking-widest uppercase transition-colors ${
+                className={`font-label text-[9px] md:text-[11px] tracking-widest uppercase transition-colors md:py-2 md:px-2 ${
                   isSaved ? 'text-rose-400' : 'text-white/30 hover:text-white/60'
                 }`}
               >
@@ -564,7 +653,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
               <span className="text-white/20">|</span>
               <button
                 onClick={() => setStep('config')}
-                className="text-white/30 font-label text-[9px] tracking-widest uppercase hover:text-white/60 transition-colors"
+                className="text-white/30 font-label text-[9px] md:text-[11px] tracking-widest uppercase hover:text-white/60 transition-colors md:py-2 md:px-2"
               >
                 Reset
               </button>
@@ -588,9 +677,9 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
               </button>
             </header>
 
-            <div className="space-y-3">
+            <div className="space-y-3 md:space-y-4">
               {playlist.items.map((item, idx) => (
-                <div key={idx} className="group flex items-center gap-4 md:gap-6 p-3 md:p-4 rounded-2xl hover:bg-white/5 transition-all">
+                <div key={idx} className="group flex items-center gap-4 md:gap-6 p-3 md:p-5 rounded-2xl hover:bg-white/5 transition-all">
                   <span className="font-label text-white/20 text-lg md:text-xl font-black w-8 md:w-12">{idx + 1}</span>
                   <img src={proxyImageUrl(item.cover_url)} loading="lazy" className="w-16 h-16 md:w-20 md:h-20 rounded-md object-cover shadow-lg flex-shrink-0" />
                   <div className="min-w-0">
@@ -611,7 +700,7 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
             <div className="mt-8 md:mt-12">
                <button
                 onClick={() => setStep('player')}
-                className="text-teal-400/60 font-label text-[9px] tracking-widest uppercase hover:text-white transition-colors flex items-center gap-2 py-4"
+                className="text-teal-400/60 font-label text-[9px] md:text-[11px] tracking-widest uppercase hover:text-white transition-colors flex items-center gap-2 py-4"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 Back to Player
@@ -620,6 +709,14 @@ const PlaylistStudio: React.FC<PlaylistStudioProps> = ({ albums, onClose, seedAl
           </div>
         )}
       </div>
+
+      {showUpgradePrompt && (
+        <UpgradePrompt
+          feature="listening_room"
+          onClose={() => setShowUpgradePrompt(false)}
+          onUpgrade={() => setShowUpgradePrompt(false)}
+        />
+      )}
     </div>
   );
 };
