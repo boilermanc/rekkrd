@@ -304,7 +304,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   };
 
   return (
-    <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={`${album.title} by ${album.artist}`} className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-2 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none">
+    <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={`${album.title} by ${album.artist}`} className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-2 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none">
       <div className="relative w-full max-w-6xl max-h-[98vh] md:max-h-[95vh] glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col md:flex-row animate-in zoom-in-95 duration-500">
 
         <button onClick={onClose} className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-th-bg/50 text-th-text flex items-center justify-center hover:bg-th-text hover:text-th-bg transition-all">

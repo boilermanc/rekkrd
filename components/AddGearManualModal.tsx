@@ -399,7 +399,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Add gear manually"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-2 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-2 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
     >
       <div className="relative w-full max-w-lg max-h-[98vh] md:max-h-[95vh] glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500">
 

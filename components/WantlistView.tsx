@@ -516,7 +516,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
           role="dialog"
           aria-modal="true"
           aria-label="Add record to wantlist"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
         >
           <div className="relative w-full max-w-md glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] animate-in zoom-in-95 duration-500">
             {/* Header */}
@@ -616,7 +616,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
           role="dialog"
           aria-modal="true"
           aria-label="Import wantlist from Discogs"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
         >
           <div className="relative w-full max-w-4xl max-h-[90vh] glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500">
             {/* Header */}
@@ -659,7 +659,7 @@ const WantlistView: React.FC<WantlistViewProps> = ({ userId, onMarkAsOwned, onRe
 
       {/* Backfill status overlay */}
       {backfillStatus && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-6 p-8 rounded-3xl glass-morphism border border-th-surface/[0.10] shadow-2xl max-w-sm mx-4">
             <SpinningRecord size="w-20 h-20" />
             <p className="text-th-text text-center text-sm font-medium">

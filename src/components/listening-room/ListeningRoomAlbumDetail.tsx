@@ -138,7 +138,7 @@ const ListeningRoomAlbumDetail: React.FC<ListeningRoomAlbumDetailProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end"
+      className="fixed inset-0 z-[60] flex items-end md:items-stretch md:justify-end"
       onClick={handleBackdropClick}
     >
       {/* Backdrop */}

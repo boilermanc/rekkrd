@@ -253,7 +253,7 @@ const GearCatalogEditor: React.FC<GearCatalogEditorProps> = ({ entry, isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+    <div className="fixed inset-0 z-[60] flex items-start justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
       <div
         className="w-full max-w-2xl h-full overflow-y-auto border-l shadow-xl"
         style={{ backgroundColor: 'rgb(255,255,255)', borderColor: 'rgb(229,231,235)' }}

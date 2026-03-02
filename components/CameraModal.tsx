@@ -67,7 +67,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
   };
 
   return (
-    <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Scanning vinyl" className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg bg-opacity-90 p-4 outline-none">
+    <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Scanning vinyl" className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg bg-opacity-90 p-4 outline-none">
       <div className="relative w-full max-w-xl glass-morphism rounded-3xl overflow-hidden neon-border border-[#dd6e42]/30">
         <div className="p-4 flex justify-between items-center border-b border-th-surface/[0.10]">
           <h2 className="font-label text-[#dd6e42] font-bold tracking-widest text-sm">SCANNING VINYL</h2>

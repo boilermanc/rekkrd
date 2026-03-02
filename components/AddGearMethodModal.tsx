@@ -34,7 +34,7 @@ const AddGearMethodModal: React.FC<AddGearMethodModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Add gear to Stakkd"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-4 md:p-8 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="relative w-full max-w-md glass-morphism rounded-3xl overflow-hidden border border-th-surface/[0.10] animate-in zoom-in-95 duration-500">

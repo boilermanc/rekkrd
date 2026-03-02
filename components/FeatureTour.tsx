@@ -390,7 +390,7 @@ const FeatureTour: React.FC<FeatureTourProps> = ({ onComplete, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-th-bg flex flex-col">
+    <div className="fixed inset-0 z-[60] bg-th-bg flex flex-col">
       {/* Top bar */}
       <header className="flex items-center justify-between px-4 md:px-8 py-4 shrink-0">
         {/* Left: Logo */}

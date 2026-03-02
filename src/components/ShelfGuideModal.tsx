@@ -24,7 +24,7 @@ const ShelfGuideModal: React.FC<ShelfGuideModalProps> = ({ isOpen, onClose }) =>
       role="dialog"
       aria-modal="true"
       aria-label="Shelf Organizer Guide"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-th-bg/95 p-2 md:p-6 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-2 md:p-6 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
     >
       <div
         className="sog-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500"
