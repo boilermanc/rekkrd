@@ -28,7 +28,6 @@ dist-ssr
 .claude
 
 .env
-.vercel
 .env*.local
 nul
 

@@ -116,7 +116,7 @@ const Privacy: React.FC = () => {
                   <li><strong>Google Gemini API</strong> — AI-powered album identification, metadata enrichment, and playlist generation</li>
                   <li><strong>iTunes Search API</strong> — Album cover art and metadata lookup</li>
                   <li><strong>MusicBrainz</strong> — Album metadata and cover art</li>
-                  <li><strong>Vercel</strong> — Application hosting and serverless functions</li>
+                  <li><strong>IONOS</strong> — VPS hosting</li>
                   <li><strong>Stripe</strong> — Payment processing for subscriptions</li>
                 </ul>
                 <p>

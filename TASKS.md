@@ -1,6 +1,6 @@
 # Rekkrd — Code Review Tasks
 
-Deployment target: **Vercel**
+Deployment target: **IONOS VPS (Plesk, PM2, nginx)**
 Review date: **2025-02-15**
 
 ---
@@ -38,7 +38,7 @@ Review date: **2025-02-15**
 ## High
 
 - [x] **Add CORS configuration**
-  - No CORS headers on any endpoint; no `vercel.json` config
+  - No CORS headers on any endpoint; no CORS config
   - Any website can make requests to the API from their users' browsers
 
 - [ ] **Add rate limiting to Gemini-powered endpoints**
@@ -152,7 +152,7 @@ Review date: **2025-02-15**
 ### Config & Build
 
 - [ ] **Move `@google/genai` to devDependencies**
-  - `package.json:13` — only used in Vercel serverless functions, not client code
+  - `package.json:13` — only used in server-side code, not client code
 
 - [ ] **Consider migrating to `import.meta.env.VITE_*` pattern**
   - `supabaseService.ts:5-6` uses `process.env` with fragile `define` replacement in `vite.config.ts`
@@ -213,7 +213,7 @@ Review date: **2025-02-15**
 <details>
 <summary>Tasks from prior review (all done)</summary>
 
-- [x] Proxy Gemini API calls through Vercel serverless functions
+- [x] Proxy Gemini API calls through server-side API routes
 - [x] Install Tailwind properly instead of CDN
 - [x] Fix `useEffect` dependency expression bug
 - [x] Add React error boundary

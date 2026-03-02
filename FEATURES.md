@@ -338,7 +338,7 @@ Protected by password (`ADMIN_PASSWORD` env var), session in localStorage.
 | Layer | Technology |
 |-------|------------|
 | Frontend | React 18 + TypeScript, Vite, TailwindCSS |
-| Backend | Vercel Serverless Functions (Node.js) |
+| Backend | Express / Node.js (IONOS VPS) |
 | Database | Supabase (PostgreSQL + RLS) |
 | Storage | Supabase Storage (album photos, gear photos, blog images) |
 | AI | Google Gemini 1.5 Flash |
@@ -347,7 +347,7 @@ Protected by password (`ADMIN_PASSWORD` env var), session in localStorage.
 | External Data | iTunes Search API, MusicBrainz, LRCLIB |
 | SEO | React Helmet Async, JSON-LD |
 | Rich Text | Tiptap |
-| Deployment | Vercel (serverless + static) |
+| Deployment | IONOS VPS (Plesk, PM2, nginx) |
 
 ---
 
