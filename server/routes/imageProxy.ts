@@ -5,6 +5,7 @@ const ALLOWED_HOSTS = [
   'img.discogs.com',
   'i.discogs.com',
   'coverartarchive.org',
+  'archive.org',
   'images.unsplash.com',
 ];
 
