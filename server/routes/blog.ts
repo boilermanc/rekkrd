@@ -350,7 +350,7 @@ router.get('/api/blog/tags', blogRateLimit, async (req, res) => {
 
 router.get('/api/blog/:slug', blogRateLimit, async (req, res) => {
   try {
-    const post = await getPostBySlug(req.params.slug);
+    const post = await getPostBySlug(req.params.slug as string);
     if (!post) {
       res.status(404).json({ error: 'Post not found' });
       return;

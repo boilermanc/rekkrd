@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { sendTemplatedEmail } from '../services/emailService.js';
 import { discogsRequest } from '../services/discogsService.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { timingSafeCompare } from '../utils/timingSafeCompare.js';
 
 const router = Router();
 const LOG_PREFIX = '[alerts-check]';
@@ -44,8 +45,9 @@ interface MarketplaceStats {
 router.post(
   '/api/alerts/check',
   async (req: Request, res: Response) => {
-    const secret = req.headers['x-internal-secret'];
-    if (!secret || secret !== process.env.INTERNAL_ALERTS_SECRET) {
+    const secret = req.headers['x-internal-secret'] as string | undefined;
+    const expected = process.env.INTERNAL_ALERTS_SECRET;
+    if (!secret || !expected || !timingSafeCompare(secret, expected)) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
