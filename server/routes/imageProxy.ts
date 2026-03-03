@@ -39,53 +39,61 @@ router.get('/api/image-proxy', async (req, res) => {
   }
 
   try {
-    // Use manual redirects to validate each hop against the allowlist (SSRF protection).
-    // Only one redirect is followed — if it redirects again, we reject.
-    let upstream = await fetch(url, {
-      headers: {
-        'User-Agent': USER_AGENT,
-        'Accept': 'image/*',
-      },
-      redirect: 'manual',
-    });
+    // Follow redirects manually, validating each hop against the allowlist (SSRF protection).
+    // Max 3 hops covers coverartarchive.org → archive.org → ia800X.us.archive.org.
+    let currentUrl = url;
+    let upstream: Response | null = null;
 
-    if (upstream.status >= 300 && upstream.status < 400) {
-      const location = upstream.headers.get('location');
-      if (!location) {
-        res.status(502).json({ error: 'Redirect with no location header' });
-        return;
-      }
-      const resolvedLocation = new URL(location, url).href;
-      if (!isAllowedUrl(resolvedLocation)) {
-        res.status(403).json({ error: 'Redirect target not allowed' });
-        return;
-      }
-      upstream = await fetch(resolvedLocation, {
+    for (let hop = 0; hop < 3; hop++) {
+      upstream = await fetch(currentUrl, {
         headers: {
           'User-Agent': USER_AGENT,
           'Accept': 'image/*',
         },
         redirect: 'manual',
       });
-      // If the redirect target itself redirects, reject
-      if (upstream.status >= 300 && upstream.status < 400) {
+
+      if (upstream.status < 300 || upstream.status >= 400) {
+        break; // Not a redirect — we have our final response
+      }
+
+      const location = upstream.headers.get('location');
+      if (!location) {
+        res.status(502).json({ error: 'Redirect with no location header' });
+        return;
+      }
+
+      const resolvedLocation = new URL(location, currentUrl).href;
+      if (!isAllowedUrl(resolvedLocation)) {
+        res.status(403).json({ error: 'Redirect target not allowed' });
+        return;
+      }
+
+      if (hop === 2) {
         res.status(403).json({ error: 'Too many redirects' });
         return;
       }
+
+      currentUrl = resolvedLocation;
     }
 
-    if (!upstream!.ok) {
-      res.status(upstream!.status).json({ error: 'Upstream fetch failed' });
+    if (!upstream) {
+      res.status(502).json({ error: 'No response from upstream' });
       return;
     }
 
-    const contentType = upstream!.headers.get('content-type');
+    if (!upstream.ok) {
+      res.status(upstream.status).json({ error: 'Upstream fetch failed' });
+      return;
+    }
+
+    const contentType = upstream.headers.get('content-type');
     if (!contentType || !contentType.startsWith('image/')) {
       res.status(502).json({ error: 'Upstream returned non-image content type' });
       return;
     }
 
-    const buffer = Buffer.from(await upstream!.arrayBuffer());
+    const buffer = Buffer.from(await upstream.arrayBuffer());
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800');
