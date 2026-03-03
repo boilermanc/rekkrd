@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import BulkImport from './BulkImport';
 import CollectionExport from './CollectionExport';
-import { useSubscription } from '../../contexts/SubscriptionContext';
-import type { Album } from '../../types';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import type { Album } from '../types';
 
 type Tab = 'import' | 'export';
 

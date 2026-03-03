@@ -34,6 +34,7 @@ router.get(
 
       // Fetch user's Discogs credentials from profiles
       const admin = getSupabaseAdmin();
+      if (!admin) throw new Error('Supabase admin not configured');
       const { data: profile, error: profileError } = await admin
         .from('profiles')
         .select('discogs_oauth_token, discogs_oauth_secret, discogs_username')

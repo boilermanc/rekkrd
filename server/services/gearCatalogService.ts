@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 // ---------------------------------------------------------------------------
@@ -30,14 +29,6 @@ export type NewGearCatalogEntry = Omit<
   'id' | 'created_at' | 'updated_at'
 >;
 
-// ---------------------------------------------------------------------------
-// Supabase admin client (service-role, bypasses RLS)
-// ---------------------------------------------------------------------------
-
-let _admin: ReturnType<typeof createClient> | null = null;
-
-
-
 const TABLE = 'gear_catalog';
 
 // ---------------------------------------------------------------------------
@@ -61,6 +52,7 @@ export async function searchGearCatalog(
 }> {
   const { category, approved, limit = 50, offset = 0 } = options;
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   let builder = supabase
     .from(TABLE)
@@ -106,6 +98,7 @@ export async function getGearCatalogEntry(
   id: string,
 ): Promise<{ data: GearCatalogEntry | null; error: string | null }> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from(TABLE)
@@ -128,6 +121,7 @@ export async function createGearCatalogEntry(
   input: NewGearCatalogEntry,
 ): Promise<{ data: GearCatalogEntry | null; error: string | null }> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from(TABLE)
@@ -151,6 +145,7 @@ export async function updateGearCatalogEntry(
   input: Partial<NewGearCatalogEntry & { is_approved: boolean }>,
 ): Promise<{ data: GearCatalogEntry | null; error: string | null }> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from(TABLE)
@@ -174,6 +169,7 @@ export async function deleteGearCatalogEntry(
   id: string,
 ): Promise<{ error: string | null }> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { error } = await supabase
     .from(TABLE)
@@ -192,6 +188,7 @@ export async function approveGearCatalogEntry(
   approved: boolean,
 ): Promise<{ data: GearCatalogEntry | null; error: string | null }> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from(TABLE)

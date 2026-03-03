@@ -67,7 +67,7 @@ const SuccessPage: React.FC = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const attemptRef = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // ── Rekkrd nudge (inline card after success) ────────────────────
   const nudgeKey = sessionId ? `sellr_success_nudge_${sessionId}` : '';

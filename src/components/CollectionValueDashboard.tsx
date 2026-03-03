@@ -4,9 +4,9 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line,
 } from 'recharts';
-import { supabase } from '../../services/supabaseService';
-import { useToast } from '../../contexts/ToastContext';
-import SpinningRecord from '../../components/SpinningRecord';
+import { supabase } from '../services/supabaseService';
+import { useToast } from '../contexts/ToastContext';
+import SpinningRecord from './SpinningRecord';
 
 interface AlbumValue {
   artist: string;

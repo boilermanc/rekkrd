@@ -1,5 +1,4 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { Resend } from 'resend';
 import { requireAdmin } from '../middleware/adminAuth.js';
@@ -8,13 +7,13 @@ import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const router = Router();
 
-let _admin: ReturnType<typeof createClient> | null = null;
 // ── GET /api/admin/integrations ─────────────────────────────────────
 // Fetch settings by category. Defaults to 'integrations', supports ?category=stripe.
 router.get('/api/admin/integrations', requireAdmin, async (req: Request, res: Response) => {
   try {
     const category = (req.query.category as string) || 'integrations';
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
     const { data, error } = await supabase
       .from('config_settings')
       .select('key, value, data_type')
@@ -65,6 +64,7 @@ router.put('/api/admin/integrations', requireAdmin, async (req: Request, res: Re
     }));
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
     const { error } = await supabase
       .from('config_settings')
       .upsert(records, { onConflict: 'category,key' });
@@ -181,10 +181,12 @@ router.post('/api/admin/integrations/test', requireAdmin, async (req: Request, r
           const resend = new Resend(apiKey);
 
           // Fetch domains, API keys, and email config in parallel
+          const supabaseForEmail = getSupabaseAdmin();
+          if (!supabaseForEmail) throw new Error('Supabase admin not configured');
           const [domainRes, keyRes, emailConfigRes] = await Promise.all([
             resend.domains.list(),
             resend.apiKeys.list(),
-            getSupabaseAdmin()
+            supabaseForEmail
               .from('config_settings')
               .select('key, value')
               .eq('category', 'email'),
@@ -339,7 +341,9 @@ router.get('/api/admin/integrations/status', requireAdmin, async (_req: Request,
     // ── Resend ──
     const resendKey = process.env.RESEND_API_KEY;
     // Read email config from DB for accurate status display
-    const { data: emailCfg } = await getSupabaseAdmin()
+    const supabaseForResend = getSupabaseAdmin();
+    if (!supabaseForResend) throw new Error('Supabase admin not configured');
+    const { data: emailCfg } = await supabaseForResend
       .from('config_settings')
       .select('key, value')
       .eq('category', 'email');
@@ -381,6 +385,7 @@ async function getStripeStatus(): Promise<{
 }> {
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
     const { data } = await supabase
       .from('config_settings')
       .select('key, value')

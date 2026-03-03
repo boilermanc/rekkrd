@@ -6,22 +6,14 @@ import { validateBase64Size } from '../middleware/validate.js';
 import { ai } from '../lib/gemini.js';
 import { getSubscription, incrementScanCount, PLAN_LIMITS } from '../lib/subscription.js';
 import { retryWithBackoff, isRetryableError } from '../utils/retry.js';
+import { withTimeout } from '../utils/timeout.js';
 import { searchDiscogs } from '../services/discogsService.js';
-import type { DiscogsMatch } from '../../types.js';
+import type { DiscogsMatch } from '../../src/types.js';
 
 const router = Router();
 
 const GEMINI_TIMEOUT_MS = 90_000;
 const MIN_BARCODE_LENGTH = 8;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
-}
 
 /** Return the first barcode that is all digits and >= MIN_BARCODE_LENGTH, or null. */
 function extractValidBarcode(barcodes: unknown): string | null {

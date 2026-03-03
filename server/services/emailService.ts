@@ -19,6 +19,8 @@ let _supabase: ReturnType<typeof createClient> | null = null;
 async function getEmailSender(): Promise<string> {
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) return `Rekkrd <${process.env.EMAIL_FROM ?? 'team@sproutify.app'}>`;
+
     const { data } = await supabase
       .from('config_settings')
       .select('key, value')

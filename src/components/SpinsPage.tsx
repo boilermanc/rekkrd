@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Album } from '../../types';
-import { spinsService, RecentSpin, MostPlayedAlbum, SpinStats, SpinHistoryPage } from '../../services/spinsService';
-import { proxyImageUrl } from '../../services/imageProxy';
-import SpinningRecord from '../../components/SpinningRecord';
-import { useTheme } from '../../contexts/ThemeContext';
+import { Album } from '../types';
+import { spinsService, RecentSpin, MostPlayedAlbum, SpinStats, SpinHistoryPage } from '../services/spinsService';
+import { proxyImageUrl } from '../services/imageProxy';
+import SpinningRecord from './SpinningRecord';
+import { useTheme } from '../contexts/ThemeContext';
 
 // ── Helpers ─────────────────────────────────────────────────────
 

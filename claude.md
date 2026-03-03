@@ -359,6 +359,31 @@ Self-hosted n8n at `https://n8n.sproutify.app`
 
 ---
 
+## TypeScript Standards
+
+### Baseline check
+`npx tsc --noEmit` must return 0 errors before any task is marked complete.
+No manual flags needed — noImplicitAny and strictNullChecks are locked in tsconfig.json.
+
+### Server-side compilation
+Server directory uses a separate `tsconfig.server.json` (strict: true, moduleResolution: node).
+Check server errors independently with: `npx tsc --project tsconfig.server.json`
+
+### Type safety rules
+- Never use `any` explicitly — find the right type or use `unknown` with a guard
+- Null guards go at the top of functions, not inline at every call site
+- Supabase admin null pattern: `if (!supabase) throw new Error('Supabase admin not configured')`
+- useRef always requires an initial value: `useRef<Type>(undefined)` not `useRef<Type>()`
+- Catch block errors: cast with `(error as Error).message`
+
+### Required devDependencies (do not remove)
+- @types/react
+- @types/react-dom
+- @types/node
+These are not optional — removing them will silently break type checking across the entire codebase.
+
+---
+
 ## Common Gotchas
 
 ### Image Uploads — MIME Type Extraction
@@ -491,4 +516,4 @@ Step-by-step checklist for creating Stripe products before Sellr launch:
 
 ---
 
-*Last updated: 2026-02-27*
+*Last updated: 2026-03-02*

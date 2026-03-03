@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { adminService, BlogPostAdmin, BlogIdeaAdmin } from '../../services/adminService';
+import { adminService, BlogPostAdmin, BlogIdeaAdmin } from '../../src/services/adminService';
 import BlogEditor from './BlogEditor';
 import BlogIdeaForm from './BlogIdeaForm';
 

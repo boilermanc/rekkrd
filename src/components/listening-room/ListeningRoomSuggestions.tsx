@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Plus, RefreshCw, Sparkles } from 'lucide-react';
-import { Album } from '../../../types';
-import { proxyImageUrl } from '../../../services/imageProxy';
+import { Album } from '../../types';
+import { proxyImageUrl } from '../../services/imageProxy';
 
 interface ListeningRoomSuggestionsProps {
   sessionAlbums: Album[];

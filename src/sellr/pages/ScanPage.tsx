@@ -65,7 +65,7 @@ const ScanPage: React.FC = () => {
 
   // Toast state
   const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Tier-limit modal
   const [showLimitModal, setShowLimitModal] = useState(false);

@@ -136,7 +136,7 @@ const ExpireSessionCard: React.FC<{ authToken: string }> = ({ authToken }) => {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const confirmTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     return () => { if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current); };
@@ -198,7 +198,7 @@ const RefundOrderCard: React.FC<{ authToken: string }> = ({ authToken }) => {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const confirmTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     return () => { if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current); };

@@ -19,11 +19,11 @@ const DeleteConfirm: React.FC<{
   onDeleted: () => void;
   onCancel: () => void;
 }> = ({ recordId, sessionId, onDeleted, onCancel }) => {
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Auto-cancel after 2 seconds
+  // Auto-cancel after 5 seconds (longer for assistive tech users)
   useEffect(() => {
-    timerRef.current = setTimeout(onCancel, 2000);
+    timerRef.current = setTimeout(onCancel, 5000);
     return () => clearTimeout(timerRef.current);
   }, [onCancel]);
 
@@ -41,7 +41,7 @@ const DeleteConfirm: React.FC<{
   };
 
   return (
-    <span className="flex items-center gap-1 text-xs text-red-500">
+    <span role="alert" className="flex items-center gap-1 text-xs text-red-500">
       Sure?
       <button
         onClick={handleConfirm}

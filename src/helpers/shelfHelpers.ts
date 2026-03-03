@@ -1,8 +1,8 @@
 import * as Papa from 'papaparse';
-import { supabase } from '../../services/supabaseService';
+import { supabase } from '../services/supabaseService';
 import { triggerDownload } from './exportHelpers';
-import type { Album } from '../../types';
-import type { ShelfConfig, ShelfSortPreference, SortScheme } from '../../types/shelf';
+import type { Album } from '../types';
+import type { ShelfConfig, ShelfSortPreference, SortScheme } from '../types/shelf';
 
 function assertClient() {
   if (!supabase) {

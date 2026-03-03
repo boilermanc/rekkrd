@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
-import type { StakkdRoom, CreateRoomPayload } from '../../../types/room';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import type { StakkdRoom, CreateRoomPayload } from '../../types/room';
 
 // ── Props ────────────────────────────────────────────────────────────
 

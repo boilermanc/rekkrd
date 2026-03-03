@@ -1,5 +1,4 @@
 import type { Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from './supabaseAdmin.js';
 
 export type Plan = 'collector' | 'curator' | 'enthusiast';
@@ -25,8 +24,6 @@ const TIER_LEVELS: Record<Plan, number> = {
   enthusiast: 2,
 };
 
-let _admin: ReturnType<typeof createClient> | null = null;
-
 /**
  * Fetches subscription info for a user.
  * Returns free-tier defaults if no subscription row exists.
@@ -43,6 +40,8 @@ export async function getSubscription(userId: string): Promise<SubscriptionInfo>
   }
 
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
+
   interface SubRow {
     plan: string;
     status: string;
@@ -81,7 +80,12 @@ export async function getSubscription(userId: string): Promise<SubscriptionInfo>
         .from('subscriptions')
         .update({ plan: 'collector', status: 'expired' })
         .eq('user_id', userId)
-        .then(() => {});
+        .then(
+          () => {},
+          (err: unknown) => {
+            console.error('[subscription] Failed to update trial expiry:', (err as Error).message);
+          },
+        );
     }
   }
 
@@ -97,7 +101,12 @@ export async function getSubscription(userId: string): Promise<SubscriptionInfo>
       .from('subscriptions')
       .update({ ai_scans_used: 0, ai_scans_reset_at: nextReset.toISOString() })
       .eq('user_id', userId)
-      .then(() => {});
+      .then(
+        () => {},
+        (err: unknown) => {
+          console.error('[subscription] Failed to reset scan counter:', (err as Error).message);
+        },
+      );
   }
 
   return {
@@ -115,6 +124,7 @@ export async function getSubscription(userId: string): Promise<SubscriptionInfo>
 export async function incrementScanCount(userId: string): Promise<void> {
   if (userId === '__legacy__') return;
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
   await supabase.rpc('increment_scan_count', { p_user_id: userId });
 }
 

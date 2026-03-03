@@ -7,8 +7,10 @@ import { ai } from '../lib/gemini.js';
 import { USER_AGENT } from '../lib/constants.js';
 import { searchItunes } from '../lib/itunes.js';
 import { searchDiscogs } from '../services/discogsService.js';
-import type { DiscogsMatch } from '../../types.js';
+import type { DiscogsMatch } from '../../src/types.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { withTimeout } from '../utils/timeout.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
 
@@ -45,12 +47,6 @@ setInterval(() => {
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
-
 async function requireActiveSession(sessionId: unknown): Promise<boolean> {
   if (!sessionId || typeof sessionId !== 'string') return false;
 
@@ -64,15 +60,6 @@ async function requireActiveSession(sessionId: unknown): Promise<boolean> {
   if (error || !data) return false;
   if (data.status === 'expired' || new Date(data.expires_at) < new Date()) return false;
   return true;
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
 }
 
 function extractValidBarcode(barcodes: unknown): string | null {

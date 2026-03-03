@@ -10,9 +10,9 @@ import {
   useDroppable,
   useDraggable,
 } from '@dnd-kit/core';
-import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
-import { useToast } from '../../contexts/ToastContext';
-import { proxyImageUrl } from '../../services/imageProxy';
+import type { DragStartEvent, DragEndEvent, Announcements } from '@dnd-kit/core';
+import { useToast } from '../contexts/ToastContext';
+import { proxyImageUrl } from '../services/imageProxy';
 import {
   sortCollectionForShelf,
   calculateShelfAssignments,
@@ -25,8 +25,8 @@ import {
   generateShelfCatalogCSV,
 } from '../helpers/shelfHelpers';
 import type { RebalancePlan } from '../helpers/shelfHelpers';
-import type { Album } from '../../types';
-import type { ShelfConfig, SortScheme } from '../../types/shelf';
+import type { Album } from '../types';
+import type { ShelfConfig, SortScheme } from '../types/shelf';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -651,7 +651,7 @@ const ShelfView: React.FC<ShelfViewProps> = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
-      accessibility={{ announcements }}
+      accessibility={{ announcements: announcements as unknown as Announcements }}
     >
       <div className="space-y-4">
         {/* Balance status banner */}

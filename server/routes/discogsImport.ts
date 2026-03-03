@@ -54,6 +54,7 @@ router.post(
       }
 
       const admin = getSupabaseAdmin();
+      if (!admin) throw new Error('Supabase admin not configured');
 
       // Collect all Discogs release IDs from the incoming batch
       const incomingIds = releases

@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { supabase, getCurrentUserId } from '../../services/supabaseService';
+import { supabase, getCurrentUserId } from '../services/supabaseService';
 import type { CSVParseResult, RekkrdField, ColumnMapping, ImportCandidate, SkippedRow, ValidationResult, ImportError, ImportResult } from '../types/import';
 
 const MAX_ROWS = 5000;

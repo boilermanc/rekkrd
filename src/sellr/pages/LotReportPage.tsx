@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import SellrLayout from '../components/SellrLayout';
 import RekkrdNudge from '../components/RekkrdNudge';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 import type { SellrSession, SellrRecord, SellrOrder } from '../types';
 
 // ── Helpers ─────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import * as Papa from 'papaparse';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { Album } from '../../types';
+import type { Album } from '../types';
 import type { ExportOptions, ExportResult } from '../types/export';
 
 // ── Export history ──────────────────────────────────────────────────

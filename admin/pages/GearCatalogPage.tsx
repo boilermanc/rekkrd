@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '../../services/supabaseService';
+import { supabase } from '../../src/services/supabaseService';
 import GearCatalogEditor from '../../src/components/GearCatalogEditor';
 import { getGearImage } from '../../src/constants/gearCategoryImages';
 

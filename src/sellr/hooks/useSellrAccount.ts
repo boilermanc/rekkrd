@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 import { useSellrAuth } from './useSellrAuth';
 
 interface SellrAccountState {

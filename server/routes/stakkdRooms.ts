@@ -1,17 +1,12 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
 import { requirePlan } from '../lib/subscription.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { getAuth } from '../utils/getAuth.js';
 
 const router = Router();
 const roomRateLimit = createRateLimit(30, 60);
-
-let _admin: ReturnType<typeof createClient> | null = null;
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
 
 const UPDATABLE_FIELDS = [
   'name', 'width_ft', 'length_ft', 'height_ft',
@@ -29,6 +24,7 @@ router.get('/api/stakkd-rooms', requireAuthWithUser, roomRateLimit, async (req: 
   try {
     const userId = getAuth(req);
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('stakkd_rooms')
@@ -96,6 +92,7 @@ router.post('/api/stakkd-rooms', requireAuthWithUser, roomRateLimit, async (req:
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const insertData: Record<string, unknown> = { user_id: userId };
     for (const key of UPDATABLE_FIELDS) {
@@ -127,6 +124,7 @@ router.get('/api/stakkd-rooms/:id', requireAuthWithUser, roomRateLimit, async (r
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('stakkd_rooms')
@@ -157,6 +155,7 @@ router.patch('/api/stakkd-rooms/:id', requireAuthWithUser, roomRateLimit, async 
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Verify ownership
     const { data: existing, error: fetchError } = await supabase
@@ -232,6 +231,7 @@ router.delete('/api/stakkd-rooms/:id', requireAuthWithUser, roomRateLimit, async
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Verify ownership
     const { data: existing, error: fetchError } = await supabase

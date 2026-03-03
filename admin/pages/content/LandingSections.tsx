@@ -14,7 +14,7 @@ import type {
   CmsFaq,
   CmsFinalCta,
   CmsFooter,
-} from '../../../types/cms';
+} from '../../../src/types/cms';
 
 // ── Shared styles ──
 

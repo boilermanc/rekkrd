@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mapDiscogsToAlbum, getDiscogsCoverUrl } from '../discogsMapper';
-import type { DiscogsRelease } from '../../types/discogs';
+import type { DiscogsRelease } from '../../src/types/discogs';
 
 // ── Helpers ───────────────────────────────────────────────────────
 

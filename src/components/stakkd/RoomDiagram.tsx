@@ -5,7 +5,7 @@ import type {
   GearPlacement,
   ListeningPosition,
   StereoTriangle,
-} from '../../../types/room';
+} from '../../types/room';
 
 // ── Props ────────────────────────────────────────────────────────────
 

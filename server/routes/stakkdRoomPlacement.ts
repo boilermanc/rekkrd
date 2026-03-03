@@ -1,33 +1,18 @@
 import { Router, type Request, type Response } from 'express';
 import { Type } from '@google/genai';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
 import { requirePlan } from '../lib/subscription.js';
 import { ai } from '../lib/gemini.js';
 import { retryWithBackoff } from '../utils/retry.js';
+import { withTimeout } from '../utils/timeout.js';
+import { getAuth } from '../utils/getAuth.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const router = Router();
 const placementRateLimit = createRateLimit(10, 60);
 
 const GEMINI_TIMEOUT_MS = 90_000;
-
-let _admin: ReturnType<typeof createClient> | null = null;
-
-
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
-}
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -89,6 +74,7 @@ router.post(
 
       const { id } = req.params;
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // 1. Fetch room with features (verify ownership)
       const { data: roomData, error: roomError } = await supabase

@@ -1,6 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 import { ai } from '../lib/gemini.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { withTimeout } from '../utils/timeout.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
 
@@ -26,19 +28,6 @@ const CONDITION_DESCRIPTIONS: Record<string, string> = {
   F: 'Fair, plays but significantly damaged',
   P: 'Poor, barely playable',
 };
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
-}
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));

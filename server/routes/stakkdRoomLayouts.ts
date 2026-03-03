@@ -1,19 +1,12 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
 import { requirePlan } from '../lib/subscription.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { getAuth } from '../utils/getAuth.js';
 
 const router = Router();
 const layoutRateLimit = createRateLimit(30, 60);
-
-let _admin: ReturnType<typeof createClient> | null = null;
-
-
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
 
 // ── GET /api/stakkd-rooms/:roomId/layouts ────────────────────────────
 // Returns all layouts for a room (summary only — id, name, is_active, created_at)
@@ -27,6 +20,7 @@ router.get(
       const userId = getAuth(req);
       const { roomId } = req.params;
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Verify room ownership
       const { data: room, error: roomErr } = await supabase
@@ -70,6 +64,7 @@ router.get(
       const userId = getAuth(req);
       const { roomId } = req.params;
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       const { data, error } = await supabase
         .from('stakkd_room_layouts')
@@ -111,6 +106,7 @@ router.post(
 
       const { roomId } = req.params;
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Verify room ownership
       const { data: room, error: roomErr } = await supabase
@@ -177,6 +173,7 @@ router.patch(
       const userId = getAuth(req);
       const { roomId, layoutId } = req.params;
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Verify ownership
       const { data: existing, error: fetchErr } = await supabase
@@ -246,6 +243,7 @@ router.delete(
       const userId = getAuth(req);
       const { roomId, layoutId } = req.params;
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Verify ownership
       const { data: existing, error: fetchErr } = await supabase

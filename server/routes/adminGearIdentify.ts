@@ -4,20 +4,12 @@ import { requireAdmin } from '../middleware/adminAuth.js';
 import { validateBase64Size } from '../middleware/validate.js';
 import { ai } from '../lib/gemini.js';
 import { retryWithBackoff, isRetryableError } from '../utils/retry.js';
+import { withTimeout } from '../utils/timeout.js';
 
 const router = Router();
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const GEMINI_TIMEOUT_MS = 90_000;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
-}
 
 async function handleIdentify(req: Request, res: Response) {
   const { image, mimeType } = req.body;

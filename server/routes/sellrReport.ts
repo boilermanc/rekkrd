@@ -3,14 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import puppeteer from 'puppeteer';
 import { buildSellrPdfHtml } from '../sellrPdfTemplate.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
-
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
 
 // ── GET /api/sellr/report/token/:report_token ────────────────────────
 // Public report access by token. Verifies order is complete.

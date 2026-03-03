@@ -1,17 +1,16 @@
 import { Router } from 'express';
-import { createClient } from '@supabase/supabase-js';
+import { requireAuthWithUser } from '../middleware/auth.js';
+import { createRateLimit } from '../middleware/rateLimit.js';
 import { sendTemplatedEmail } from '../services/emailService.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const router = Router();
 
-// ── Supabase client (service role — bypasses RLS) ──────────────────
-
-let _admin: ReturnType<typeof createClient> | null = null;
+const supportRateLimit = createRateLimit(5, 900); // 5 requests per 15 minutes
 
 // ── POST /api/support — submit a support request ───────────────────
 
-router.post('/api/support', async (req, res) => {
+router.post('/api/support', supportRateLimit, requireAuthWithUser, async (req, res) => {
   const { name, email, subject, message } = req.body;
 
   if (
@@ -26,6 +25,7 @@ router.post('/api/support', async (req, res) => {
 
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
     const { data, error } = await supabase
       .from('support_requests')
       .insert({ name, email, subject, message })

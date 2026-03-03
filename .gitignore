@@ -35,3 +35,11 @@ nul
 # Design / scratch files
 CARD_DESIGN_PROMPT.md
 RekkrdCard.tsx
+
+# Developer audit artifacts
+strict-audit.txt
+
+# Root artifacts
+*.csv
+*.zip
+vercel.json

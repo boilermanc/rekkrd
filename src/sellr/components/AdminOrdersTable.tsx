@@ -79,7 +79,7 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ authToken }) => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // ── Inspector state ────────────────────────────────────────────────
   const [inspectOrderId, setInspectOrderId] = useState<string | null>(null);

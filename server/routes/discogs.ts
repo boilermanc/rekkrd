@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { discogsRateLimiter } from '../middleware/discogsRateLimit.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { searchDiscogs, getRelease, getMasterRelease } from '../services/discogsService.js';
 import { discogsConfig } from '../lib/discogs.js';
-import type { DiscogsSearchParams } from '../../types/discogs.js';
+import type { DiscogsSearchParams } from '../../src/types/discogs.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const DISCOGS_IMAGES_BUCKET = 'discogs-images';
@@ -14,7 +15,7 @@ const router = Router();
 // Apply Discogs rate limiter to all routes in this router
 router.use(discogsRateLimiter);
 
-router.get('/api/discogs/search', async (req, res) => {
+router.get('/api/discogs/search', requireAuthWithUser, async (req, res) => {
   try {
     const { q, type, artist, title, barcode, year, format, country, per_page, page } = req.query;
 
@@ -59,13 +60,12 @@ router.get('/api/discogs/search', async (req, res) => {
     const result = await searchDiscogs(params);
     res.status(200).json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Discogs search error:', error);
-    res.status(500).json({ error: 'Failed to search Discogs', details: message });
+    console.error('[discogs] Search error:', error);
+    res.status(500).json({ error: 'Failed to search Discogs' });
   }
 });
 
-router.get('/api/discogs/releases/:id', async (req, res) => {
+router.get('/api/discogs/releases/:id', requireAuthWithUser, async (req, res) => {
   const parsed = Number(req.params.id);
   if (!Number.isInteger(parsed) || parsed < 1) {
     res.status(400).json({ error: 'Release ID must be a positive integer' });
@@ -76,14 +76,14 @@ router.get('/api/discogs/releases/:id', async (req, res) => {
     const release = await getRelease(parsed);
     res.status(200).json(release);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Discogs release fetch error:', error);
+    const message = error instanceof Error ? error.message : '';
+    console.error('[discogs] Release fetch error:', error);
     const status = message.includes(' 404 ') ? 404 : 500;
-    res.status(status).json({ error: 'Failed to fetch Discogs release', details: message });
+    res.status(status).json({ error: 'Failed to fetch Discogs release' });
   }
 });
 
-router.get('/api/discogs/masters/:id', async (req, res) => {
+router.get('/api/discogs/masters/:id', requireAuthWithUser, async (req, res) => {
   const parsed = Number(req.params.id);
   if (!Number.isInteger(parsed) || parsed < 1) {
     res.status(400).json({ error: 'Master release ID must be a positive integer' });
@@ -94,16 +94,16 @@ router.get('/api/discogs/masters/:id', async (req, res) => {
     const master = await getMasterRelease(parsed);
     res.status(200).json(master);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Discogs master release fetch error:', error);
+    const message = error instanceof Error ? error.message : '';
+    console.error('[discogs] Master release fetch error:', error);
     const status = message.includes(' 404 ') ? 404 : 500;
-    res.status(status).json({ error: 'Failed to fetch Discogs master release', details: message });
+    res.status(status).json({ error: 'Failed to fetch Discogs master release' });
   }
 });
 
 // ── Discogs Image Proxy (cache in Supabase Storage) ───────────────
 
-router.get('/api/discogs/images/:releaseId', async (req, res) => {
+router.get('/api/discogs/images/:releaseId', requireAuthWithUser, async (req, res) => {
   const releaseId = Number(req.params.releaseId);
   if (!Number.isInteger(releaseId) || releaseId < 1) {
     res.status(400).json({ error: 'Release ID must be a positive integer' });
@@ -118,6 +118,7 @@ router.get('/api/discogs/images/:releaseId', async (req, res) => {
 
   try {
     const admin = getSupabaseAdmin();
+    if (!admin) throw new Error('Supabase admin not configured');
 
     // 1. Check if already cached in Supabase Storage
     const { data: existing } = await admin.storage

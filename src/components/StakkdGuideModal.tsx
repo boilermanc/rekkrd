@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState } from 'react';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import './StakkdGuideModal.css';
 
 interface StakkdGuideModalProps {

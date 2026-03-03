@@ -5,7 +5,7 @@ import SellrLayout from '../components/SellrLayout';
 import SlotCounter from '../components/SlotCounter';
 import { useSellrAuth } from '../hooks/useSellrAuth';
 import { useSellrMeta } from '../hooks/useSellrMeta';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 
 // ── API response types ──────────────────────────────────────────────
 

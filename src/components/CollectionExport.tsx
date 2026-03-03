@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import type { Album } from '../../types';
+import type { Album } from '../types';
 import type { ExportOptions } from '../types/export';
 import { exportCollectionAsCSV, exportCollectionAsPDF } from '../helpers/exportHelpers';
-import { useToast } from '../../contexts/ToastContext';
+import { useToast } from '../contexts/ToastContext';
 
 const LARGE_COLLECTION_THRESHOLD = 500;
 

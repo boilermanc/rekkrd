@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Info, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { supabase } from '../../../services/supabaseService';
-import { useToast } from '../../../contexts/ToastContext';
+import { supabase } from '../../services/supabaseService';
+import { useToast } from '../../contexts/ToastContext';
 import type { SellrRecord, SellrSession } from '../types';
 
 // ── Types ────────────────────────────────────────────────────────────

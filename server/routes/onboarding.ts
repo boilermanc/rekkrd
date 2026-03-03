@@ -19,6 +19,7 @@ router.post(
 
     try {
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Guard against duplicate sends: only trigger when the profile
       // already has onboarding_completed = true (just set by the wizard)

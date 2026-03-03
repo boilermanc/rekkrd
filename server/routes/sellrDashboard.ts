@@ -2,14 +2,9 @@ import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { getSlotStatus } from '../sellrSlots.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
-
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
 
 // ── GET /api/sellr/dashboard ─────────────────────────────────────────
 // Returns slots + sessions + orders for the authenticated user.

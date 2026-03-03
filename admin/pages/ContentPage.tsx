@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { adminService } from '../../services/adminService';
-import type { CmsContentRow } from '../../services/adminService';
-import type { CmsLandingContent, CmsLegalBody } from '../../types/cms';
+import { adminService } from '../../src/services/adminService';
+import type { CmsContentRow } from '../../src/services/adminService';
+import type { CmsLandingContent, CmsLegalBody } from '../../src/types/cms';
 import {
   LANDING_DEFAULTS,
   DEFAULT_HERO,

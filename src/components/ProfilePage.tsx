@@ -4,14 +4,14 @@ import {
   AlertTriangle, Crown, Gem, Sparkles, Headphones, Music, Tv, Trophy,
   TrendingUp, Mail, Eye, EyeOff, Check, Bell, LogOut, Trash2,
 } from 'lucide-react';
-import { useAuthContext } from '../../contexts/AuthContext';
-import { useSubscription } from '../../contexts/SubscriptionContext';
-import { getProfile, updateProfile, type Profile } from '../../services/profileService';
-import DiscogsConnect from '../../components/DiscogsConnect';
-import { wantlistService } from '../../services/wantlistService';
-import { supabase } from '../../services/supabaseService';
-import { useToast } from '../../contexts/ToastContext';
-import type { Plan } from '../../services/subscriptionService';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { getProfile, updateProfile, type Profile } from '../services/profileService';
+import DiscogsConnect from './DiscogsConnect';
+import { wantlistService } from '../services/wantlistService';
+import { supabase } from '../services/supabaseService';
+import { useToast } from '../contexts/ToastContext';
+import type { Plan } from '../services/subscriptionService';
 
 // ── Shared constants (mirrored from OnboardingWizard, self-contained) ──
 

@@ -1,9 +1,9 @@
 import React, { useState, useCallback, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 import SellrLayout from '../components/SellrLayout';
 import { useSellrMeta } from '../hooks/useSellrMeta';
-import Turnstile from '../../../components/Turnstile';
+import Turnstile from '../../components/Turnstile';
 
 const SignupPage: React.FC = () => {
   useSellrMeta({

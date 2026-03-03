@@ -11,7 +11,7 @@ import {
   Cable,
   type LucideIcon,
 } from 'lucide-react';
-import type { GearCategory } from '../../types';
+import type { GearCategory } from '../types';
 
 /** Maps each gear category to a Lucide icon for signal chain display. */
 const SIGNAL_CHAIN_ICONS: Record<GearCategory, LucideIcon> = {

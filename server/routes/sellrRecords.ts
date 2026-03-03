@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { consumeSlots, releaseSlot } from '../sellrSlots.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
 
@@ -12,12 +13,6 @@ const TIER_LIMITS: Record<string, number> = {
   standard: 100,
   full: 500,
 };
-
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
 
 /** Fetch a session and verify it's active + not expired. */
 async function getActiveSession(supabase: ReturnType<typeof requireSupabaseAdmin>, sessionId: string) {

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { parseCSVFile, autoDetectMapping, validateMappedRows, detectDuplicates, executeBulkImport } from '../helpers/csvImportHelpers';
 import { REKKRD_FIELDS } from '../types/import';
 import type { CSVParseResult, RekkrdField, ColumnMapping, ImportCandidate, SkippedRow, ImportResult, ImportError } from '../types/import';
-import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 
 type ReviewFilter = 'all' | 'duplicates' | 'skipped';
 

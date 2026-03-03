@@ -14,7 +14,7 @@ import type {
   CmsFinalCta,
   CmsFooter,
   CmsLandingContent,
-} from '../types/cms';
+} from '../src/types/cms';
 
 export const DEFAULT_HERO: CmsHero = {
   badge: 'AI-Powered Collection',

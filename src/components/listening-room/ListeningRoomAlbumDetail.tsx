@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Check, Maximize2 } from 'lucide-react';
-import { Album } from '../../../types';
-import { proxyImageUrl } from '../../../services/imageProxy';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
+import { Album } from '../../types';
+import { proxyImageUrl } from '../../services/imageProxy';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import ListeningRoomFullscreenArt from './ListeningRoomFullscreenArt';
 
 interface ListeningRoomAlbumDetailProps {

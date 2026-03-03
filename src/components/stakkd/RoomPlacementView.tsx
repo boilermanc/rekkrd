@@ -1,15 +1,15 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
-import { useToast } from '../../../contexts/ToastContext';
-import { useSubscription } from '../../../contexts/SubscriptionContext';
-import { supabase } from '../../../services/supabaseService';
-import { useRoomLayouts } from '../../../hooks/useRoomLayouts';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useToast } from '../../contexts/ToastContext';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { supabase } from '../../services/supabaseService';
+import { useRoomLayouts } from '../../hooks/useRoomLayouts';
 import RoomDiagram from './RoomDiagram';
 import type {
   StakkdRoom,
   StakkdRoomFeature,
   PlacementResponse,
-} from '../../../types/room';
+} from '../../types/room';
 
 // ── Props ────────────────────────────────────────────────────────────
 

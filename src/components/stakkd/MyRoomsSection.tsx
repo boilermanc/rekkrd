@@ -1,17 +1,17 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { HelpCircle } from 'lucide-react';
-import { useRooms } from '../../../hooks/useRooms';
-import { useToast } from '../../../contexts/ToastContext';
-import { useSubscription } from '../../../contexts/SubscriptionContext';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
+import { useRooms } from '../../hooks/useRooms';
+import { useToast } from '../../contexts/ToastContext';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import RoomForm from './RoomForm';
 import RoomFeaturesEditor from './RoomFeaturesEditor';
 import RoomPlacementView from './RoomPlacementView';
 import RoomOnboarding from './RoomOnboarding';
 import RoomGuideModal from './RoomGuideModal';
-import UpgradePrompt from '../../../components/UpgradePrompt';
-import type { StakkdRoom, CreateRoomPayload } from '../../../types/room';
-import { supabase } from '../../../services/supabaseService';
+import UpgradePrompt from '../UpgradePrompt';
+import type { StakkdRoom, CreateRoomPayload } from '../../types/room';
+import { supabase } from '../../services/supabaseService';
 
 // ── Delete Confirmation Dialog ───────────────────────────────────────
 

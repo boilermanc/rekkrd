@@ -1,20 +1,13 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
-import { GEAR_CATEGORIES } from '../../types.js';
+import { GEAR_CATEGORIES } from '../../src/types.js';
 import { getSubscription, PLAN_LIMITS } from '../lib/subscription.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { getAuth } from '../utils/getAuth.js';
 
 const router = Router();
 const gearRateLimit = createRateLimit(30, 60);
-
-let _admin: ReturnType<typeof createClient> | null = null;
-
-
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
 
 const UPDATABLE_FIELDS = [
   'category', 'brand', 'model', 'year', 'description', 'specs',
@@ -39,6 +32,7 @@ router.post('/api/gear/check-limit', requireAuthWithUser, async (req: Request, r
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
     const { count, error } = await supabase
       .from('gear')
       .select('id', { count: 'exact', head: true })
@@ -77,6 +71,7 @@ router.get('/api/gear', requireAuthWithUser, gearRateLimit, async (req: Request,
   try {
     const userId = getAuth(req);
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('gear')
@@ -120,6 +115,7 @@ router.post('/api/gear', requireAuthWithUser, gearRateLimit, async (req: Request
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const insertData: Record<string, unknown> = { user_id: userId };
     for (const key of UPDATABLE_FIELDS) {
@@ -157,6 +153,7 @@ router.get('/api/gear/catalog/search', async (req: Request, res: Response) => {
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
     const { data, error } = await supabase.rpc('search_gear_catalog', {
       search_query: q,
       max_results: limit,
@@ -184,6 +181,7 @@ router.put('/api/gear/reorder', requireAuthWithUser, async (req: Request, res: R
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Verify all IDs belong to this user
     const { data: owned, error: verifyError } = await supabase
@@ -225,6 +223,7 @@ router.put('/api/gear/:id', requireAuthWithUser, gearRateLimit, async (req: Requ
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Verify ownership
     const { data: existing, error: fetchError } = await supabase
@@ -282,6 +281,7 @@ router.delete('/api/gear/:id', requireAuthWithUser, gearRateLimit, async (req: R
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Verify ownership
     const { data: existing, error: fetchError } = await supabase

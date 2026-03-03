@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, ChevronRight } from 'lucide-react';
-import { supabase } from '../../services/supabaseService';
+import { supabase } from '../services/supabaseService';
 
 interface ValueSnapshot {
   totalMedian: number;

@@ -1,17 +1,12 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
 import { requirePlan } from '../lib/subscription.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { getAuth } from '../utils/getAuth.js';
 
 const router = Router();
 const featureRateLimit = createRateLimit(30, 60);
-
-let _admin: ReturnType<typeof createClient> | null = null;
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
 
 const VALID_FEATURE_TYPES = ['door', 'window', 'closet', 'fireplace', 'stairs', 'opening'];
 const VALID_WALLS = ['north', 'south', 'east', 'west'];
@@ -48,6 +43,7 @@ router.post('/api/stakkd-room-features', requireAuthWithUser, featureRateLimit, 
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Verify room belongs to user
     const { data: room, error: roomError } = await supabase
@@ -94,6 +90,7 @@ router.delete('/api/stakkd-room-features/:id', requireAuthWithUser, featureRateL
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     // Fetch the feature and verify its room belongs to the user
     const { data: feature, error: fetchError } = await supabase

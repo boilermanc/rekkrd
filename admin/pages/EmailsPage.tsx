@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { adminService, EmailTemplate, SendEmailResult } from '../../services/adminService';
+import { adminService, EmailTemplate, SendEmailResult } from '../../src/services/adminService';
 import EmailComposer from '../../src/components/admin/EmailComposer';
 
 /** Strip script tags from HTML for safe iframe preview */

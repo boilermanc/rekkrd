@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
-import { useAuthContext } from '../../contexts/AuthContext';
-import { useToast } from '../../contexts/ToastContext';
-import { Album } from '../../types';
-import { supabaseService } from '../../services/supabaseService';
-import { playlistService } from '../../services/playlistService';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { Album } from '../types';
+import { supabaseService } from '../services/supabaseService';
+import { playlistService } from '../services/playlistService';
 import ListeningRoomBrowse from '../components/listening-room/ListeningRoomBrowse';
 import ListeningRoomAlbumDetail from '../components/listening-room/ListeningRoomAlbumDetail';
 import ListeningRoomSession from '../components/listening-room/ListeningRoomSession';

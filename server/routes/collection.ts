@@ -31,6 +31,7 @@ router.post(
       }
 
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
       const { count, error } = await supabase
         .from('albums')
         .select('id', { count: 'exact', head: true })
@@ -75,6 +76,7 @@ router.post(
 
     try {
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       const { count, error } = await supabase
         .from('albums')

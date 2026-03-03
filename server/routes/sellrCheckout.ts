@@ -5,6 +5,7 @@ import type Stripe from 'stripe';
 import { sendPaymentConfirmedEmail, sendAdminOrderAlert } from '../sellrEmails.js';
 import { purchaseSlots, TIER_SLOTS } from '../sellrSlots.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
 
@@ -18,12 +19,6 @@ const TIER_AMOUNT_CENTS: Record<Tier, number> = {
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
 
 // ── POST /api/sellr/checkout/create-intent ───────────────────────────
 // Creates a Stripe PaymentIntent for a Sellr order.

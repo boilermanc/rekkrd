@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import type { Album } from '../../types';
+import type { Album } from '../types';
 import {
   computeCollectionStats,
   computeGenreBreakdown,
@@ -15,7 +15,7 @@ import type {
   GrowthData,
 } from '../types/analytics';
 import { Disc3, Music, Tag, Calendar, Clock, BarChart3 } from 'lucide-react';
-import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,

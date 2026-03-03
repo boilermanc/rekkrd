@@ -1,16 +1,9 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { getAuth } from '../utils/getAuth.js';
 
 const router = Router();
-
-let _admin: ReturnType<typeof createClient> | null = null;
-
-
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
 
 interface AlbumRow {
   artist: string;
@@ -49,6 +42,7 @@ router.get('/api/collection/value', requireAuthWithUser, async (req: Request, re
 
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data: albums, error } = await supabase
       .from('albums')
@@ -175,6 +169,7 @@ router.get('/api/collection/value/history', requireAuthWithUser, async (req: Req
 
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('discogs_value_history')

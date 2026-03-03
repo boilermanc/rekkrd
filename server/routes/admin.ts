@@ -1,15 +1,14 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { requireAdmin, type AdminAuthResult } from '../middleware/adminAuth.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const router = Router();
 
-let _admin: ReturnType<typeof createClient> | null = null;
 // ── Customers ──────────────────────────────────────────────────────
 async function handleCustomers(_req: Request, res: Response) {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
@@ -23,9 +22,14 @@ async function handleCustomers(_req: Request, res: Response) {
 
   const userMap = new Map(users.map(u => [u.id, u] as const));
 
-  const { count: totalAlbums } = await supabase
+  const { data: albumCounts } = await supabase
     .from('albums')
-    .select('*', { count: 'exact', head: true });
+    .select('user_id');
+
+  const albumCountMap = new Map<string, number>();
+  for (const row of (albumCounts || []) as Array<{ user_id: string }>) {
+    albumCountMap.set(row.user_id, (albumCountMap.get(row.user_id) || 0) + 1);
+  }
 
   const { data: subscriptions } = await supabase
     .from('subscriptions')
@@ -64,7 +68,7 @@ async function handleCustomers(_req: Request, res: Response) {
       updated_at: p.updated_at,
       last_sign_in_at: authUser?.last_sign_in_at || null,
       banned_until: (authUser as Record<string, unknown> | undefined)?.banned_until as string | null ?? null,
-      album_count: totalAlbums || 0,
+      album_count: albumCountMap.get(p.id) || 0,
       subscription_plan: sub?.plan || null,
       subscription_status: sub?.status || null,
     };
@@ -76,6 +80,7 @@ async function handleCustomers(_req: Request, res: Response) {
 // ── Collections ────────────────────────────────────────────────────
 async function handleCollections(_req: Request, res: Response) {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data: albums, error } = await supabase
     .from('albums')
@@ -111,6 +116,7 @@ async function handleCollections(_req: Request, res: Response) {
 // ── Email Templates ────────────────────────────────────────────────
 async function handleEmailTemplates(req: Request, res: Response) {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   switch (req.method) {
     case 'GET': {
@@ -204,7 +210,8 @@ async function handleSendEmail(req: Request, res: Response) {
     });
 
     if (result.error) {
-      res.status(400).json({ error: result.error.message, details: result.error });
+      console.error('[admin] Resend API error:', result.error);
+      res.status(400).json({ error: 'Failed to send email' });
       return;
     }
 
@@ -217,9 +224,8 @@ async function handleSendEmail(req: Request, res: Response) {
       status: 'sent',
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[admin] Failed to send email:', message, err);
-    res.status(500).json({ error: message });
+    console.error('[admin] Failed to send email:', err);
+    res.status(500).json({ error: 'Failed to send email' });
   }
 }
 
@@ -228,6 +234,7 @@ const VALID_CMS_PAGES = ['landing', 'privacy', 'terms'];
 
 async function handleCmsContent(req: Request, res: Response) {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   switch (req.method) {
     case 'GET': {
@@ -299,6 +306,7 @@ function groupBy(rows: ProfileUtmRow[], key: keyof ProfileUtmRow): Record<string
 
 async function handleUtmStats(_req: Request, res: Response) {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data: profiles, error } = await supabase
     .from('profiles')
@@ -375,6 +383,7 @@ async function handleUpdateSubscription(req: Request, res: Response) {
 
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -415,7 +424,7 @@ async function handleUpdateSubscription(req: Request, res: Response) {
 
     if (subError) {
       console.error('[admin] Subscription update failed:', subError);
-      res.status(500).json({ error: `Failed to update subscription: ${subError.message}` });
+      res.status(500).json({ error: 'Failed to update subscription' });
       return;
     }
 
@@ -430,15 +439,14 @@ async function handleUpdateSubscription(req: Request, res: Response) {
 
     if (profError) {
       console.error('[admin] Profile update failed:', profError);
-      res.status(500).json({ error: `Failed to update profile: ${profError.message}` });
+      res.status(500).json({ error: 'Failed to update profile' });
       return;
     }
 
     res.status(200).json({ user_id: userId, plan, status, period_end: periodEnd, scans_reset: true });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[admin] Subscription override error:', message, err);
-    res.status(500).json({ error: message });
+    console.error('[admin] Subscription override error:', err);
+    res.status(500).json({ error: 'Failed to update subscription' });
   }
 }
 
@@ -457,6 +465,7 @@ async function handleDeactivateUser(req: Request, res: Response) {
   }
 
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data: targetProfile } = await supabase
     .from('profiles')
@@ -479,8 +488,8 @@ async function handleDeactivateUser(req: Request, res: Response) {
   });
 
   if (error) {
-    console.error('[admin] Failed to deactivate user:', error.message);
-    res.status(500).json({ error: `Failed to deactivate user: ${error.message}` });
+    console.error('[admin] Failed to deactivate user:', error);
+    res.status(500).json({ error: 'Failed to deactivate user' });
     return;
   }
 
@@ -492,6 +501,7 @@ async function handleReactivateUser(req: Request, res: Response) {
   const userId = req.params.id as string;
   const adminAuth = getAdminAuth(req);
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data: { user }, error: fetchError } = await supabase.auth.admin.getUserById(userId);
   if (fetchError || !user) {
@@ -504,8 +514,8 @@ async function handleReactivateUser(req: Request, res: Response) {
   });
 
   if (error) {
-    console.error('[admin] Failed to reactivate user:', error.message);
-    res.status(500).json({ error: `Failed to reactivate user: ${error.message}` });
+    console.error('[admin] Failed to reactivate user:', error);
+    res.status(500).json({ error: 'Failed to reactivate user' });
     return;
   }
 
@@ -541,6 +551,7 @@ async function handleWipeUser(req: Request, res: Response) {
   }
 
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
   if (userError || !user) {

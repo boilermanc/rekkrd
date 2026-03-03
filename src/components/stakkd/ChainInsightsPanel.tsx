@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Info, AlertTriangle, AlertCircle, CheckCircle2, X, Plus } from 'lucide-react';
 import { getSignalChainIcon } from '../../config/signalChainIcons';
-import type { ChainAnalysisResult } from '../../../components/StakkdPage';
-import type { GearCategory } from '../../../types';
+import type { ChainAnalysisResult } from '../StakkdPage';
+import type { GearCategory } from '../../types';
 
 interface ChainInsightsPanelProps {
   analysis: ChainAnalysisResult;

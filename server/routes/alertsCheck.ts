@@ -56,6 +56,7 @@ router.post(
 
     try {
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Fetch active alerts where last_checked_at is null or older than 23 hours
       const cutoff = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString();

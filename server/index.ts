@@ -1,10 +1,15 @@
 import 'dotenv/config';
+import { validateEnv } from './utils/validateEnv.js';
+validateEnv(); // fail fast if env is misconfigured
+
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { errorHandler } from './middleware/errorHandler.js';
+import { getSupabaseAdmin } from './lib/supabaseAdmin.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -145,8 +150,7 @@ app.get('/api/health', (_req, res) => {
 console.log('[boot] Health check registered');
 
 // API routes — each wrapped in try/catch to detect silent mount failures
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mountRouter(name: string, router: any) {
+function mountRouter(name: string, router: express.Router) {
   try {
     app.use(router);
   } catch (err) {
@@ -221,91 +225,47 @@ console.log('[boot] All routes registered');
 // Start Sellr cron jobs
 startSellrCron();
 
-// Ensure gear-photos storage bucket exists
-async function ensureGearPhotosBucket() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return;
+// Ensure required storage buckets exist
+async function ensureBucket(
+  name: string,
+  options: { public?: boolean; fileSizeLimit?: number; allowedMimeTypes?: string[] } = {},
+): Promise<void> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
 
-  const { createClient } = await import('@supabase/supabase-js');
-  const admin = createClient(url, key);
-
-  const { data: buckets } = await admin.storage.listBuckets();
-  const exists = buckets?.some((b: { name: string }) => b.name === 'gear-photos');
-
+  const { data: buckets } = await supabase.storage.listBuckets();
+  const exists = buckets?.some((b: { name: string }) => b.name === name);
   if (!exists) {
-    const { error } = await admin.storage.createBucket('gear-photos', { public: true });
-    if (error) {
-      console.error('Failed to create gear-photos bucket:', error.message);
-    } else {
-      console.log('Created gear-photos storage bucket');
-    }
-  }
-}
-
-ensureGearPhotosBucket().catch(err =>
-  console.error('gear-photos bucket check failed:', err)
-);
-
-// Ensure gear-manuals storage bucket exists
-async function ensureGearManualsBucket() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return;
-
-  const { createClient } = await import('@supabase/supabase-js');
-  const admin = createClient(url, key);
-
-  const { data: buckets } = await admin.storage.listBuckets();
-  const exists = buckets?.some((b: { name: string }) => b.name === 'gear-manuals');
-
-  if (!exists) {
-    const { error } = await admin.storage.createBucket('gear-manuals', {
-      public: true,
-      fileSizeLimit: 25 * 1024 * 1024, // 25 MB
-      allowedMimeTypes: ['application/pdf'],
+    const { error } = await supabase.storage.createBucket(name, {
+      public: options.public ?? false,
+      ...options.fileSizeLimit != null ? { fileSizeLimit: options.fileSizeLimit } : {},
+      ...options.allowedMimeTypes ? { allowedMimeTypes: options.allowedMimeTypes } : {},
     });
-    if (error) {
-      console.error('Failed to create gear-manuals bucket:', error.message);
-    } else {
-      console.log('Created gear-manuals storage bucket');
-    }
+    if (error) console.error(`[storage] Failed to create bucket "${name}":`, error.message);
+    else console.log(`[storage] Created bucket: ${name}`);
   }
 }
 
-ensureGearManualsBucket().catch(err =>
-  console.error('gear-manuals bucket check failed:', err)
+ensureBucket('gear-photos', { public: true }).catch(err =>
+  console.error('[storage] gear-photos bucket check failed:', err),
+);
+ensureBucket('gear-manuals', {
+  public: true,
+  fileSizeLimit: 25 * 1024 * 1024,
+  allowedMimeTypes: ['application/pdf'],
+}).catch(err =>
+  console.error('[storage] gear-manuals bucket check failed:', err),
+);
+ensureBucket('discogs-images', {
+  public: true,
+  fileSizeLimit: 10 * 1024 * 1024,
+  allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+}).catch(err =>
+  console.error('[storage] discogs-images bucket check failed:', err),
 );
 
-// Ensure discogs-images storage bucket exists
-async function ensureDiscogsImagesBucket() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return;
-
-  const { createClient } = await import('@supabase/supabase-js');
-  const admin = createClient(url, key);
-
-  const { data: buckets } = await admin.storage.listBuckets();
-  const exists = buckets?.some((b: { name: string }) => b.name === 'discogs-images');
-
-  if (!exists) {
-    const { error } = await admin.storage.createBucket('discogs-images', {
-      public: true,
-      fileSizeLimit: 10 * 1024 * 1024, // 10 MB
-      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-    });
-    if (error) {
-      console.error('Failed to create discogs-images bucket:', error.message);
-    } else {
-      console.log('Created discogs-images storage bucket');
-    }
-  }
-}
-
-ensureDiscogsImagesBucket().catch(err =>
-  console.error('discogs-images bucket check failed:', err)
-);
+// Global error handler — catches next(err) from route handlers
+app.use(errorHandler);
 
 // Crawler/bot meta tag pre-rendering — before static files + SPA fallback
 app.use(crawlerMeta);
@@ -329,5 +289,5 @@ app.get('/{*splat}', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`[boot] Node ${process.version} | __dirname=${__dirname}`);
-  console.log(`[boot] Router stack size: ${(app as any).router?.stack?.length ?? 'unknown'}`);
+  console.log(`[boot] Router stack size: ${(app as unknown as Record<string, { stack?: unknown[] }>).router?.stack?.length ?? 'unknown'}`);
 });

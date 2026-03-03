@@ -2,25 +2,12 @@ import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { ai } from '../lib/gemini.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { withTimeout } from '../utils/timeout.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
 
 const GEMINI_TIMEOUT_MS = 60_000;
-
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
-}
 
 // ── POST /api/sellr/lot/:session_id/calculate ─────────────────────────
 // Calculates lot pricing tiers for all priced records in a session.

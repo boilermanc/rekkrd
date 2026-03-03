@@ -4,7 +4,7 @@ import type {
   DiscogsSearchResponse,
   DiscogsRelease,
   DiscogsMasterRelease,
-} from '../../types/discogs.js';
+} from '../../src/types/discogs.js';
 
 // Re-export all types so consumers can import from the service
 export type {
@@ -21,7 +21,7 @@ export type {
   DiscogsFormat,
   DiscogsCommunity,
   DiscogsRateLimit,
-} from '../../types/discogs.js';
+} from '../../src/types/discogs.js';
 
 const BASE_URL = 'https://api.discogs.com';
 const LOG_PREFIX = '[discogs]';

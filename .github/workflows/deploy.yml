@@ -17,6 +17,8 @@ jobs:
         run: npm install --legacy-peer-deps
       - name: Type check
         run: npx tsc --noEmit
+      - name: Type-check server
+        run: npx tsc --project tsconfig.server.json --noEmit
       - name: Build
         run: npm run build
 

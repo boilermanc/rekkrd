@@ -2,14 +2,9 @@ import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { getSlotStatus } from '../sellrSlots.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
-
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
 
 // ── GET /api/sellr/account/slots ─────────────────────────────────────
 // Returns slot status for the authenticated user.
@@ -22,6 +17,7 @@ router.get('/api/sellr/account/slots', async (req: Request, res: Response) => {
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) { errorResponse(res, 500, 'Server not configured'); return; }
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) {
       errorResponse(res, 401, 'Invalid or expired token');
@@ -47,6 +43,7 @@ router.get('/api/sellr/account/orders', async (req: Request, res: Response) => {
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) { errorResponse(res, 500, 'Server not configured'); return; }
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) {
       errorResponse(res, 401, 'Invalid or expired token');
@@ -101,6 +98,7 @@ router.post('/api/sellr/account/delete', async (req: Request, res: Response) => 
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) { errorResponse(res, 500, 'Server not configured'); return; }
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) {
       errorResponse(res, 401, 'Invalid or expired token');

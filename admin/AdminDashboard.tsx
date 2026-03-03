@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { adminService, AdminCustomer, AdminCollectionStats } from '../services/adminService';
+import { adminService, AdminCustomer, AdminCollectionStats } from '../src/services/adminService';
 
 const AdminDashboard: React.FC = () => {
   const [customerCount, setCustomerCount] = useState<number | null>(null);

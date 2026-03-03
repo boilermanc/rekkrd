@@ -106,6 +106,7 @@ router.get('/api/discogs/auth/callback', async (req, res) => {
 
     // Store credentials in the user's profile
     const admin = getSupabaseAdmin();
+    if (!admin) throw new Error('Supabase admin not configured');
     const { error: updateError } = await admin
       .from('profiles')
       .update({
@@ -148,6 +149,7 @@ router.post(
       const { userId } = (req as Request & { auth: AuthResult }).auth;
 
       const admin = getSupabaseAdmin();
+      if (!admin) throw new Error('Supabase admin not configured');
       const { error: updateError } = await admin
         .from('profiles')
         .update({

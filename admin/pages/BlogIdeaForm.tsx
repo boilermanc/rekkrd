@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { adminService } from '../../services/adminService';
+import { adminService } from '../../src/services/adminService';
 
 interface BlogIdeaFormProps {
   onSubmitted: () => void;

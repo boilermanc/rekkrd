@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -40,10 +39,6 @@ export interface UpdatePostInput {
   status?: 'draft' | 'published';
 }
 
-// ── Supabase client (service role — bypasses RLS) ──────────────────
-
-let _admin: ReturnType<typeof createClient> | null = null;
-
 // ── Helpers ────────────────────────────────────────────────────────
 
 function slugify(text: string): string {
@@ -68,6 +63,7 @@ export async function getPublishedPosts(options?: {
   const limit = options?.limit ?? 10;
   const offset = options?.offset ?? 0;
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   let query = supabase
     .from('blog_posts')
@@ -98,6 +94,7 @@ export async function getPublishedPosts(options?: {
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from('blog_posts')
@@ -116,6 +113,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 
 export async function getCategories(): Promise<{ category: string; count: number }[]> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase.rpc('get_blog_categories');
 
@@ -126,6 +124,7 @@ export async function getCategories(): Promise<{ category: string; count: number
 
 export async function getPopularTags(limit: number = 20): Promise<{ tag: string; count: number }[]> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase.rpc('get_popular_blog_tags', { tag_limit: limit });
 
@@ -138,6 +137,7 @@ export async function getPopularTags(limit: number = 20): Promise<{ tag: string;
 
 export async function getPostBySlugAdmin(slug: string): Promise<BlogPost | null> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from('blog_posts')
@@ -155,6 +155,7 @@ export async function getPostBySlugAdmin(slug: string): Promise<BlogPost | null>
 
 export async function getAllPostsAdmin(): Promise<BlogPost[]> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from('blog_posts')
@@ -170,6 +171,7 @@ export async function getAllPostsAdmin(): Promise<BlogPost[]> {
 
 export async function createPost(input: CreatePostInput): Promise<BlogPost> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
   const status = input.status ?? 'draft';
 
   const row = {
@@ -200,6 +202,7 @@ export async function createPost(input: CreatePostInput): Promise<BlogPost> {
 
 export async function updatePost(id: string, input: UpdatePostInput): Promise<BlogPost> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   // Build update payload — only include provided fields
   const updates: Record<string, unknown> = {};
@@ -252,6 +255,7 @@ export async function updatePost(id: string, input: UpdatePostInput): Promise<Bl
 
 export async function deletePost(id: string): Promise<boolean> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   // Unlink any blog_ideas that reference this post
   const { error: unlinkError } = await supabase
@@ -299,6 +303,7 @@ export interface UpdateIdeaInput {
 
 export async function createIdea(input: CreateIdeaInput): Promise<BlogIdea> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const row = {
     idea: input.idea,
@@ -323,6 +328,7 @@ export async function createIdea(input: CreateIdeaInput): Promise<BlogIdea> {
 
 export async function getAllIdeas(): Promise<BlogIdea[]> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from('blog_ideas')
@@ -336,6 +342,7 @@ export async function getAllIdeas(): Promise<BlogIdea[]> {
 
 export async function getIdeaById(id: string): Promise<BlogIdea | null> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const { data, error } = await supabase
     .from('blog_ideas')
@@ -353,6 +360,7 @@ export async function getIdeaById(id: string): Promise<BlogIdea | null> {
 
 export async function updateIdea(id: string, input: UpdateIdeaInput): Promise<BlogIdea> {
   const supabase = getSupabaseAdmin();
+  if (!supabase) throw new Error('Supabase admin not configured');
 
   const updates: Record<string, unknown> = {};
   if (input.idea !== undefined) updates.idea = input.idea;

@@ -1,14 +1,9 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requireAuthWithUser } from '../middleware/auth.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { getAuth } from '../utils/getAuth.js';
 
 const router = Router();
-
-let _admin: ReturnType<typeof createClient> | null = null;
-function getAuth(req: Request): string {
-  return (req as Request & { auth: AuthResult }).auth.userId;
-}
 
 // ── GET /api/setup-guides ────────────────────────────────────────
 
@@ -16,6 +11,7 @@ router.get('/api/setup-guides', requireAuthWithUser, async (req: Request, res: R
   try {
     const userId = getAuth(req);
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('setup_guides')
@@ -39,6 +35,7 @@ router.get('/api/setup-guides/:id', requireAuthWithUser, async (req: Request, re
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('setup_guides')
@@ -80,6 +77,7 @@ router.post('/api/setup-guides', requireAuthWithUser, async (req: Request, res: 
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data, error } = await supabase
       .from('setup_guides')
@@ -108,6 +106,7 @@ router.delete('/api/setup-guides/:id', requireAuthWithUser, async (req: Request,
     const userId = getAuth(req);
     const { id } = req.params;
     const supabase = getSupabaseAdmin();
+    if (!supabase) throw new Error('Supabase admin not configured');
 
     const { data: existing, error: fetchError } = await supabase
       .from('setup_guides')

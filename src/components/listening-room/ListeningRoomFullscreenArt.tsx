@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
-import { proxyImageUrl } from '../../../services/imageProxy';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { proxyImageUrl } from '../../services/imageProxy';
 
 interface ListeningRoomFullscreenArtProps {
   coverUrl: string;

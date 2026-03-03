@@ -2,14 +2,9 @@ import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
-
-
-
-function errorResponse(res: Response, status: number, message: string, code?: string) {
-  res.status(status).json({ error: message, code: code ?? message });
-}
 
 function getAuth(req: Request): AuthResult {
   return (req as Request & { auth: AuthResult }).auth;

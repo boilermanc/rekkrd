@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { adminService, ComposerSendResult, type EmailPreset } from '../../../services/adminService';
+import { adminService, ComposerSendResult, type EmailPreset } from '../../services/adminService';
 
 type TemplateId = 'light' | 'orange' | 'dark-blue';
 
@@ -38,6 +38,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 const CATEGORY_ORDER = ['transactional', 'engagement', 'marketing', 'operational'];
 
 interface FormFields {
+  [key: string]: string;
   preheader_text: string;
   headline: string;
   hero_body: string;

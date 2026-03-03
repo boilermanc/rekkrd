@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { getPostBySlug } from '../services/blogService.js';
+import { escapeHtml } from '../utils/escapeHtml.js';
 
 const BOT_PATTERN =
   /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot/i;
@@ -17,28 +18,30 @@ function renderHtml(meta: {
   type?: string;
   bodyHtml?: string;
 }): string {
-  const ogType = meta.type || 'website';
+  const title = escapeHtml(meta.title);
+  const description = escapeHtml(meta.description);
+  const ogType = escapeHtml(meta.type || 'website');
   const imageTag = meta.image
-    ? `<meta property="og:image" content="${meta.image}" />\n    <meta name="twitter:image" content="${meta.image}" />`
+    ? `<meta property="og:image" content="${escapeHtml(meta.image)}" />\n    <meta name="twitter:image" content="${escapeHtml(meta.image)}" />`
     : '';
   const urlTag = meta.url
-    ? `<meta property="og:url" content="${meta.url}" />`
+    ? `<meta property="og:url" content="${escapeHtml(meta.url)}" />`
     : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>${meta.title}</title>
-    <meta name="description" content="${meta.description}" />
-    <meta property="og:title" content="${meta.title}" />
-    <meta property="og:description" content="${meta.description}" />
+    <title>${title}</title>
+    <meta name="description" content="${description}" />
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
     <meta property="og:type" content="${ogType}" />
     ${imageTag}
     ${urlTag}
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${meta.title}" />
-    <meta name="twitter:description" content="${meta.description}" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
 </head>
 <body>
     ${meta.bodyHtml || ''}
@@ -82,7 +85,7 @@ export default function crawlerMeta(req: Request, res: Response, next: NextFunct
             description,
             image,
             type: 'article',
-            bodyHtml: `<h1>${post.title}</h1>${post.excerpt ? `<p>${post.excerpt}</p>` : ''}`,
+            bodyHtml: `<h1>${escapeHtml(post.title)}</h1>${post.excerpt ? `<p>${escapeHtml(post.excerpt)}</p>` : ''}`,
           }),
         );
       })

@@ -5,7 +5,7 @@ import SellrLayout from '../components/SellrLayout';
 import { useSellrMeta } from '../hooks/useSellrMeta';
 import { SELLR_TIERS } from '../types';
 import type { SellrTier } from '../types';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -152,7 +152,7 @@ const SIZE_OPTIONS: {
 ];
 
 const StepCollectionSize: React.FC<StepProps> = ({ state, setState, onNext }) => {
-  const advanceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const advanceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const handleSelect = (records: number | null, tier: SellrTier['id'] | null) => {
     clearTimeout(advanceTimer.current);
@@ -283,7 +283,7 @@ const TierCard: React.FC<{
 
 const StepPickPlan: React.FC<StepProps> = ({ state, setState, onNext }) => {
   const [showAll, setShowAll] = useState(false);
-  const advanceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const advanceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const hasTier = state.tier !== null;
   const showFullPicker = !hasTier || showAll;

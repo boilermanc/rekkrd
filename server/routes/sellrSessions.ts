@@ -2,16 +2,18 @@ import { Router, type Request, type Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { sendSessionCreatedEmail } from '../sellrEmails.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
 
 const VALID_TIERS = ['starter', 'standard', 'full'] as const;
 type Tier = (typeof VALID_TIERS)[number];
 
-
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
+function getSessionCookie(req: Request): string | undefined {
+  const header = req.headers.cookie;
+  if (!header) return undefined;
+  const match = header.match(/(?:^|;\s*)sellr_session_id=([^;]+)/);
+  return match ? match[1] : undefined;
 }
 
 // ── POST /api/sellr/sessions ─────────────────────────────────────────
@@ -128,6 +130,13 @@ router.get('/api/sellr/sessions/:session_id', async (req: Request, res: Response
       return;
     }
 
+    // Verify session ownership via cookie
+    const cookieSessionId = getSessionCookie(req);
+    if (!cookieSessionId || cookieSessionId !== session.id) {
+      errorResponse(res, 403, 'Forbidden');
+      return;
+    }
+
     // Check expiry
     if (session.status === 'expired' || new Date(session.expires_at) < new Date()) {
       errorResponse(res, 404, 'Session expired');
@@ -185,6 +194,13 @@ router.patch('/api/sellr/sessions/:session_id', async (req: Request, res: Respon
 
     if (lookupErr || !existing) {
       errorResponse(res, 404, 'Session not found');
+      return;
+    }
+
+    // Verify session ownership via cookie
+    const cookieSessionId = getSessionCookie(req);
+    if (!cookieSessionId || cookieSessionId !== session_id) {
+      errorResponse(res, 403, 'Forbidden');
       return;
     }
 

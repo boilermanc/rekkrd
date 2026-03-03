@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 
 export interface SellrAuthContextValue {
   user: User | null;

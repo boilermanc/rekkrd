@@ -39,6 +39,7 @@ class DiscogsTokenExpiredError extends Error {
 
 export async function validateDiscogsTokens(userId: string): Promise<DiscogsAuthResult> {
   const admin = getSupabaseAdmin();
+  if (!admin) throw new Error('Supabase admin not configured');
 
   const { data, error } = await admin
     .from('profiles')

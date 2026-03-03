@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { adminService, AdminCustomer } from '../../services/adminService';
-import { useToast } from '../../contexts/ToastContext';
+import { adminService, AdminCustomer } from '../../src/services/adminService';
+import { useToast } from '../../src/contexts/ToastContext';
 
 type SortKey = 'display_name' | 'email' | 'subscription_plan' | 'created_at' | 'last_sign_in_at';
 type SortDir = 'asc' | 'desc';

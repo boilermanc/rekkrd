@@ -74,6 +74,7 @@ router.post(
       }
 
       const supabase = getSupabaseAdmin();
+      if (!supabase) throw new Error('Supabase admin not configured');
 
       // Pre-fetch which release IDs are missing cover art so we only
       // call the heavier /releases endpoint when needed.

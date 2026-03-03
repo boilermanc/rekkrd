@@ -1,11 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
-import { useToast } from '../../../contexts/ToastContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useToast } from '../../contexts/ToastContext';
 import type {
   StakkdRoom,
   StakkdRoomFeature,
   CreateRoomFeaturePayload,
-} from '../../../types/room';
+} from '../../types/room';
 
 // ── Props ────────────────────────────────────────────────────────────
 

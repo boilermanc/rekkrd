@@ -1,31 +1,19 @@
 import { Router } from 'express';
 import { Type } from '@google/genai';
-import { createClient } from '@supabase/supabase-js';
 import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
 import { createRateLimit } from '../middleware/rateLimit.js';
 import { validateBase64Size } from '../middleware/validate.js';
 import { ai } from '../lib/gemini.js';
 import { getSubscription, incrementScanCount, PLAN_LIMITS } from '../lib/subscription.js';
 import { retryWithBackoff, isRetryableError } from '../utils/retry.js';
-import { GEAR_CATEGORIES } from '../../types.js';
+import { withTimeout } from '../utils/timeout.js';
+import { GEAR_CATEGORIES } from '../../src/types.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const router = Router();
 
-let _admin: ReturnType<typeof createClient> | null = null;
-
-
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const GEMINI_TIMEOUT_MS = 90_000; // 90s — under typical proxy timeouts (120s)
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Gemini request timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
-}
 
 router.post(
   '/api/identify-gear',
@@ -154,6 +142,7 @@ If you cannot identify the gear, return null for all fields.`,
 
       try {
         const supabase = getSupabaseAdmin();
+        if (!supabase) throw new Error('Supabase admin not configured');
         const { data: catalogResults } = await supabase
           .rpc('search_gear_catalog', {
             search_query: `${data.brand} ${data.model}`,

@@ -8,6 +8,17 @@ const ALLOWED_HOSTS = [
   'images.unsplash.com',
 ];
 
+function isAllowedUrl(rawUrl: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'https:') return false;
+  return ALLOWED_HOSTS.some(host => parsed.hostname === host || parsed.hostname.endsWith('.' + host));
+}
+
 const router = Router();
 
 // Auth intentionally skipped: this endpoint is called via <img> src attributes in the
@@ -21,40 +32,45 @@ router.get('/api/image-proxy', async (req, res) => {
     return;
   }
 
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    res.status(400).json({ error: 'Invalid URL' });
-    return;
-  }
-
-  if (!ALLOWED_HOSTS.some(host => parsed.hostname === host || parsed.hostname.endsWith('.' + host))) {
+  if (!isAllowedUrl(url)) {
     res.status(403).json({ error: 'Host not allowed' });
     return;
   }
 
   try {
-    // Use manual redirects — Node.js fetch can fail on cross-origin redirect chains
-    // (e.g. coverartarchive.org → archive.org). We follow up to 3 hops ourselves.
-    let upstream: Response;
-    let targetUrl = url;
-    for (let hops = 0; hops < 3; hops++) {
-      upstream = await fetch(targetUrl, {
+    // Use manual redirects to validate each hop against the allowlist (SSRF protection).
+    // Only one redirect is followed — if it redirects again, we reject.
+    let upstream = await fetch(url, {
+      headers: {
+        'User-Agent': USER_AGENT,
+        'Accept': 'image/*',
+      },
+      redirect: 'manual',
+    });
+
+    if (upstream.status >= 300 && upstream.status < 400) {
+      const location = upstream.headers.get('location');
+      if (!location) {
+        res.status(502).json({ error: 'Redirect with no location header' });
+        return;
+      }
+      const resolvedLocation = new URL(location, url).href;
+      if (!isAllowedUrl(resolvedLocation)) {
+        res.status(403).json({ error: 'Redirect target not allowed' });
+        return;
+      }
+      upstream = await fetch(resolvedLocation, {
         headers: {
           'User-Agent': USER_AGENT,
           'Accept': 'image/*',
         },
         redirect: 'manual',
       });
-
+      // If the redirect target itself redirects, reject
       if (upstream.status >= 300 && upstream.status < 400) {
-        const location = upstream.headers.get('location');
-        if (!location) break;
-        targetUrl = new URL(location, targetUrl).href;
-        continue;
+        res.status(403).json({ error: 'Too many redirects' });
+        return;
       }
-      break;
     }
 
     if (!upstream!.ok) {

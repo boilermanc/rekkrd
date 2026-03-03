@@ -4,7 +4,7 @@ import { Loader2, Check, AlertCircle } from 'lucide-react';
 import SellrLayout from '../components/SellrLayout';
 import { useSellrMeta } from '../hooks/useSellrMeta';
 import { useSellrAuth } from '../hooks/useSellrAuth';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 
 // ── Types ─────────────────────────────────────────────────────────────
 

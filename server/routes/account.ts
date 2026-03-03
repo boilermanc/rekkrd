@@ -40,6 +40,7 @@ router.post(
     }
 
     const supabase = getSupabaseAdmin();
+    if (!supabase) { res.status(500).json({ error: 'Server not configured' }); return; }
 
     try {
       // Verify user exists

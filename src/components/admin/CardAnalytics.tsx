@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { adminService, UtmStats } from '../../../services/adminService';
+import { adminService, UtmStats } from '../../services/adminService';
 
 function relativeTime(dateStr: string): string {
   const now = Date.now();

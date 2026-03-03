@@ -1,5 +1,5 @@
 import OAuthModule from 'oauth-1.0a';
-const OAuth = (OAuthModule as any).default || OAuthModule;
+const OAuth = ((OAuthModule as unknown as { default?: typeof OAuthModule }).default ?? OAuthModule);
 import * as crypto from 'crypto';
 import { discogsConfig } from '../lib/discogs.js';
 
@@ -13,7 +13,7 @@ const oauth = new OAuth({
     secret: discogsConfig.consumerSecret,
   },
   signature_method: 'HMAC-SHA1',
-  hash_function(baseString, key) {
+  hash_function(baseString: string, key: string) {
     return crypto.createHmac('sha1', key).update(baseString).digest('base64');
   },
 });

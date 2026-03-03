@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, Copy, AlertTriangle } from 'lucide-react';
-import { supabase } from '../../../services/supabaseService';
+import { supabase } from '../../services/supabaseService';
 import SellrLogo from './SellrLogo';
 import type { SellrRecord } from '../types';
 

@@ -1,4 +1,4 @@
-import type { GearCategory } from '../../types';
+import type { GearCategory } from '../types';
 
 /**
  * Signal chain sort priority for each gear category.

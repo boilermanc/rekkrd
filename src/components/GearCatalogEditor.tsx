@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../../services/supabaseService';
+import { supabase } from '../services/supabaseService';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -102,7 +102,7 @@ const GearCatalogEditor: React.FC<GearCatalogEditorProps> = ({ entry, isOpen, on
   const [fieldErrors, setFieldErrors] = useState<{ brand?: string; model?: string }>({});
   const [isEnriching, setIsEnriching] = useState(false);
   const [enrichMsg, setEnrichMsg] = useState<{ text: string; color: 'green' | 'amber' | 'red' } | null>(null);
-  const enrichTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const enrichTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Populate / reset on open
   useEffect(() => {

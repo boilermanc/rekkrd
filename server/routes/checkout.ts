@@ -18,6 +18,7 @@ router.post(
     if (action === 'billing-portal') {
       try {
         const supabase = getSupabaseAdmin();
+        if (!supabase) { res.status(500).json({ error: 'Server not configured' }); return; }
 
         const { data: sub } = await supabase
           .from('subscriptions')
@@ -62,6 +63,7 @@ router.post(
     try {
       const stripe = await getStripe();
       const supabase = getSupabaseAdmin();
+      if (!supabase) { res.status(500).json({ error: 'Server not configured' }); return; }
 
       const { data: sub } = await supabase
         .from('subscriptions')
@@ -137,6 +139,7 @@ router.post(
     try {
       const stripe = await getStripe();
       const supabase = getSupabaseAdmin();
+      if (!supabase) { res.status(500).json({ error: 'Server not configured' }); return; }
 
       const { data: sub } = await supabase
         .from('subscriptions')
@@ -232,7 +235,10 @@ router.post(
         return;
       }
 
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
+      // Stripe API 2025+ removed payment_intent from Invoice core type,
+      // but it's still present when expanded via `expand: ['latest_invoice.payment_intent']`
+      type InvoiceWithPI = Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
+      const invoice = subscription.latest_invoice as InvoiceWithPI;
       const rawPI = invoice?.payment_intent;
       let paymentIntent: Stripe.PaymentIntent | null = null;
 
@@ -247,7 +253,7 @@ router.post(
         const expandedInvoice = await stripe.invoices.retrieve(invoice.id, {
           expand: ['payment_intent'],
         });
-        const expandedPI = expandedInvoice.payment_intent;
+        const expandedPI = (expandedInvoice as InvoiceWithPI).payment_intent;
         if (expandedPI && typeof expandedPI === 'object') {
           paymentIntent = expandedPI as Stripe.PaymentIntent;
         } else if (typeof expandedPI === 'string') {
@@ -308,6 +314,7 @@ router.post(
 
     try {
       const supabase = getSupabaseAdmin();
+      if (!supabase) { res.status(500).json({ error: 'Server not configured' }); return; }
 
       // Verify the subscription exists and belongs to this user
       const { data: sub } = await supabase

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { useAuthContext } from '../../../contexts/AuthContext';
-import { supabase } from '../../../services/supabaseService';
+import { useAuthContext } from '../../contexts/AuthContext';
+import { supabase } from '../../services/supabaseService';
 import SellrLayout from '../components/SellrLayout';
 import ImportConfirmation from '../components/ImportConfirmation';
 import type { SellrRecord, SellrSession } from '../types';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { adminService, AdminAlbum, AdminCollectionStats } from '../../services/adminService';
+import { adminService, AdminAlbum, AdminCollectionStats } from '../../src/services/adminService';
 
 type SortKey = 'title' | 'artist' | 'year' | 'genre' | 'price_median' | 'created_at';
 type SortDir = 'asc' | 'desc';

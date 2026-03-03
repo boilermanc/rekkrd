@@ -30,7 +30,7 @@ router.get('/api/blog/admin/posts', requireAdmin, async (_req, res) => {
 
 router.get('/api/blog/admin/posts/:slug', requireAdmin, async (req, res) => {
   try {
-    const post = await getPostBySlugAdmin(req.params.slug);
+    const post = await getPostBySlugAdmin(req.params.slug as string);
     if (!post) {
       res.status(404).json({ error: 'Post not found' });
       return;
@@ -59,7 +59,7 @@ router.post('/api/blog/admin/posts', requireAdmin, async (req, res) => {
 
 router.put('/api/blog/admin/posts/:id', requireAdmin, async (req, res) => {
   try {
-    const post = await updatePost(req.params.id, req.body);
+    const post = await updatePost(req.params.id as string, req.body);
     res.json(post);
   } catch (error) {
     console.error('Blog admin update error:', error);
@@ -69,7 +69,7 @@ router.put('/api/blog/admin/posts/:id', requireAdmin, async (req, res) => {
 
 router.delete('/api/blog/admin/posts/:id', requireAdmin, async (req, res) => {
   try {
-    await deletePost(req.params.id);
+    await deletePost(req.params.id as string);
     res.json({ success: true });
   } catch (error) {
     console.error('Blog admin delete error:', error);
@@ -182,7 +182,7 @@ router.post('/api/blog/generate-image', requireAdmin, async (req, res) => {
     }
     const imageData = await imageResp.json();
     const parts = imageData?.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find((p: any) => p.inlineData?.data);
+    const imagePart = parts.find((p: { inlineData?: { data: string; mimeType: string } }) => p.inlineData?.data);
     if (!imagePart) {
       console.error('Gemini image response had no image data:', JSON.stringify(imageData).slice(0, 500));
       res.status(500).json({ error: 'Failed to generate image' });
@@ -291,7 +291,7 @@ router.post('/api/blog/webhook', async (req, res) => {
     res.status(201).json(post);
   } catch (error) {
     console.error('Blog webhook error:', error);
-    res.status(500).json({ error: 'Failed to create post', details: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ error: 'Failed to create post' });
   }
 });
 

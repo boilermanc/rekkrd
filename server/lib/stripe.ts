@@ -1,5 +1,4 @@
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from './supabaseAdmin.js';
 
 export type PlanTier = 'collector' | 'curator' | 'enthusiast';
@@ -28,7 +27,6 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 const _stripeInstances = new Map<string, Stripe>();
 
-let _supabase: ReturnType<typeof createClient> | null = null;
 // ── Env var fallbacks ────────────────────────────────────────────────
 
 function envFallbackConfig(): StripeConfig {
@@ -68,6 +66,8 @@ function parseValue(value: unknown): string {
 async function loadConfigFromDB(): Promise<StripeConfig | null> {
   try {
     const supabase = getSupabaseAdmin();
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from('config_settings')
       .select('key, value')

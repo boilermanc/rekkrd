@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Disc3, GripVertical, Save } from 'lucide-react';
-import { Album } from '../../../types';
-import { proxyImageUrl } from '../../../services/imageProxy';
+import { Album } from '../../types';
+import { proxyImageUrl } from '../../services/imageProxy';
 import ListeningRoomSignalChain from './ListeningRoomSignalChain';
 import ListeningRoomSuggestions from './ListeningRoomSuggestions';
 

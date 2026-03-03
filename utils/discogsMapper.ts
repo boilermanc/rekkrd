@@ -1,5 +1,5 @@
-import type { DiscogsRelease } from '../types/discogs';
-import type { NewAlbum } from '../types';
+import type { DiscogsRelease } from '../src/types/discogs';
+import type { NewAlbum } from '../src/types';
 
 /**
  * NewAlbum extended with Discogs-specific metadata that doesn't exist

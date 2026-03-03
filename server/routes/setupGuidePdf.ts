@@ -2,12 +2,9 @@ import { Router, type Request, type Response } from 'express';
 import puppeteer from 'puppeteer';
 import { requireAuthWithUser } from '../middleware/auth.js';
 import { buildSetupGuidePdfHtml } from '../setupGuidePdfTemplate.js';
+import { errorResponse } from '../utils/errorResponse.js';
 
 const router = Router();
-
-function errorResponse(res: Response, code: number, message: string) {
-  res.status(code).json({ error: message, code });
-}
 
 // ── POST /api/setup-guides/pdf ──────────────────────────────────────
 // Generates a setup guide PDF for the user's gear signal chain.

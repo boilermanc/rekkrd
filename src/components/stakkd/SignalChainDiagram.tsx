@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Plus } from 'lucide-react';
-import { Gear, GearCategory } from '../../../types';
+import { Gear, GearCategory } from '../../types';
 import { getSignalChainIcon } from '../../config/signalChainIcons';
 import {
   groupBySignalChain,

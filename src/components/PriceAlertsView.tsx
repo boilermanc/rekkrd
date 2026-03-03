@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ArrowRight, Bell, BellOff, BellRing, Disc3, Loader2, RefreshCw, Trash2 } from 'lucide-react';
-import { PriceAlert } from '../../types';
-import { supabase } from '../../services/supabaseService';
-import { useToast } from '../../contexts/ToastContext';
-import { proxyImageUrl } from '../../services/imageProxy';
-import SpinningRecord from '../../components/SpinningRecord';
+import { PriceAlert } from '../types';
+import { supabase } from '../services/supabaseService';
+import { useToast } from '../contexts/ToastContext';
+import { proxyImageUrl } from '../services/imageProxy';
+import SpinningRecord from './SpinningRecord';
 
 function formatRelativeDate(dateString: string): string {
   const now = Date.now();

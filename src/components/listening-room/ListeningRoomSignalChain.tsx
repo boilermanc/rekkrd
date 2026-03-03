@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
-import { Gear } from '../../../types';
-import { gearService } from '../../../services/gearService';
+import { Gear } from '../../types';
+import { gearService } from '../../services/gearService';
 import { sortBySignalFlow } from '../../config/signalChainOrder';
 import { getSignalChainIcon } from '../../config/signalChainIcons';
 

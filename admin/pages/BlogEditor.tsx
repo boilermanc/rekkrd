@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import { Sparkles } from 'lucide-react';
-import { adminService, BlogPostAdmin } from '../../services/adminService';
-import { supabase } from '../../services/supabaseService';
-import '../../pages/Blog.css';
+import { adminService, BlogPostAdmin } from '../../src/services/adminService';
+import { supabase } from '../../src/services/supabaseService';
+import '../../src/pages/Blog.css';
 
 const CATEGORIES = [
   { value: 'general', label: 'General' },

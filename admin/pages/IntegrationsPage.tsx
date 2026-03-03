@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { adminService } from '../../services/adminService';
+import { adminService } from '../../src/services/adminService';
 
 // ── Types ────────────────────────────────────────────────────────────
 

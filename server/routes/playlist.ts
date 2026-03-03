@@ -154,7 +154,7 @@ ${JSON.stringify(simplifiedCollection)}`;
         name = typeof result.playlistName === 'string' ? result.playlistName.trim() : 'Crate Mix';
         if (name.length > 60) name = name.slice(0, 57) + '...';
         const rawItems = Array.isArray(result.items) ? result.items : [];
-        verifiedItems = rawItems.filter((item: RawPlaylistItem) => item && validIds.has(item.albumId));
+        verifiedItems = rawItems.filter((item: RawPlaylistItem) => item && item.albumId && validIds.has(item.albumId));
 
         // If we got results or playlist name says no matches, don't retry
         if (verifiedItems.length > 0 || name === 'No Matches Found') break;

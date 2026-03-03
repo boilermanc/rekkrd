@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Check, Disc3, Plus } from 'lucide-react';
-import { Album } from '../../../types';
-import { supabaseService } from '../../../services/supabaseService';
-import { proxyImageUrl } from '../../../services/imageProxy';
+import { Album } from '../../types';
+import { supabaseService } from '../../services/supabaseService';
+import { proxyImageUrl } from '../../services/imageProxy';
 import ListeningRoomFilters, { type BrowseFilters } from './ListeningRoomFilters';
 
 interface ListeningRoomBrowseProps {

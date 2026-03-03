@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { HelpCircle } from 'lucide-react';
-import { useToast } from '../../contexts/ToastContext';
-import { useSubscription } from '../../contexts/SubscriptionContext';
-import { supabase } from '../../services/supabaseService';
+import { useToast } from '../contexts/ToastContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { supabase } from '../services/supabaseService';
 import {
   getShelfConfigs,
   upsertShelfConfig,
@@ -16,9 +16,9 @@ import {
 import ShelfView from './ShelfView';
 import ShelfOnboarding from './ShelfOnboarding';
 import ShelfGuideModal from './ShelfGuideModal';
-import type { Album } from '../../types';
-import type { ShelfConfig } from '../../types/shelf';
-import type { SortScheme } from '../../types/shelf';
+import type { Album } from '../types';
+import type { ShelfConfig } from '../types/shelf';
+import type { SortScheme } from '../types/shelf';
 
 const SORT_OPTIONS: { value: SortScheme; label: string }[] = [
   { value: 'artist_alpha', label: 'A\u2192Z by Artist' },
