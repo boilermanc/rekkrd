@@ -14,6 +14,20 @@ import { engagementService } from '../services/engagementService';
 import { getAlbumPlacementInfo, type PlacementResult } from '../helpers/shelfHelpers';
 import { MEDIA_FORMATS, FORMAT_COLORS, type MediaFormat } from '../../constants/formatTypes';
 
+interface PressingResult {
+  id: number;
+  title: string;
+  year: number | null;
+  country: string | null;
+  label: string | null;
+  catno: string | null;
+  format: string | null;
+  thumb: string | null;
+  discogsUrl: string;
+  score: number;
+  matchedText: string | null;
+}
+
 interface AlbumDetailModalProps {
   album: Album;
   allAlbums: Album[];
@@ -48,6 +62,10 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   const stableOnClose = useCallback(onClose, [onClose]);
   useFocusTrap(modalRef, stableOnClose);
   const [notes, setNotes] = useState(album.personal_notes || '');
+  const [matrix, setMatrix] = useState(album.matrix || '');
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [pressingResults, setPressingResults] = useState<PressingResult[] | null>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
   const [expandedTrack, setExpandedTrack] = useState<number | null>(null);
   const [lyricsCache, setLyricsCache] = useState<Record<number, { lyrics: string | null; syncedLyrics: string | null }>>({});
   const [loadingTrack, setLoadingTrack] = useState<number | null>(null);
@@ -160,7 +178,53 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
     }
   }, [expandedTrack, lyricsCache, album.artist, album.title]);
 
+  const handlePressingLookup = async () => {
+    if (!matrix) return;
+    setLookupLoading(true);
+    setPressingResults(null);
+    setLookupError(null);
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      }
+      const res = await fetch('/api/discogs-pressing', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ artist: album.artist, title: album.title, matrix }),
+      });
+      if (!res.ok) throw new Error('Lookup failed');
+      const data = await res.json();
+      setPressingResults(data);
+    } catch {
+      setLookupError('Could not fetch pressing info. Try again.');
+      showToast('Pressing lookup failed', 'error');
+    } finally {
+      setLookupLoading(false);
+    }
+  };
 
+  const handleApplyPressing = (r: PressingResult) => {
+    if (!onUpdateAlbum) return;
+    const updates: Partial<Album> = {};
+    if (!album.year && r.year) updates.year = String(r.year);
+    if (!album.discogs_release_id && r.id) {
+      updates.discogs_release_id = r.id;
+      updates.discogs_url = r.discogsUrl;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      showToast('All fields already filled — nothing to apply.', 'info');
+      return;
+    }
+
+    onUpdateAlbum(album.id, updates);
+    setPressingResults(null);
+    showToast('Pressing details applied.', 'success');
+  };
 
   const collectionStats = useMemo(() => {
     const genreCount = allAlbums.filter(a => a.genre === album.genre).length;
@@ -517,6 +581,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                       <p className="text-sm font-bold text-th-text font-mono">{album.barcode}</p>
                     </div>
                   )}
+                  {album.matrix && (
+                    <div>
+                      <p className="text-th-text3/50 text-[9px] uppercase mb-1">Deadwax</p>
+                      <p className="text-sm font-bold text-th-text font-mono">{album.matrix}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="glass-morphism p-6 rounded-2xl border border-th-surface/[0.06] space-y-6">
@@ -651,6 +721,94 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                   >
                     Save Notes
                   </button>
+                )}
+              </section>
+            )}
+
+            {/* Deadwax / Matrix */}
+            {onUpdateAlbum && (
+              <section>
+                <h4 className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase mb-4">Deadwax / Matrix</h4>
+                <input
+                  type="text"
+                  value={matrix}
+                  onChange={(e) => setMatrix(e.target.value)}
+                  placeholder="e.g. BSK-3010 1A TML-M"
+                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text/80 font-mono placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                  aria-label="Deadwax or matrix runout text"
+                />
+                <p className="mt-1 text-[9px] text-th-text3/50">The etching in the runout groove — identifies the specific pressing.</p>
+                <div className="flex gap-2 mt-2">
+                  {matrix !== (album.matrix || '') && (
+                    <button
+                      onClick={() => onUpdateAlbum(album.id, { matrix })}
+                      className="bg-[#dd6e42]/20 border border-[#dd6e42]/30 text-[#f0a882] text-[10px] uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-[#dd6e42]/30 transition-all"
+                    >
+                      Save Matrix
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handlePressingLookup}
+                    disabled={!matrix || lookupLoading}
+                    className="inline-flex items-center gap-1.5 bg-th-surface/[0.06] border border-th-surface/[0.10] text-th-text2 text-[10px] uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-th-surface/[0.12] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label="Look up pressing details on Discogs"
+                  >
+                    {lookupLoading
+                      ? <span className="animate-spin h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full" aria-hidden="true" />
+                      : <span aria-hidden="true">&#x1F50D;</span>
+                    }
+                    {lookupLoading ? 'Searching\u2026' : 'Look up pressing'}
+                  </button>
+                </div>
+                {lookupError && (
+                  <p className="mt-2 text-[10px] text-red-400">{lookupError}</p>
+                )}
+                {pressingResults && pressingResults.length === 0 && (
+                  <p className="mt-2 text-[10px] text-th-text3/50">No matching pressings found.</p>
+                )}
+                {pressingResults && pressingResults.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {pressingResults.map(r => (
+                      <div
+                        key={r.id}
+                        className="flex items-center gap-3 p-2 rounded-lg bg-th-surface/[0.04] border border-th-surface/[0.06]"
+                      >
+                        {r.thumb && (
+                          <img src={r.thumb} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-th-text truncate">{r.title}</p>
+                          <p className="text-[9px] text-th-text3/70">
+                            {[r.label, r.catno, r.year, r.country].filter(Boolean).join(' · ')}
+                          </p>
+                          {r.matchedText && (
+                            <p className="text-[9px] text-th-text3/50 font-mono truncate">{r.matchedText}</p>
+                          )}
+                        </div>
+                        <span className="text-[9px] text-th-text3/50 shrink-0">{Math.round(r.score * 100)}%</span>
+                        <div className="flex gap-1.5 shrink-0">
+                          <a
+                            href={r.discogsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-th-surface/[0.06] border border-th-surface/[0.10] text-th-text3 text-[9px] uppercase tracking-widest px-2.5 py-1.5 rounded-lg hover:bg-th-surface/[0.12] transition-all"
+                            aria-label={`View ${r.title} on Discogs`}
+                          >
+                            View
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleApplyPressing(r)}
+                            className="bg-[#dd6e42]/20 border border-[#dd6e42]/30 text-[#f0a882] text-[9px] uppercase tracking-widest px-2.5 py-1.5 rounded-lg hover:bg-[#dd6e42]/30 transition-all"
+                            aria-label={`Apply pressing details from ${r.title}`}
+                          >
+                            Apply
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </section>
             )}

@@ -24,6 +24,7 @@ export interface NewAlbum {
   price_median?: number;
   price_high?: number;
   play_count?: number;
+  matrix?: string;
 }
 
 /** A saved album — always has an id and created_at from the database. */
