@@ -728,7 +728,21 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
             {/* Deadwax / Matrix */}
             {onUpdateAlbum && (
               <section>
-                <h4 className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase mb-4">Deadwax / Matrix</h4>
+                <div className="flex items-center gap-1.5 mb-4">
+                  <h4 className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase">Deadwax / Matrix</h4>
+                  <div className="relative group">
+                    <span
+                      className="text-th-muted cursor-help text-xs"
+                      aria-label="What is deadwax?"
+                    >
+                      ⓘ
+                    </span>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-th-surface border border-th-surface/20 p-2.5 text-xs text-th-muted shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-10">
+                      The etching scratched into the runout groove of a vinyl record.
+                      Identifies the specific pressing — e.g. BSK-3010 1A TML-M.
+                    </div>
+                  </div>
+                </div>
                 <input
                   type="text"
                   value={matrix}
