@@ -72,6 +72,7 @@ import stakkdRoomFeaturesRouter from './routes/stakkdRoomFeatures.js';
 import stakkdRoomPlacementRouter from './routes/stakkdRoomPlacement.js';
 import stakkdRoomLayoutsRouter from './routes/stakkdRoomLayouts.js';
 import analyzeChainRouter from './routes/analyzeChain.js';
+import spenndRouter from './routes/spennd.js';
 import crawlerMeta from './middleware/crawlerMeta.js';
 import { validateDiscogsConfig } from './lib/discogs.js';
 import { startSellrCron } from './sellrCron.js';
@@ -85,7 +86,7 @@ const _routerMap: Record<string, unknown> = {
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, setupGuideSaveRouter, setupGuidePdfRouter, supportRouter, sitemapRouter, emailRouter,
-  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsCollectionRouter, discogsImportRouter, discogsWantlistRouter, discogsPricingRouter, discogsPriceRouter, discogsPressingRouter,
+  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsCollectionRouter, discogsImportRouter, discogsWantlistRouter, discogsPricingRouter, discogsPriceRouter, discogsPressingRouter, spenndRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
   sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
   sellrAdminRouter, sellrAccountRouter, sellrDashboardRouter, sellrImportRouter, sellrLotRouter, integrationsRouter,
@@ -180,6 +181,7 @@ mountRouter('coversRouter', coversRouter);
 mountRouter('lyricsRouter', lyricsRouter);
 mountRouter('uploadCoverRouter', uploadCoverRouter);
 mountRouter('imageProxyRouter', imageProxyRouter);
+mountRouter('spenndRouter', spenndRouter);
 mountRouter('subscriptionRouter', subscriptionRouter);
 mountRouter('checkoutRouter', checkoutRouter);
 mountRouter('customerPortalRouter', customerPortalRouter);
