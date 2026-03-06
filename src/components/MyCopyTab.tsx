@@ -37,11 +37,11 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
   // First-time empty state
   if (isCompletelyEmpty && !showDetailsOverride) {
     return (
-      <div className="bg-paper min-h-[600px] relative flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center px-6">
-          {/* Vinyl record icon - concentric circles */}
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-4">
-            <svg className="w-16 h-16 text-ink/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.75}>
+      <div className="bg-paper-warm min-h-[600px] relative flex items-center justify-center">
+        <div className="flex flex-col items-center text-center gap-3 py-10 px-6">
+          {/* Icon container */}
+          <div className="w-12 h-12 rounded-full bg-paper-dark border border-paper-darker flex items-center justify-center">
+            <svg className="w-6 h-6 text-ink/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.75}>
               <circle cx="12" cy="12" r="10" />
               <circle cx="12" cy="12" r="7" />
               <circle cx="12" cy="12" r="4" />
@@ -50,27 +50,27 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
           </div>
 
           {/* Heading */}
-          <h3 className="font-display text-[20px] text-ink mb-3">Make it yours</h3>
+          <h3 className="font-display text-[20px] text-ink-soft">Make it yours</h3>
 
           {/* Body */}
-          <p className="font-serif text-[14px] text-ink/60 italic mb-6 leading-relaxed">
+          <p className="font-serif text-[13px] text-ink-soft italic leading-relaxed">
             Track condition, what you paid, where you got it.<br />
             Your copy — your story.
           </p>
 
           {/* Buttons */}
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-3 mt-1">
             <button
               onClick={() => setGradingSheetOpen(true)}
               aria-label={`Grade your copy of ${album.title} by ${album.artist}`}
-              className="px-6 py-3 border-2 border-burnt-peach text-burnt-peach font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/10 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
+              className="border border-burnt-peach text-burnt-peach bg-burnt-peach/10 font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 rounded-xl hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
             >
               Grade Your Copy →
             </button>
             <button
               onClick={() => setShowDetailsOverride(true)}
               aria-label={`Add details for ${album.title} by ${album.artist}`}
-              className="px-6 py-3 border-2 border-burnt-peach text-burnt-peach font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/10 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
+              className="border border-burnt-peach text-burnt-peach bg-burnt-peach/10 font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 rounded-xl hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
             >
               Add Details →
             </button>
@@ -92,19 +92,19 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
   }
 
   return (
-    <div className="bg-paper min-h-[600px] relative">
+    <div className="bg-paper-warm min-h-[600px] relative">
       {/* Background ruled lines */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, rgba(42, 32, 22, 0.1) 0px, rgba(42, 32, 22, 0.1) 1px, transparent 1px, transparent 32px)',
+          backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(162,140,100,0.10) 31px, rgba(162,140,100,0.10) 32px)',
         }}
       />
 
       {/* Acquired date annotation (top-right) */}
       {album.acquired_date && (
         <div
-          className="absolute top-4 right-4 font-serif text-[10px] text-ink/40 italic"
+          className="absolute top-4 right-5 font-serif italic text-[10px] text-ink-soft/40"
           style={{ transform: 'rotate(-2deg)' }}
         >
           acquired {new Date(album.acquired_date).getFullYear()}
@@ -114,48 +114,48 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
       <div className="relative space-y-8">
         {/* Condition Section */}
         <section>
-          <div className="flex items-center gap-4 mb-4">
-            <h4 className="font-mono text-[8px] tracking-[0.3em] uppercase text-ink/60">Condition</h4>
-            <div className="flex-1 h-px bg-paper-dark" />
+          <div className="flex items-center gap-2 mb-4">
+            <h4 className="font-mono text-[8px] tracking-[3px] uppercase text-ink-soft">Condition</h4>
+            <div className="flex-1 h-px bg-paper-darker" />
           </div>
 
           {conditionInfo ? (
             /* Condition Hero Card */
-            <div className="bg-cream rounded-xl border border-paper-dark p-4 flex items-center gap-4">
+            <div className="relative bg-cream border border-paper-darker rounded-2xl shadow-sm p-4 flex items-center gap-4">
               {/* Left accent bar */}
-              <div className="w-1 h-16 bg-burnt-peach rounded-full" />
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-burnt-peach rounded-l-2xl" />
 
               {/* Circular badge */}
-              <div className="w-[52px] h-[52px] rounded-full bg-ink flex items-center justify-center flex-shrink-0">
+              <div className="w-[52px] h-[52px] rounded-full bg-ink flex items-center justify-center flex-shrink-0 ml-2">
                 <span className="font-display font-bold text-pearl-beige text-lg">{conditionInfo.shortLabel}</span>
               </div>
 
               {/* Grade details */}
               <div className="flex-1 min-w-0">
                 <p className="font-display text-[15px] text-ink">{conditionInfo.label}</p>
-                <p className="font-serif text-[11px] text-ink/60 italic">{conditionInfo.description}</p>
+                <p className="font-serif text-[11px] text-ink-soft italic">{conditionInfo.description}</p>
               </div>
 
               {/* Edit button */}
               <button
                 onClick={() => setGradingSheetOpen(true)}
                 aria-label="Edit condition grade"
-                className="px-4 py-2 border-2 border-burnt-peach text-burnt-peach font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/10 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
+                className="text-burnt-peach border border-burnt-peach/40 bg-burnt-peach/10 font-mono text-[8px] tracking-wide uppercase px-3 py-1.5 rounded-lg hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
               >
                 Edit
               </button>
             </div>
           ) : (
             /* Invitation Card */
-            <div className="bg-cream rounded-xl border-2 border-dashed border-paper-dark p-6 text-center">
-              <h5 className="font-display text-[15px] text-ink/60 mb-2">Grade your copy</h5>
-              <p className="font-serif text-[11px] text-ink/60 italic mb-4">
+            <div className="bg-cream rounded-2xl border-2 border-dashed border-paper-darker p-6 text-center shadow-sm">
+              <h5 className="font-display text-[15px] text-ink-soft mb-2">Grade your copy</h5>
+              <p className="font-serif text-[11px] text-ink-soft italic mb-4">
                 Takes 30 seconds. Unlocks value estimates.
               </p>
               <button
                 onClick={() => setGradingSheetOpen(true)}
                 aria-label={`Grade ${album.title} by ${album.artist}`}
-                className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
+                className="px-6 py-2 bg-burnt-peach text-white font-mono text-[9px] tracking-wide uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
               >
                 Grade Now
               </button>
@@ -167,36 +167,36 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
         {album.condition && (
           <section>
             {userPlan === 'collector' || userPlan === 'curator' ? (
-              /* Upgrade prompt */
-              <div className="bg-ink text-pearl-beige rounded-xl p-6">
-                <h5 className="font-display text-[18px] mb-2">See what your collection is worth</h5>
-                <p className="font-serif text-[13px] italic mb-4">
+              /* Upgrade prompt — stays dark */
+              <div className="bg-ink rounded-2xl p-6">
+                <h5 className="font-display text-[15px] text-pearl-beige mb-2">See what your collection is worth</h5>
+                <p className="font-serif text-[11px] text-white/50 italic mb-4">
                   Upgrade to Enthusiast to unlock live Discogs pricing.
                 </p>
-                <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
+                <button className="bg-burnt-peach text-white font-mono text-[9px] tracking-wide uppercase px-4 py-2 rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
                   Upgrade to Enthusiast
                 </button>
               </div>
             ) : !discogsConnected ? (
-              /* Discogs connection prompt */
-              <div className="bg-ink text-pearl-beige rounded-xl p-6">
-                <h5 className="font-display text-[18px] mb-2">Connect Discogs to see value</h5>
-                <p className="font-serif text-[13px] italic mb-4">
+              /* Discogs connection prompt — stays dark */
+              <div className="bg-ink rounded-2xl p-6">
+                <h5 className="font-display text-[15px] text-pearl-beige mb-2">Connect Discogs to see value</h5>
+                <p className="font-serif text-[11px] text-white/50 italic mb-4">
                   Link your Discogs account to unlock marketplace pricing.
                 </p>
-                <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
+                <button className="bg-burnt-peach text-white font-mono text-[9px] tracking-wide uppercase px-4 py-2 rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
                   Connect Discogs
                 </button>
               </div>
             ) : (
-              /* Value display placeholder (will fetch from API) */
-              <div className="bg-ink text-pearl-beige rounded-xl p-6">
-                <div className="font-mono text-[8px] tracking-[0.3em] uppercase text-pearl-beige/60 mb-2">
+              /* Value display — stays dark */
+              <div className="bg-ink rounded-2xl p-6">
+                <div className="font-mono text-[7px] tracking-widest uppercase text-white/30 mb-2">
                   Est. Value ({album.condition})
                 </div>
                 <div className="font-display text-[28px] text-pearl-beige mb-1">$—</div>
-                <div className="font-mono text-[9px] text-pearl-beige/60">
-                  Price data will be fetched in production
+                <div className="font-mono text-[8px] text-burnt-peach/80">
+                  View on Discogs →
                 </div>
               </div>
             )}
@@ -205,15 +205,15 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
 
         {/* My Copy Fields Section */}
         <section>
-          <div className="flex items-center gap-4 mb-4">
-            <h4 className="font-mono text-[8px] tracking-[0.3em] uppercase text-ink/60">My Copy</h4>
-            <div className="flex-1 h-px bg-paper-dark" />
+          <div className="flex items-center gap-2 mb-4">
+            <h4 className="font-mono text-[8px] tracking-[3px] uppercase text-ink-soft">My Copy</h4>
+            <div className="flex-1 h-px bg-paper-darker" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-2 gap-2.5 mb-4">
             {/* Paid */}
-            <div className="bg-cream rounded-lg border border-paper-dark p-3">
-              <label className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60 block mb-1">
+            <div className="bg-cream border border-paper-darker rounded-xl p-3 shadow-sm">
+              <label className="font-mono text-[7px] tracking-[2px] uppercase text-ink-soft block mb-1">
                 Paid
               </label>
               {editingField === 'purchase_price' ? (
@@ -228,12 +228,12 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                       handleFieldUpdate('purchase_price', parseFloat(e.currentTarget.value) || null);
                     }
                   }}
-                  className="font-serif text-[13px] text-ink w-full bg-transparent border-none outline-none"
+                  className="bg-transparent font-serif text-[13px] text-ink border-b border-burnt-peach/50 outline-none w-full"
                 />
               ) : (
                 <div
                   onClick={() => setEditingField('purchase_price')}
-                  className="font-serif text-[13px] text-ink cursor-pointer"
+                  className={`font-serif text-[13px] cursor-pointer ${album.purchase_price ? 'text-ink' : 'font-serif text-[12px] text-ink-soft italic'}`}
                 >
                   {album.purchase_price ? `$${album.purchase_price.toFixed(2)}` : '—'}
                 </div>
@@ -241,8 +241,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Acquired */}
-            <div className="bg-cream rounded-lg border border-paper-dark p-3">
-              <label className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60 block mb-1">
+            <div className="bg-cream border border-paper-darker rounded-xl p-3 shadow-sm">
+              <label className="font-mono text-[7px] tracking-[2px] uppercase text-ink-soft block mb-1">
                 Acquired
               </label>
               {editingField === 'acquired_date' ? (
@@ -256,12 +256,12 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                       handleFieldUpdate('acquired_date', e.currentTarget.value || null);
                     }
                   }}
-                  className="font-serif text-[13px] text-ink w-full bg-transparent border-none outline-none"
+                  className="bg-transparent font-serif text-[13px] text-ink border-b border-burnt-peach/50 outline-none w-full"
                 />
               ) : (
                 <div
                   onClick={() => setEditingField('acquired_date')}
-                  className="font-serif text-[13px] text-ink cursor-pointer"
+                  className={`font-serif text-[13px] cursor-pointer ${album.acquired_date ? 'text-ink' : 'font-serif text-[12px] text-ink-soft italic'}`}
                 >
                   {album.acquired_date
                     ? new Date(album.acquired_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -271,8 +271,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Source */}
-            <div className="bg-cream rounded-lg border border-paper-dark p-3">
-              <label className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60 block mb-1">
+            <div className="bg-cream border border-paper-darker rounded-xl p-3 shadow-sm">
+              <label className="font-mono text-[7px] tracking-[2px] uppercase text-ink-soft block mb-1">
                 Source
               </label>
               {editingField === 'acquired_from' ? (
@@ -286,12 +286,12 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                       handleFieldUpdate('acquired_from', e.currentTarget.value || null);
                     }
                   }}
-                  className="font-serif text-[13px] text-ink w-full bg-transparent border-none outline-none"
+                  className="bg-transparent font-serif text-[13px] text-ink border-b border-burnt-peach/50 outline-none w-full"
                 />
               ) : (
                 <div
                   onClick={() => setEditingField('acquired_from')}
-                  className="font-serif text-[13px] text-ink cursor-pointer"
+                  className={`font-serif text-[13px] cursor-pointer ${album.acquired_from ? 'text-ink' : 'font-serif text-[12px] text-ink-soft italic'}`}
                 >
                   {album.acquired_from || '—'}
                 </div>
@@ -299,17 +299,19 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Format */}
-            <div className="bg-cream rounded-lg border border-paper-dark p-3">
-              <label className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60 block mb-1">
+            <div className="bg-cream border border-paper-darker rounded-xl p-3 shadow-sm">
+              <label className="font-mono text-[7px] tracking-[2px] uppercase text-ink-soft block mb-1">
                 Format
               </label>
-              <div className="font-serif text-[13px] text-ink">{album.format || '—'}</div>
+              <div className={`font-serif text-[13px] ${album.format ? 'text-ink' : 'text-[12px] text-ink-soft italic'}`}>
+                {album.format || '—'}
+              </div>
             </div>
           </div>
 
           {/* Notes (full-width) */}
-          <div className="bg-cream rounded-lg border border-paper-dark p-3">
-            <label className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60 block mb-1">
+          <div className="bg-cream border border-paper-darker rounded-xl p-3 shadow-sm">
+            <label className="font-mono text-[7px] tracking-[2px] uppercase text-ink-soft block mb-1">
               Notes
             </label>
             {editingField === 'copy_notes' ? (
@@ -318,12 +320,12 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                 rows={3}
                 defaultValue={album.copy_notes || ''}
                 onBlur={(e) => handleFieldUpdate('copy_notes', e.target.value || null)}
-                className="font-serif text-[13px] text-ink w-full bg-transparent border-none outline-none resize-none"
+                className="bg-transparent font-serif text-[13px] text-ink border-b border-burnt-peach/50 outline-none w-full resize-none"
               />
             ) : (
               <div
                 onClick={() => setEditingField('copy_notes')}
-                className="font-serif text-[13px] text-ink cursor-pointer min-h-[3rem]"
+                className={`font-serif text-[13px] cursor-pointer min-h-[3rem] ${album.copy_notes ? 'text-ink' : 'font-serif text-[12px] text-ink-soft italic'}`}
               >
                 {album.copy_notes || '—'}
               </div>
@@ -333,21 +335,21 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
 
         {/* Pressing Section */}
         <section>
-          <div className="flex items-center gap-4 mb-4">
-            <h4 className="font-mono text-[8px] tracking-[0.3em] uppercase text-ink/60">Pressing</h4>
-            <div className="flex-1 h-px bg-paper-dark" />
+          <div className="flex items-center gap-2 mb-4">
+            <h4 className="font-mono text-[8px] tracking-[3px] uppercase text-ink-soft">Pressing</h4>
+            <div className="flex-1 h-px bg-paper-darker" />
           </div>
 
-          <div className="bg-cream rounded-lg border border-paper-dark divide-y divide-paper-dark">
+          <div className="bg-cream border border-paper-darker rounded-xl overflow-hidden shadow-sm">
             {/* Label */}
-            <div className="p-3 flex justify-between items-center">
-              <span className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60">Label</span>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-paper-darker">
+              <span className="font-mono text-[9px] tracking-wide text-ink-soft">Label</span>
               <span className="font-serif text-[13px] text-ink">{album.label || '—'}</span>
             </div>
 
             {/* Cat. No. */}
-            <div className="p-3 flex justify-between items-center">
-              <span className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60">Cat. No.</span>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-paper-darker">
+              <span className="font-mono text-[9px] tracking-wide text-ink-soft">Cat. No.</span>
               {editingField === 'catalog_number' ? (
                 <input
                   type="text"
@@ -359,13 +361,13 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                       handleFieldUpdate('catalog_number', e.currentTarget.value || null);
                     }
                   }}
-                  className="font-serif text-[13px] text-blue-slate bg-transparent border-none outline-none text-right"
+                  className="font-serif text-[13px] text-blue-slate font-semibold bg-transparent border-none outline-none text-right"
                 />
               ) : (
                 <span
                   onClick={() => setEditingField('catalog_number')}
                   className={`font-serif text-[13px] cursor-pointer ${
-                    album.catalog_number ? 'text-blue-slate' : 'text-ink'
+                    album.catalog_number ? 'text-blue-slate font-semibold' : 'text-ink'
                   }`}
                 >
                   {album.catalog_number || '—'}
@@ -374,8 +376,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Country */}
-            <div className="p-3 flex justify-between items-center">
-              <span className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60">Country</span>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-paper-darker">
+              <span className="font-mono text-[9px] tracking-wide text-ink-soft">Country</span>
               {editingField === 'pressing_country' ? (
                 <input
                   type="text"
@@ -400,8 +402,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Year */}
-            <div className="p-3 flex justify-between items-center">
-              <span className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/60">Year</span>
+            <div className="flex items-center justify-between px-4 py-2.5">
+              <span className="font-mono text-[9px] tracking-wide text-ink-soft">Year</span>
               {editingField === 'pressing_year' ? (
                 <input
                   type="number"
@@ -415,7 +417,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                   }}
                   className={`font-serif text-[13px] bg-transparent border-none outline-none text-right ${
                     album.pressing_year && album.pressing_year.toString() !== album.year
-                      ? 'text-blue-slate'
+                      ? 'text-blue-slate font-semibold'
                       : 'text-ink'
                   }`}
                 />
@@ -424,7 +426,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                   onClick={() => setEditingField('pressing_year')}
                   className={`font-serif text-[13px] cursor-pointer ${
                     album.pressing_year && album.pressing_year.toString() !== album.year
-                      ? 'text-blue-slate'
+                      ? 'text-blue-slate font-semibold'
                       : 'text-ink'
                   }`}
                 >
@@ -436,10 +438,10 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
         </section>
 
         {/* Footer Stamp */}
-        <div className="flex items-center justify-center gap-4 py-6">
-          <div className="flex-1 h-px bg-ink/20" />
-          <span className="font-mono text-[7px] tracking-[0.3em] uppercase text-ink/20">Rekkrd</span>
-          <div className="flex-1 h-px bg-ink/20" />
+        <div className="flex items-center justify-center gap-2.5 opacity-20 mt-6">
+          <div className="flex-1 h-px bg-ink" />
+          <span className="font-mono text-[7px] tracking-[3px] uppercase text-ink">Rekkrd</span>
+          <div className="flex-1 h-px bg-ink" />
         </div>
       </div>
 

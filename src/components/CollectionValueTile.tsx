@@ -182,11 +182,14 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
 
   const getGradePillColor = (grade: ConditionGrade): string => {
     const order = CONDITION_ORDER[grade];
-    if (order <= 2) return 'bg-emerald-900 text-emerald-300';
-    if (order === 3) return 'bg-sky-800 text-sky-200';
-    if (order === 4) return 'bg-amber-700 text-amber-100';
-    if (order <= 6) return 'bg-red-900 text-red-300';
-    return 'bg-slate-800 text-slate-400';
+    if (order === 1) return 'bg-ink text-pearl-beige';
+    if (order === 2) return 'bg-[#2d3a2e] text-[#a8c5a8]';
+    if (order === 3) return 'bg-blue-slate text-pale-sky';
+    if (order === 4) return 'bg-[#5a4a2a] text-[#d4b87a]';
+    if (order === 5) return 'bg-[#6a3a2a] text-[#d4987a]';
+    if (order === 6) return 'bg-[#6a2a2a] text-[#d47a7a]';
+    if (order === 7) return 'bg-[#4a2a2a] text-[#a06060]';
+    return 'bg-[#2a2020] text-[#705050]';
   };
 
   const formatTimeAgo = (date: Date): string => {
@@ -295,7 +298,7 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
               className="h-1 bg-paper-dark rounded-full overflow-hidden"
             >
               <div
-                className="h-full bg-gradient-to-r from-burnt-peach to-burnt-peach/80 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-burnt-peach to-burnt-peach/70 transition-all duration-500"
                 style={{ width: `${gradedPercent}%` }}
               />
             </div>
@@ -406,10 +409,10 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="font-display text-[14px] text-emerald-700">
+                  <div className="font-display text-[14px] text-green-800">
                     +${Math.round(candidate.gain)}
                   </div>
-                  <div className="font-mono text-[7px] text-emerald-700/60">
+                  <div className="font-mono text-[7px] text-green-800/60">
                     if upgraded
                   </div>
                 </div>

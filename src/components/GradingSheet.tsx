@@ -5,7 +5,6 @@ import {
   scoreToGrade,
   CONDITION_GRADES,
   type ConditionGrade,
-  type ConditionOption,
 } from '../constants/conditionGrades';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -32,7 +31,6 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
 
   const isCD = format?.toLowerCase().includes('cd');
   const checklist = isCD ? CD_CHECKLIST : VINYL_CHECKLIST;
-  const accentColor = isCD ? 'blue-slate' : 'burnt-peach';
 
   const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
   const suggestedGrade = scoreToGrade(totalScore);
@@ -49,18 +47,44 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
 
   const getGradePillColor = (grade: ConditionGrade): string => {
     const order = CONDITION_GRADES.find((g) => g.value === grade)?.sortOrder || 8;
-    if (order <= 2) return 'bg-emerald-900 text-emerald-300'; // M/NM
-    if (order === 3) return 'bg-sky-800 text-sky-200'; // VG+
-    if (order === 4) return 'bg-amber-700 text-amber-100'; // VG
-    if (order <= 6) return 'bg-red-900 text-red-300'; // G+/G
-    return 'bg-slate-800 text-slate-400'; // F/P
+    if (order === 1) return 'bg-ink text-pearl-beige';
+    if (order === 2) return 'bg-[#2d3a2e] text-[#a8c5a8]';
+    if (order === 3) return 'bg-blue-slate text-pale-sky';
+    if (order === 4) return 'bg-[#5a4a2a] text-[#d4b87a]';
+    if (order === 5) return 'bg-[#6a3a2a] text-[#d4987a]';
+    if (order === 6) return 'bg-[#6a2a2a] text-[#d47a7a]';
+    if (order === 7) return 'bg-[#4a2a2a] text-[#a06060]';
+    return 'bg-[#2a2020] text-[#705050]';
   };
 
   const getGrooveBarColors = (score: number): string[] => {
-    if (score === 0) return ['#2d3a2e', '#2d3a2e', '#2d3a2e', '#2d3a2e', '#2d3a2e']; // pristine green
-    if (score === 1) return ['#3d4a3e', '#4f6d7a', '#4f6d7a', '#5a6b6d', '#6a7b7d']; // mixed green/slate
-    if (score === 2) return ['#8b6914', '#9a7721', '#a58735', '#b0954a', '#baa35f']; // amber/brown
-    return ['#8b3a3a', '#9a4949', '#a55858', '#b06767', '#ba7676']; // red/brown
+    if (score === 0) return ['#2d3a2e', '#2d3a2e', '#2d3a2e', '#2d3a2e', '#2d3a2e'];
+    if (score === 1) return ['#2d3a2e', '#4f6d7a', '#4f6d7a', '#2d3a2e', '#4f6d7a'];
+    if (score === 2) return ['#7a6030', '#5a4020', '#7a6030', '#5a4020', '#7a6030'];
+    return ['#7a3020', '#5a2010', '#7a3020', '#5a2010', '#7a3020'];
+  };
+
+  const getPackagingStatus = (score: number): Array<{ label: string; status: 'good' | 'worn' | 'missing' }> => {
+    if (score === 0) return [
+      { label: 'Booklet', status: 'good' },
+      { label: 'Tray', status: 'good' },
+      { label: 'Case', status: 'good' },
+    ];
+    if (score === 1) return [
+      { label: 'Booklet', status: 'good' },
+      { label: 'Tray', status: 'worn' },
+      { label: 'Case', status: 'worn' },
+    ];
+    if (score === 2) return [
+      { label: 'Booklet', status: 'worn' },
+      { label: 'Tray', status: 'worn' },
+      { label: 'Case', status: 'worn' },
+    ];
+    return [
+      { label: 'Booklet', status: 'missing' },
+      { label: 'Tray', status: 'worn' },
+      { label: 'Case', status: 'missing' },
+    ];
   };
 
   if (!isOpen) return null;
@@ -80,51 +104,49 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label="Grade your copy"
-        className="fixed bottom-0 left-0 right-0 z-50 bg-paper rounded-t-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-paper-warm rounded-t-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up"
       >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-2">
-          <div className="w-8 h-0.5 bg-paper-dark rounded-full" />
+          <div className="w-8 h-1 bg-paper-darker rounded-full" />
         </div>
 
         {/* Header */}
-        <div className="px-6 pb-4 flex items-center justify-between border-b border-paper-dark">
+        <div className="px-6 pb-4 flex items-center justify-between">
           <h3 className="font-display text-[18px] text-ink">Grade Your Copy</h3>
           <button
             onClick={onClose}
             aria-label="Close grading sheet"
-            className="w-8 h-8 rounded-full bg-paper-dark flex items-center justify-center hover:bg-ink/10 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
+            className="w-7 h-7 rounded-full bg-paper-dark border border-paper-darker text-ink-soft flex items-center justify-center hover:bg-paper-darker transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
           >
-            <svg className="w-4 h-4 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Mode Tabs */}
-        <div className="px-6 pt-4">
-          <div className="bg-paper-dark rounded-xl p-1 inline-flex">
-            <button
-              onClick={() => setMode('checklist')}
-              className={`px-4 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-1 ${
-                mode === 'checklist'
-                  ? 'bg-ink text-pearl-beige'
-                  : 'text-ink/60 hover:text-ink'
-              }`}
-            >
-              Help Me Grade
-            </button>
-            <button
-              onClick={() => setMode('guide')}
-              className={`px-4 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-1 ${
-                mode === 'guide'
-                  ? 'bg-ink text-pearl-beige'
-                  : 'text-ink/60 hover:text-ink'
-              }`}
-            >
-              Grade Guide
-            </button>
-          </div>
+        <div className="flex bg-paper-dark rounded-xl p-1 gap-1 mx-5 mt-3">
+          <button
+            onClick={() => setMode('checklist')}
+            className={`flex-1 text-center py-2 rounded-lg font-mono text-[8px] tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-1 ${
+              mode === 'checklist'
+                ? 'bg-ink text-pearl-beige'
+                : 'text-ink-soft hover:text-ink'
+            }`}
+          >
+            Help Me Grade
+          </button>
+          <button
+            onClick={() => setMode('guide')}
+            className={`flex-1 text-center py-2 rounded-lg font-mono text-[8px] tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-1 ${
+              mode === 'guide'
+                ? 'bg-ink text-pearl-beige'
+                : 'text-ink-soft hover:text-ink'
+            }`}
+          >
+            Grade Guide
+          </button>
         </div>
 
         {/* Content */}
@@ -134,17 +156,15 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
               {checklist.map((question, qIndex) => (
                 <div key={question.id}>
                   {/* Question Label */}
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="font-mono text-[8px] tracking-[2.5px] uppercase text-ink-soft flex items-center gap-2 mb-2">
                     <div
-                      className={`w-6 h-6 rounded-full ${
+                      className={`w-4 h-4 rounded-full ${
                         isCD ? 'bg-blue-slate' : 'bg-burnt-peach'
-                      } text-white flex items-center justify-center font-mono text-[10px] font-bold`}
+                      } text-white flex items-center justify-center text-[8px]`}
                     >
                       {qIndex + 1}
                     </div>
-                    <h4 className="font-mono text-[8px] tracking-[0.3em] uppercase text-ink/60">
-                      {question.question}
-                    </h4>
+                    {question.question}
                   </div>
 
                   {/* Options */}
@@ -157,91 +177,68 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => handleAnswer(question.id, option.score)}
-                          className={`w-full text-left p-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
+                          className={`w-full text-left bg-paper-dark rounded-xl border-2 p-3 flex items-start gap-3 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
                             isSelected
                               ? isCD
                                 ? 'border-blue-slate bg-blue-slate/10'
                                 : 'border-burnt-peach bg-burnt-peach/10'
-                              : 'border-transparent bg-paper-dark hover:bg-paper-dark/80'
+                              : 'border-transparent'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            {/* Radio Circle */}
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                isSelected
-                                  ? isCD
-                                    ? 'border-blue-slate'
-                                    : 'border-burnt-peach'
-                                  : 'border-paper-darker'
-                              }`}
-                            >
-                              {isSelected && (
-                                <div
-                                  className={`w-2.5 h-2.5 rounded-full ${
-                                    isCD ? 'bg-blue-slate' : 'bg-burnt-peach'
-                                  }`}
-                                />
-                              )}
-                            </div>
-
-                            {/* Option Text */}
-                            <span className="font-serif text-[12px] text-ink flex-1">
-                              {option.label}
-                            </span>
+                          {/* Radio Circle */}
+                          <div
+                            className={`w-4 h-4 rounded-full border-[1.5px] mt-0.5 flex-shrink-0 flex items-center justify-center ${
+                              isSelected
+                                ? isCD
+                                  ? 'border-blue-slate bg-blue-slate'
+                                  : 'border-burnt-peach bg-burnt-peach'
+                                : 'border-paper-darker'
+                            }`}
+                          >
+                            {isSelected && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                            )}
                           </div>
 
-                          {/* Vinyl Q1 (visual) - Groove color bars */}
-                          {!isCD && question.id === 'visual' && (
-                            <div className="flex gap-1 mt-2 ml-8">
-                              {getGrooveBarColors(option.score).map((color, i) => (
-                                <div
-                                  key={i}
-                                  className="h-1 flex-1 rounded"
-                                  style={{ backgroundColor: color }}
-                                />
-                              ))}
-                            </div>
-                          )}
+                          {/* Option content */}
+                          <div className="flex-1">
+                            <span className="font-serif text-[12px] text-ink leading-snug">
+                              {option.label}
+                            </span>
 
-                          {/* CD Q3 (packaging) - Component boxes */}
-                          {isCD && question.id === 'packaging' && (
-                            <div className="flex gap-2 mt-2 ml-8">
-                              <div
-                                className={`px-2 py-1 rounded text-[8px] font-mono tracking-wide ${
-                                  option.score === 0
-                                    ? 'bg-emerald-600 text-white'
-                                    : option.score === 1
-                                    ? 'bg-amber-500 text-white'
-                                    : 'bg-slate-400 text-white'
-                                }`}
-                              >
-                                Booklet
+                            {/* Vinyl Q1 (visual) - Groove color bars */}
+                            {!isCD && question.id === 'visual' && (
+                              <div className="flex gap-0.5 mt-1.5">
+                                {getGrooveBarColors(option.score).map((color, i) => (
+                                  <div
+                                    key={i}
+                                    className="h-1 flex-1 rounded-sm"
+                                    style={{ backgroundColor: color }}
+                                  />
+                                ))}
                               </div>
-                              <div
-                                className={`px-2 py-1 rounded text-[8px] font-mono tracking-wide ${
-                                  option.score === 0
-                                    ? 'bg-emerald-600 text-white'
-                                    : option.score === 1
-                                    ? 'bg-amber-500 text-white'
-                                    : 'bg-slate-400 text-white'
-                                }`}
-                              >
-                                Tray
+                            )}
+
+                            {/* CD Q3 (packaging) - Component boxes */}
+                            {isCD && question.id === 'packaging' && (
+                              <div className="flex gap-1 mt-1.5">
+                                {getPackagingStatus(option.score).map((item, i) => (
+                                  <div
+                                    key={i}
+                                    className={`flex-1 h-4 rounded border flex items-center justify-center font-mono text-[6px] tracking-tight ${
+                                      item.status === 'good'
+                                        ? 'border-green-700/40 bg-green-700/10 text-green-800'
+                                        : item.status === 'worn'
+                                        ? 'border-amber-600/40 bg-amber-600/10 text-amber-700'
+                                        : 'border-gray-300 bg-gray-50 text-gray-400'
+                                    }`}
+                                  >
+                                    {item.label}
+                                  </div>
+                                ))}
                               </div>
-                              <div
-                                className={`px-2 py-1 rounded text-[8px] font-mono tracking-wide ${
-                                  option.score === 0
-                                    ? 'bg-emerald-600 text-white'
-                                    : option.score === 1
-                                    ? 'bg-amber-500 text-white'
-                                    : 'bg-slate-400 text-white'
-                                }`}
-                              >
-                                Case
-                              </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </button>
                       );
                     })}
@@ -249,27 +246,30 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
                 </div>
               ))}
 
-              {/* Suggested Grade Result Bar */}
+              {/* Suggested Grade Result Bar — stays dark when answered */}
               <div
-                className={`sticky bottom-0 mt-6 p-4 rounded-xl border-2 ${
+                className={`sticky bottom-0 mt-1 rounded-xl p-4 ${
                   allQuestionsAnswered
-                    ? 'bg-ink border-ink'
-                    : 'bg-slate-100 border-slate-200'
+                    ? 'bg-ink'
+                    : 'bg-paper-dark'
                 }`}
               >
                 {allQuestionsAnswered ? (
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-display text-[20px] text-pearl-beige mb-1">
+                      <div className="font-mono text-[7px] tracking-widest uppercase text-white/30 mb-1">
+                        Suggested Grade
+                      </div>
+                      <div className="font-display text-[20px] text-pearl-beige">
                         {CONDITION_GRADES.find((g) => g.value === suggestedGrade)?.label}
                       </div>
-                      <div className="font-serif text-[11px] text-pearl-beige/70 italic">
+                      <div className="font-serif text-[11px] text-white/40 italic">
                         {CONDITION_GRADES.find((g) => g.value === suggestedGrade)?.description}
                       </div>
                     </div>
                     <button
                       onClick={handleApplyGrade}
-                      className={`px-6 py-3 rounded-lg font-mono text-[10px] tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
+                      className={`px-4 py-2.5 rounded-xl font-mono text-[9px] tracking-wide uppercase focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
                         isCD
                           ? 'bg-blue-slate text-white hover:bg-blue-slate/90'
                           : 'bg-burnt-peach text-white hover:bg-burnt-peach/90'
@@ -280,8 +280,8 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
                   </div>
                 ) : (
                   <div className="text-center">
-                    <div className="font-display text-[20px] text-slate-400 mb-1">—</div>
-                    <div className="font-serif text-[11px] text-slate-400 italic">
+                    <div className="font-display text-[20px] text-ink-soft mb-1">—</div>
+                    <div className="font-serif text-[11px] text-ink-soft italic">
                       Answer all questions to see suggested grade
                     </div>
                   </div>
@@ -290,19 +290,19 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
             </div>
           ) : (
             /* Grade Guide Mode */
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              <p className="font-serif text-[12px] text-ink/60 italic mb-4">
+            <div className="overflow-y-auto">
+              <p className="font-serif text-[11px] text-ink-soft italic mb-4 leading-relaxed">
                 Grades follow the Goldmine/Discogs standard — used by collectors worldwide.
               </p>
 
               {CONDITION_GRADES.map((grade) => (
                 <div
                   key={grade.value}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-paper-dark/50"
+                  className="flex items-start gap-3 py-3 border-b border-paper-darker last:border-0"
                 >
                   {/* Grade Pill */}
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-mono text-[10px] font-bold flex-shrink-0 ${getGradePillColor(
+                    className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-[10px] font-bold flex-shrink-0 ${getGradePillColor(
                       grade.value
                     )}`}
                   >
@@ -311,11 +311,13 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
 
                   {/* Grade Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="font-mono text-[11px] text-ink mb-1">{grade.label}</div>
-                    <div className="font-serif text-[11px] text-ink/70 mb-2">
+                    <div className="font-mono text-[9px] tracking-widest uppercase text-ink-mid mb-0.5">
+                      {grade.label}
+                    </div>
+                    <div className="font-serif text-[11px] text-ink-soft leading-relaxed">
                       {grade.description}
                     </div>
-                    <div className="font-serif text-[10px] text-ink/60">
+                    <div className="font-serif text-[10px] text-ink-soft/70 mt-1">
                       {isCD ? grade.cdDetail : grade.vinylDetail}
                     </div>
 
@@ -324,13 +326,13 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
                       (grade.value === 'NM' ||
                         grade.value === 'VG+' ||
                         grade.value === 'VG') && (
-                        <div className="flex gap-1 mt-2">
+                        <div className="flex gap-0.5 mt-1.5">
                           {getGrooveBarColors(
                             grade.value === 'NM' ? 0 : grade.value === 'VG+' ? 1 : 2
                           ).map((color, i) => (
                             <div
                               key={i}
-                              className="h-1 w-8 rounded"
+                              className="h-1 w-8 rounded-sm"
                               style={{ backgroundColor: color }}
                             />
                           ))}
