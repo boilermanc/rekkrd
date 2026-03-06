@@ -22,7 +22,7 @@ const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> = ({ isO
 
   if (!isOpen) return null;
 
-  const displayName = planName === 'curator' ? 'Curator' : planName === 'enthusiast' ? 'Enthusiast' : planName;
+  const displayName = planName === 'curator' ? 'Curator' : planName === 'enthusiast' ? 'Archivist' : planName;
 
   return (
     <div

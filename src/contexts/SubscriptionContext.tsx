@@ -88,7 +88,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (isPaidTier) return true;
       return (subscription?.ai_scans_used ?? 0) < SCAN_LIMIT_FREE;
     }
-    // room_planner, shelf_organizer, analytics require Enthusiast
+    // room_planner, shelf_organizer, analytics require Archivist
     if (feature === 'room_planner' || feature === 'shelf_organizer' || feature === 'analytics') return plan === 'enthusiast';
     // playlist, lyrics, covers, manual_finder, setup_guide require Curator+
     return isPaidTier;

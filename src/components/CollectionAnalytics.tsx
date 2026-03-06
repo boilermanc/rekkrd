@@ -261,7 +261,7 @@ const CollectionAnalytics: React.FC<CollectionAnalyticsProps> = ({ albums, onSca
   const formats = useMemo<FormatData[]>(() => computeFormatBreakdown(albums), [albums]);
   const growth = useMemo<GrowthData[]>(() => computeCollectionGrowth(albums), [albums]);
 
-  // ── Gate: Enthusiast-only feature ─────────────────────────────────
+  // ── Gate: Archivist-only feature ──────────────────────────────────
 
   if (!canUse('analytics')) {
     return (
@@ -281,7 +281,7 @@ const CollectionAnalytics: React.FC<CollectionAnalyticsProps> = ({ albums, onSca
             onClick={() => onUpgradeRequired?.('analytics')}
             className="rounded-xl bg-th-accent px-6 py-3 font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]"
           >
-            Upgrade to Enthusiast
+            Upgrade to Archivist
           </button>
         </div>
       </main>

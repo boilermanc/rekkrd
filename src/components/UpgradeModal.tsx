@@ -224,7 +224,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
   const enthusiastButtonLabel = alreadyHasPlan && plan === 'enthusiast'
     ? 'Subscribe Now'
     : alreadyHasPlan
-      ? 'Upgrade to Enthusiast'
+      ? 'Upgrade to Archivist'
       : 'Start Free Trial';
 
   // Track whether auto-proceed has fired for the current defaultPriceId
@@ -524,9 +524,9 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
                 </button>
               </div>
 
-              {/* Enthusiast */}
+              {/* Archivist */}
               <div className="rounded-xl border border-th-surface/[0.15] bg-th-surface/[0.03] p-5">
-                <p className="font-label text-[10px] tracking-widest uppercase text-[#f0a882] mb-1 mt-1">Enthusiast</p>
+                <p className="font-label text-[10px] tracking-widest uppercase text-[#f0a882] mb-1 mt-1">Archivist</p>
                 <div className="flex items-baseline gap-0.5 mb-4">
                   <span className="text-th-text3 text-sm font-semibold">$</span>
                   <span className="text-3xl font-bold text-th-text">{enthusiastPrice}</span>

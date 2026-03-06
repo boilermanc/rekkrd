@@ -361,7 +361,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
         <div className="flex items-center gap-3 shrink-0">
           {!hasAccess && (
             <span className="text-th-text3/60 text-[10px] tracking-wide mr-1">
-              Upgrade to Enthusiast to generate AI layouts
+              Upgrade to Archivist to generate AI layouts
             </span>
           )}
           {!generating && (
@@ -371,7 +371,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
               disabled={!hasAccess}
               aria-label={
                 !hasAccess
-                  ? 'Generate room layout — upgrade to Enthusiast required'
+                  ? 'Generate room layout — upgrade to Archivist required'
                   : result ? 'Regenerate room layout' : 'Generate room layout'
               }
               aria-busy={generating}
@@ -431,14 +431,14 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
               </p>
               {!hasAccess && (
                 <p className="text-th-text3/60 text-xs mb-3">
-                  Upgrade to Enthusiast to generate AI layouts
+                  Upgrade to Archivist to generate AI layouts
                 </p>
               )}
               <button
                 type="button"
                 onClick={handleGenerate}
                 disabled={!hasAccess}
-                aria-label={hasAccess ? 'Generate room layout' : 'Generate room layout — upgrade to Enthusiast required'}
+                aria-label={hasAccess ? 'Generate room layout' : 'Generate room layout — upgrade to Archivist required'}
                 className={`font-bold py-2.5 px-6 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2 ${
                   hasAccess
                     ? 'bg-[#dd6e42] text-white hover:bg-[#c45e38]'

@@ -116,7 +116,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, hasAccess, onEdit, onDelete, 
         <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
           <button
             onClick={() => onLayout(room)}
-            aria-label={hasAccess ? `AI layout for ${room.name}` : `AI layout for ${room.name} — upgrade to Enthusiast required`}
+            aria-label={hasAccess ? `AI layout for ${room.name}` : `AI layout for ${room.name} — upgrade to Archivist required`}
             className={`relative p-1.5 rounded-lg transition-colors ${gatedClass}`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -126,7 +126,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, hasAccess, onEdit, onDelete, 
           </button>
           <button
             onClick={() => onFeatures(room)}
-            aria-label={hasAccess ? `Features for ${room.name}` : `Features for ${room.name} — upgrade to Enthusiast required`}
+            aria-label={hasAccess ? `Features for ${room.name}` : `Features for ${room.name} — upgrade to Archivist required`}
             className={`relative p-1.5 rounded-lg transition-colors ${gatedClass}`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -136,7 +136,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, hasAccess, onEdit, onDelete, 
           </button>
           <button
             onClick={() => onEdit(room)}
-            aria-label={hasAccess ? `Edit ${room.name}` : `Edit ${room.name} — upgrade to Enthusiast required`}
+            aria-label={hasAccess ? `Edit ${room.name}` : `Edit ${room.name} — upgrade to Archivist required`}
             className={`relative p-1.5 rounded-lg transition-colors ${gatedClass}`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -338,7 +338,7 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
         </div>
         <button
           onClick={handleAddRoom}
-          aria-label={hasAccess ? 'Add new room' : 'Add new room — upgrade to Enthusiast required'}
+          aria-label={hasAccess ? 'Add new room' : 'Add new room — upgrade to Archivist required'}
           className={`font-bold py-2 px-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2 ${
             hasAccess
               ? 'bg-[#dd6e42] text-th-text hover:bg-[#c45e38]'
@@ -382,11 +382,11 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
           ) : (
             <>
               <p className="text-th-text3 text-sm mb-6 max-w-xs mx-auto">
-                Room Planner is an Enthusiast feature. Set up your listening rooms and get AI-powered gear placement recommendations.
+                Room Planner is an Archivist feature. Set up your listening rooms and get AI-powered gear placement recommendations.
               </p>
               <button
                 onClick={() => setShowUpgradePrompt(true)}
-                aria-label="Upgrade to Enthusiast for Room Planner"
+                aria-label="Upgrade to Archivist for Room Planner"
                 className="bg-[#dd6e42]/60 text-th-text font-bold py-2.5 px-6 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2"
               >
                 <LockIcon className="w-3.5 h-3.5" />
@@ -466,7 +466,7 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
         />
       )}
 
-      {/* Onboarding overlay (first visit only, Enthusiast users) */}
+      {/* Onboarding overlay (first visit only, Archivist users) */}
       {showOnboarding && hasAccess && (
         <RoomOnboarding onComplete={handleOnboardingComplete} onGoHome={onGoHome} />
       )}

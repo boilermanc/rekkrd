@@ -264,7 +264,7 @@ const BulkImport: React.FC<BulkImportProps> = ({ onUpgradeRequired, albums, onIm
           onUpgradeRequired('album_limit');
           return;
         }
-        // Cap to remaining capacity (shouldn't normally happen since bulk import is Enthusiast-only, but safe guard)
+        // Cap to remaining capacity (shouldn't normally happen since bulk import is Archivist-only, but safe guard)
         selected.splice(remaining);
       }
     }

@@ -186,7 +186,7 @@ const PLAN_CONFIG: Record<Plan, { label: string; color: string; bg: string; bord
     icon: <Crown className="w-5 h-5" />,
   },
   enthusiast: {
-    label: 'Enthusiast',
+    label: 'Archivist',
     color: 'text-[#f0a882]',
     bg: 'bg-[#dd6e42]/10',
     border: 'border-[#dd6e42]/25',

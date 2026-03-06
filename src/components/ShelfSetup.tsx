@@ -253,7 +253,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
 
   // ── Render ────────────────────────────────────────────────────
 
-  // Gate: Enthusiast-only feature
+  // Gate: Archivist-only feature
   if (!canUse('shelf_organizer')) {
     return (
       <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8 pb-8">
@@ -272,7 +272,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
             onClick={() => onUpgradeRequired?.('shelf_organizer')}
             className="rounded-xl bg-th-accent px-6 py-3 font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98]"
           >
-            Upgrade to Enthusiast
+            Upgrade to Archivist
           </button>
         </div>
       </main>

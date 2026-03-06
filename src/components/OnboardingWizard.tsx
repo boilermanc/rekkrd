@@ -268,7 +268,7 @@ const PLAN_OPTIONS: {
   },
   {
     id: 'enthusiast',
-    name: 'Enthusiast',
+    name: 'Archivist',
     monthlyPrice: '$9.99/mo',
     annualPrice: '$99.99/yr',
     Icon: Gem,
@@ -441,7 +441,7 @@ interface StepGetStartedProps {
 const StepGetStarted: React.FC<StepGetStartedProps> = ({
   displayName, startAction, selectedTier, onSelectStartAction,
 }) => {
-  const tierLabel = selectedTier === 'curator' ? 'Curator' : selectedTier === 'enthusiast' ? 'Enthusiast' : '';
+  const tierLabel = selectedTier === 'curator' ? 'Curator' : selectedTier === 'enthusiast' ? 'Archivist' : '';
 
   return (
     <div className="w-full flex flex-col items-center text-center">

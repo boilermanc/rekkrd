@@ -148,7 +148,7 @@ const StakkdGuideModal: React.FC<StakkdGuideModalProps> = ({ isOpen, onClose }) 
               <h3>Setup Guides</h3>
               <div className="stakkd-callout stakkd-callout-warning">
                 <div className="stakkd-callout-icon">⭐</div>
-                <p><strong>Curator+ feature:</strong> Setup guides require a Curator or Enthusiast subscription.</p>
+                <p><strong>Curator+ feature:</strong> Setup guides require a Curator or Archivist subscription.</p>
               </div>
               <p>With 2 or more pieces of gear, click <strong>How to Connect</strong> to generate an AI-powered setup guide. It provides:</p>
               <div className="stakkd-info-grid">
@@ -172,7 +172,7 @@ const StakkdGuideModal: React.FC<StakkdGuideModalProps> = ({ isOpen, onClose }) 
               <h3>Manual Finder</h3>
               <div className="stakkd-callout stakkd-callout-warning">
                 <div className="stakkd-callout-icon">⭐</div>
-                <p><strong>Curator+ feature:</strong> Manual finder requires a Curator or Enthusiast subscription.</p>
+                <p><strong>Curator+ feature:</strong> Manual finder requires a Curator or Archivist subscription.</p>
               </div>
               <p>Lost your equipment manual? Open any gear detail view and click <strong>Find Manual</strong>. AI will search for the PDF and show you results with a confidence level. High-confidence matches are auto-saved. You can also upload your own PDF manuals (up to 25 MB).</p>
 
@@ -220,7 +220,7 @@ const StakkdGuideModal: React.FC<StakkdGuideModalProps> = ({ isOpen, onClose }) 
 
               <div className="stakkd-faq-item">
                 <div className="stakkd-faq-q">How many pieces of gear can I add?</div>
-                <p className="stakkd-faq-a">Free accounts can add up to 5 pieces. Curator and Enthusiast plans have no limit — add your entire setup.</p>
+                <p className="stakkd-faq-a">Free accounts can add up to 5 pieces. Curator and Archivist plans have no limit — add your entire setup.</p>
               </div>
 
               <div className="stakkd-faq-item">
