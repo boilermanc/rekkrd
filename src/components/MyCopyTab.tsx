@@ -37,7 +37,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
   // First-time empty state
   if (isCompletelyEmpty && !showDetailsOverride) {
     return (
-      <div className="bg-[#f5efe3] min-h-[600px] relative flex items-center justify-center overflow-hidden">
+      <div className="bg-[#f5efe3] min-h-[300px] md:min-h-[600px] relative flex items-center justify-center overflow-hidden">
         <div className="flex flex-col items-center text-center gap-3 py-10 px-6">
           {/* Icon container */}
           <div className="w-12 h-12 rounded-full bg-[#ede4d3] border border-[#e0d4bc] flex items-center justify-center">
@@ -104,14 +104,14 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
       {/* Acquired date annotation (top-right) */}
       {album.acquired_date && (
         <div
-          className="absolute top-[18px] right-8 font-serif italic text-[11px] text-[#9a8f80] opacity-45 z-[2]"
+          className="absolute top-[18px] right-4 md:right-8 font-serif italic text-[11px] text-[#9a8f80] opacity-45 z-[2]"
           style={{ transform: 'rotate(-1.5deg)' }}
         >
           acquired {new Date(album.acquired_date).getFullYear()}
         </div>
       )}
 
-      <div className="relative px-8 py-7 pb-10">
+      <div className="relative px-4 md:px-8 py-7 pb-10">
         {/* ── CONDITION ─────────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-3 mb-4">
@@ -122,34 +122,36 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
           {conditionInfo ? (
             /* Condition Hero Card */
             <div
-              className="relative bg-[#fefcf8] border border-[#e0d4bc] rounded-2xl overflow-hidden flex items-center gap-5 mb-4"
-              style={{ padding: '22px 22px 22px 26px', boxShadow: '0 2px 12px rgba(42,32,22,0.07)' }}
+              className="relative bg-[#fefcf8] border border-[#e0d4bc] rounded-2xl overflow-hidden mb-4 p-4 pl-5 md:p-[22px] md:pl-[26px]"
+              style={{ boxShadow: '0 2px 12px rgba(42,32,22,0.07)' }}
             >
               {/* Left accent bar */}
               <div className="absolute left-0 top-0 bottom-0 w-[5px] bg-burnt-peach rounded-l-2xl" />
 
-              {/* Circular badge */}
-              <div
-                className="w-[60px] h-[60px] rounded-full bg-[#2a2016] text-[#e8dab2] flex items-center justify-center flex-shrink-0 font-display text-[20px] font-bold"
-                style={{ letterSpacing: '-1px', boxShadow: '0 3px 12px rgba(42,32,22,0.25)' }}
-              >
-                {conditionInfo.shortLabel}
-              </div>
+              <div className="flex items-center gap-3 md:gap-4">
+                {/* Circular badge */}
+                <div
+                  className="w-[48px] h-[48px] md:w-[60px] md:h-[60px] rounded-full bg-[#2a2016] text-[#e8dab2] flex items-center justify-center flex-shrink-0 font-display text-[16px] md:text-[20px] font-bold"
+                  style={{ letterSpacing: '-1px', boxShadow: '0 3px 12px rgba(42,32,22,0.25)' }}
+                >
+                  {conditionInfo.shortLabel}
+                </div>
 
-              {/* Grade details */}
-              <div className="flex-1 min-w-0">
-                <p className="font-display text-[18px] text-[#2a2016] mb-1.5">{conditionInfo.label}</p>
-                <p className="font-serif text-[13px] text-[#7a6f60] italic leading-relaxed">{conditionInfo.description}</p>
+                {/* Grade details + edit */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-display text-[16px] md:text-[18px] text-[#2a2016] mb-1">{conditionInfo.label}</p>
+                    <button
+                      onClick={() => setGradingSheetOpen(true)}
+                      aria-label="Edit condition grade"
+                      className="text-burnt-peach border-[1.5px] border-burnt-peach/35 bg-burnt-peach/8 font-mono text-[10px] tracking-[1.5px] uppercase px-3 py-1.5 rounded-lg flex-shrink-0 whitespace-nowrap hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 cursor-pointer"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <p className="font-serif text-[13px] text-[#7a6f60] italic leading-relaxed">{conditionInfo.description}</p>
+                </div>
               </div>
-
-              {/* Edit button */}
-              <button
-                onClick={() => setGradingSheetOpen(true)}
-                aria-label="Edit condition grade"
-                className="text-burnt-peach border-[1.5px] border-burnt-peach/35 bg-burnt-peach/8 font-mono text-[10px] tracking-[1.5px] uppercase px-3.5 py-2 rounded-lg flex-shrink-0 whitespace-nowrap hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 cursor-pointer"
-              >
-                Edit
-              </button>
             </div>
           ) : (
             /* Invitation Card */
@@ -174,8 +176,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
           <section className="mb-7">
             {userPlan === 'collector' || userPlan === 'curator' ? (
               /* Upgrade prompt — dark card */
-              <div className="bg-[#2a2016] rounded-2xl" style={{ padding: '22px 24px', boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
-                <h5 className="font-display text-[18px] text-[#e8dab2] mb-2">See what your collection is worth</h5>
+              <div className="bg-[#2a2016] rounded-2xl p-4 md:p-[22px_24px]" style={{ boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
+                <h5 className="font-display text-[16px] md:text-[18px] text-[#e8dab2] mb-2">See what your collection is worth</h5>
                 <p className="font-serif text-[13px] text-white/45 italic leading-relaxed mb-4">
                   Upgrade to Archivist to unlock live Discogs pricing.
                 </p>
@@ -185,8 +187,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
               </div>
             ) : !discogsConnected ? (
               /* Discogs connection prompt — dark card */
-              <div className="bg-[#2a2016] rounded-2xl" style={{ padding: '22px 24px', boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
-                <h5 className="font-display text-[18px] text-[#e8dab2] mb-2">Connect Discogs to see value</h5>
+              <div className="bg-[#2a2016] rounded-2xl p-4 md:p-[22px_24px]" style={{ boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
+                <h5 className="font-display text-[16px] md:text-[18px] text-[#e8dab2] mb-2">Connect Discogs to see value</h5>
                 <p className="font-serif text-[13px] text-white/45 italic leading-relaxed mb-4">
                   Link your Discogs account to unlock marketplace pricing.
                 </p>
@@ -196,7 +198,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
               </div>
             ) : (
               /* Value display — dark card */
-              <div className="bg-[#2a2016] rounded-2xl flex items-center justify-between" style={{ padding: '22px 24px', boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
+              <div className="bg-[#2a2016] rounded-2xl flex items-center justify-between p-4 md:p-[22px_24px]" style={{ boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
                 <div>
                   <div className="font-mono text-[10px] tracking-[2px] uppercase text-white/35 mb-1.5">
                     Est. Value ({album.condition})
@@ -226,7 +228,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
 
           <div className="grid grid-cols-2 gap-2.5 mb-7">
             {/* Paid */}
-            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '14px 16px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
+            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '12px 12px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
               <label className="font-mono text-[9px] tracking-[2.5px] uppercase text-[#9a8f80] block mb-1.5">
                 Paid
               </label>
@@ -255,7 +257,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Acquired */}
-            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '14px 16px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
+            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '12px 12px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
               <label className="font-mono text-[9px] tracking-[2.5px] uppercase text-[#9a8f80] block mb-1.5">
                 Acquired
               </label>
@@ -285,7 +287,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Source */}
-            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '14px 16px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
+            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '12px 12px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
               <label className="font-mono text-[9px] tracking-[2.5px] uppercase text-[#9a8f80] block mb-1.5">
                 Source
               </label>
@@ -313,7 +315,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Format */}
-            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '14px 16px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
+            <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl" style={{ padding: '12px 12px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
               <label className="font-mono text-[9px] tracking-[2.5px] uppercase text-[#9a8f80] block mb-1.5">
                 Format
               </label>
@@ -324,7 +326,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
           </div>
 
           {/* Notes (full-width) */}
-          <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl col-span-2 mb-7" style={{ padding: '14px 16px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
+          <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl col-span-2 mb-7" style={{ padding: '12px 12px', boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
             <label className="font-mono text-[9px] tracking-[2.5px] uppercase text-[#9a8f80] block mb-1.5">
               Notes
             </label>
@@ -356,13 +358,13 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
 
           <div className="bg-[#fefcf8] border border-[#e0d4bc] rounded-xl overflow-hidden mb-7" style={{ boxShadow: '0 1px 4px rgba(42,32,22,0.05)' }}>
             {/* Label */}
-            <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '14px 18px' }}>
+            <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '12px 14px' }}>
               <span className="font-mono text-[10px] tracking-[1.5px] uppercase text-[#9a8f80]">Label</span>
               <span className="font-serif text-[15px] text-[#2a2016]">{album.label || '—'}</span>
             </div>
 
             {/* Cat. No. */}
-            <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '14px 18px' }}>
+            <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '12px 14px' }}>
               <span className="font-mono text-[10px] tracking-[1.5px] uppercase text-[#9a8f80]">Cat. No.</span>
               {editingField === 'catalog_number' ? (
                 <input
@@ -390,7 +392,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Country */}
-            <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '14px 18px' }}>
+            <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '12px 14px' }}>
               <span className="font-mono text-[10px] tracking-[1.5px] uppercase text-[#9a8f80]">Country</span>
               {editingField === 'pressing_country' ? (
                 <input
@@ -416,7 +418,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             </div>
 
             {/* Year */}
-            <div className="flex items-center justify-between" style={{ padding: '14px 18px' }}>
+            <div className="flex items-center justify-between" style={{ padding: '12px 14px' }}>
               <span className="font-mono text-[10px] tracking-[1.5px] uppercase text-[#9a8f80]">Year</span>
               {editingField === 'pressing_year' ? (
                 <input

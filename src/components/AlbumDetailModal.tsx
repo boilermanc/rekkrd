@@ -373,7 +373,37 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
 
-        <div className="w-full md:w-5/12 overflow-hidden bg-th-bg flex items-center justify-center p-6 md:p-12 relative flex-shrink-0">
+        {/* Mobile: styled album name header instead of cover image */}
+        <div className="md:hidden w-full bg-th-bg relative overflow-hidden flex-shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#2a2016] via-[#3d2e1e] to-[#1a1510]" />
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 30% 40%, rgba(221,110,66,0.3), transparent 60%), radial-gradient(circle at 70% 60%, rgba(232,218,178,0.15), transparent 50%)' }} />
+          {/* Record watermark */}
+          <svg className="absolute -right-10 -bottom-10 w-52 h-52 text-[#e8dab2] opacity-[0.04]" viewBox="0 0 200 200" fill="currentColor">
+            <circle cx="100" cy="100" r="98" />
+            <circle cx="100" cy="100" r="80" fill="#2a2016" />
+            <circle cx="100" cy="100" r="78" fill="currentColor" />
+            <circle cx="100" cy="100" r="60" fill="#2a2016" />
+            <circle cx="100" cy="100" r="58" fill="currentColor" />
+            <circle cx="100" cy="100" r="40" fill="#2a2016" />
+            <circle cx="100" cy="100" r="38" fill="currentColor" />
+            <circle cx="100" cy="100" r="22" fill="#2a2016" />
+            <circle cx="100" cy="100" r="20" fill="currentColor" />
+            <circle cx="100" cy="100" r="6" fill="#2a2016" />
+          </svg>
+          <div className="relative px-6 pt-14 pb-8 flex flex-col items-center text-center">
+            <span className="text-[#e8dab2]/30 font-mono text-[9px] tracking-[4px] uppercase mb-3">{album.genre || 'Vinyl'}</span>
+            <h2 className="text-2xl font-bold text-[#e8dab2] leading-tight mb-2">{album.title}</h2>
+            <h3 className="text-base text-[#e8dab2]/60 font-medium">{album.artist}</h3>
+            <div className="flex items-center gap-2 mt-3">
+              {album.year && <span className="text-[#e8dab2]/30 font-mono text-[10px] tracking-wider">{album.year}</span>}
+              {album.year && album.label && <span className="text-[#e8dab2]/20">·</span>}
+              {album.label && <span className="text-[#e8dab2]/30 font-mono text-[10px] tracking-wider">{album.label}</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: cover image panel */}
+        <div className="hidden md:flex w-5/12 overflow-hidden bg-th-bg items-center justify-center p-12 relative flex-shrink-0">
              <button onClick={() => {
                if (!canUseCovers) {
                  onUpgradeRequired?.('covers');
@@ -384,7 +414,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                  void engagementService.logEvent(album.id, 'cover_view');
                }
              }} className="relative group cursor-pointer z-10">
-               <img src={proxyImageUrl(displayCoverUrl)} alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'} loading="lazy" decoding="async" className={`w-full h-auto max-h-[40vh] md:max-h-full object-contain rounded-md shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-opacity ${uploadingCover ? 'opacity-50' : ''}`} />
+               <img src={proxyImageUrl(displayCoverUrl)} alt={album.title && album.artist ? `Album cover for ${album.title} by ${album.artist}` : album.title ? `Album cover for ${album.title}` : 'Album cover'} loading="lazy" decoding="async" className={`w-full h-auto object-contain rounded-md shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-opacity ${uploadingCover ? 'opacity-50' : ''}`} />
                {uploadingCover ? (
                  <div className="absolute inset-0 bg-th-bg/60 rounded-md flex items-center justify-center">
                    <div className="flex flex-col items-center gap-3">
@@ -433,7 +463,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
         </div>
 
         <div className="w-full md:w-7/12 p-6 md:p-12 overflow-y-auto bg-th-surface/[0.02] custom-scrollbar">
-          <header className="mb-8">
+          <header className="hidden md:block mb-8">
             <div className="flex items-center gap-2 mb-3">
               <FormatBadge format={album.format} size="sm" />
               {album.genre && (
@@ -865,8 +895,8 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
             )}
           </div>
 
-          {/* My Copy Tab Panel */}
-          <div id="my-copy-panel" role="tabpanel" aria-labelledby="my-copy-tab" className={activeTab === 'my-copy' ? 'block' : 'hidden'}>
+          {/* My Copy Tab Panel — negative margins cancel parent p-6/p-12 so MyCopyTab controls its own padding */}
+          <div id="my-copy-panel" role="tabpanel" aria-labelledby="my-copy-tab" className={activeTab === 'my-copy' ? 'block -mx-6 md:-mx-12 -mb-6 md:-mb-12' : 'hidden'}>
             <MyCopyTab
               album={album}
               onUpdate={async (updates) => {
