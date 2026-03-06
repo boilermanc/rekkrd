@@ -46,6 +46,7 @@ import discogsWantlistRouter from './routes/discogsWantlist.js';
 import discogsCollectionRouter from './routes/discogsCollection.js';
 import discogsImportRouter from './routes/discogsImport.js';
 import discogsPricingRouter from './routes/discogsPricing.js';
+import discogsPriceRouter from './routes/discogsPrice.js';
 import discogsPressingRouter from './routes/discogsPressing.js';
 import collectionValueRouter from './routes/collectionValue.js';
 import accountRouter from './routes/account.js';
@@ -84,7 +85,7 @@ const _routerMap: Record<string, unknown> = {
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
   adminRouter, blogRouter, gearRouter, identifyGearRouter,
   findManualRouter, setupGuideRouter, setupGuideSaveRouter, setupGuidePdfRouter, supportRouter, sitemapRouter, emailRouter,
-  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsCollectionRouter, discogsImportRouter, discogsWantlistRouter, discogsPricingRouter, discogsPressingRouter,
+  onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsCollectionRouter, discogsImportRouter, discogsWantlistRouter, discogsPricingRouter, discogsPriceRouter, discogsPressingRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
   sellrSessionsRouter, sellrRecordsRouter, sellrScanRouter, sellrCheckoutRouter, sellrReportRouter,
   sellrAdminRouter, sellrAccountRouter, sellrDashboardRouter, sellrImportRouter, sellrLotRouter, integrationsRouter,
@@ -205,6 +206,7 @@ mountRouter('discogsCollectionRouter', discogsCollectionRouter);
 mountRouter('discogsImportRouter', discogsImportRouter);
 mountRouter('discogsWantlistRouter', discogsWantlistRouter);
 mountRouter('discogsPricingRouter', discogsPricingRouter);
+mountRouter('discogsPriceRouter', discogsPriceRouter);
 mountRouter('discogsPressingRouter', discogsPressingRouter);
 mountRouter('collectionValueRouter', collectionValueRouter);
 mountRouter('accountRouter', accountRouter);
