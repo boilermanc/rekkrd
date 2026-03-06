@@ -78,6 +78,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   const [spinRecorded, setSpinRecorded] = useState(false);
   const [shelfPlacement, setShelfPlacement] = useState<PlacementResult | null>(null);
   const [hasShelfConfig, setHasShelfConfig] = useState(false);
+  const [activeTab, setActiveTab] = useState<'about' | 'my-copy'>('about');
 
   useEffect(() => {
     if (album?.id) {
@@ -468,7 +469,40 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
             <h3 className="text-xl text-th-text2 font-medium">{album.artist}</h3>
           </header>
 
-          <div className="space-y-12">
+          {/* Tab Bar */}
+          <div className="bg-paper border-b border-paper-darker -mx-6 md:-mx-12 px-6 md:px-12 mb-8" role="tablist">
+            <div className="flex gap-6">
+              <button
+                role="tab"
+                aria-selected={activeTab === 'about'}
+                aria-controls="about-panel"
+                onClick={() => setActiveTab('about')}
+                className={`font-mono text-xs tracking-widest uppercase py-4 border-b-2 transition-colors ${
+                  activeTab === 'about'
+                    ? 'text-burnt-peach border-burnt-peach'
+                    : 'text-ink/60 border-transparent hover:text-ink/80'
+                }`}
+              >
+                About
+              </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === 'my-copy'}
+                aria-controls="my-copy-panel"
+                onClick={() => setActiveTab('my-copy')}
+                className={`font-mono text-xs tracking-widest uppercase py-4 border-b-2 transition-colors ${
+                  activeTab === 'my-copy'
+                    ? 'text-burnt-peach border-burnt-peach'
+                    : 'text-ink/60 border-transparent hover:text-ink/80'
+                }`}
+              >
+                My Copy
+              </button>
+            </div>
+          </div>
+
+          {/* About Tab Panel */}
+          <div id="about-panel" role="tabpanel" aria-labelledby="about-tab" className={activeTab === 'about' ? 'space-y-12' : 'hidden'}>
             {/* Market Valuation: NEW SECTION */}
             <section className="p-6 rounded-2xl bg-[#dd6e42]/5 border border-[#dd6e42]/10 space-y-6">
               <div className="flex justify-between items-center">
@@ -826,6 +860,11 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 )}
               </section>
             )}
+          </div>
+
+          {/* My Copy Tab Panel */}
+          <div id="my-copy-panel" role="tabpanel" aria-labelledby="my-copy-tab" className={activeTab === 'my-copy' ? 'block' : 'hidden'}>
+            <p className="text-ink/60 text-sm">My Copy content will be added in Task 38.2</p>
           </div>
         </div>
       </div>
