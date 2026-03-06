@@ -512,7 +512,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
 
             {/* Quick Actions */}
             <section className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => onToggleFavorite?.(album.id)} className={`flex-1 font-bold py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 ${album.isFavorite ? 'bg-[#dd6e42] text-th-text' : 'bg-th-text text-th-bg hover:bg-emerald-500 hover:text-th-text'}`}>
+              <button onClick={() => onToggleFavorite?.(album.id)} className={`flex-1 font-bold py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-4 ${album.isFavorite ? 'bg-[#dd6e42] text-th-text' : 'bg-th-text text-th-bg hover:bg-emerald-500 hover:text-th-text'}`}>
                 <svg className={`w-4 h-4 ${album.isFavorite ? 'fill-current' : ''}`} viewBox="0 0 24 24" fill={album.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
@@ -521,7 +521,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
               <button
                 onClick={handleNowSpinning}
                 aria-pressed={isSpinning}
-                className={`flex items-center justify-center gap-2 flex-1 py-4 rounded-xl font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95 ${
+                className={`flex items-center justify-center gap-3 flex-1 py-4 rounded-xl font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95 ${
                   spinRecorded
                     ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 scale-105'
                     : isSpinning
@@ -535,12 +535,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 </svg>
                 {spinRecorded ? 'Spin Logged!' : isSpinning ? 'Spinning' : 'Now Spinning'}
               </button>
-              <button onClick={handlePlaySample} className="flex-1 border border-th-surface/[0.10] text-th-text font-bold py-4 rounded-xl hover:bg-th-surface/[0.08] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
+              <button onClick={handlePlaySample} className="flex-1 border border-th-surface/[0.10] text-th-text font-bold py-4 rounded-xl hover:bg-th-surface/[0.08] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3">
                 Listen Sample
               </button>
               <button
                 onClick={() => onMoreLikeThis?.(album)}
-                className="flex items-center justify-center gap-2 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
+                className="flex items-center justify-center gap-3 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
                 aria-label={`Build a session around ${album.title}`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -551,7 +551,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
               {onAddToWantlist && (
                 <button
                   onClick={() => onAddToWantlist(album)}
-                  className="flex items-center justify-center gap-2 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
+                  className="flex items-center justify-center gap-3 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
                   aria-label={`Add ${album.title} to wantlist`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
