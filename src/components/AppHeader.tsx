@@ -22,6 +22,7 @@ interface AppHeaderProps {
   wantlistCount: number;
   priceAlertCount: number;
   albumCount: number;
+  activeFilterCount: number;
   theme: string;
   toggleTheme: () => void;
   signOut: () => void;
@@ -33,7 +34,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   searchQuery, setSearchQuery, searchInputRef,
   isFilterPanelOpen, setIsFilterPanelOpen,
   canUse, setUpgradeFeature,
-  navigate, wantlistCount, priceAlertCount, albumCount,
+  navigate, wantlistCount, priceAlertCount, albumCount, activeFilterCount,
   theme, toggleTheme, signOut,
 }) => (
   <header className="sticky top-0 z-40 glass-morphism border-b border-th-surface/[0.10] px-4 md:px-6 py-4">
@@ -79,7 +80,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             ref={searchInputRef}
             type="text"
             aria-label="Search your collection"
-            placeholder="Search crate..."
+            placeholder="Search titles, artists, genres…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-full pl-10 ${searchQuery ? 'pr-9' : 'pr-4'} py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all placeholder:text-th-text3/50`}
@@ -268,11 +269,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         {(currentView === 'grid' || currentView === 'list') && (
           <button
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-            className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${isFilterPanelOpen ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
+            aria-label={`Filter and sort collection${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
+            className={`relative hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${isFilterPanelOpen ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
+            {activeFilterCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#dd6e42] text-white text-[9px] font-bold flex items-center justify-center"
+                aria-hidden="true"
+              >
+                {activeFilterCount}
+              </span>
+            )}
           </button>
         )}
       </div>}

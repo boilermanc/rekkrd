@@ -46,7 +46,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-th-bg/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+    <div className="fixed inset-0 top-[60px] z-[35] bg-th-bg/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
 
       {/* Progress bar */}
       <div className="w-full max-w-lg mb-8">

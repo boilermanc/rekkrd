@@ -18,6 +18,9 @@ interface CollectionListProps {
   onToggleFavoritesFilter?: () => void;
   searchQuery: string;
   importedAlbumIds?: Set<string>;
+  genreFilter?: string;
+  conditionFilter?: string;
+  activeTags?: string[];
 }
 
 type SortField = 'favorite' | 'title' | 'artist' | 'year' | 'genre' | 'format' | 'value' | 'added' | 'condition' | 'plays';
@@ -41,7 +44,7 @@ const SortArrow: React.FC<SortArrowProps> = ({ field, currentSortField, sortDir 
   );
 };
 
-const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, onAddToWantlist, favoritesOnly, onToggleFavoritesFilter, searchQuery, importedAlbumIds }) => {
+const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDelete, onToggleFavorite, onAddToWantlist, favoritesOnly, onToggleFavoritesFilter, searchQuery, importedAlbumIds, genreFilter, conditionFilter, activeTags }) => {
   const [sortField, setSortField] = useState<SortField>('title');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +62,9 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
     let result = albums.filter(a => {
       const matchesFavorite = !favoritesOnly || a.isFavorite;
       if (!matchesFavorite) return false;
+      if (genreFilter && a.genre !== genreFilter) return false;
+      if (conditionFilter && a.condition !== conditionFilter) return false;
+      if (activeTags && activeTags.length > 0 && !activeTags.every(t => a.tags?.includes(t))) return false;
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
       return (
@@ -106,12 +112,12 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
     });
 
     return result;
-  }, [albums, searchQuery, sortField, sortDir, favoritesOnly]);
+  }, [albums, searchQuery, sortField, sortDir, favoritesOnly, genreFilter, conditionFilter, activeTags]);
 
   // Reset page when filters or sort change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, sortField, sortDir, favoritesOnly]);
+  }, [searchQuery, sortField, sortDir, favoritesOnly, genreFilter, conditionFilter, activeTags]);
 
   const totalPages = Math.ceil(sortedAlbums.length / PAGE_SIZE);
   const paginatedAlbums = sortedAlbums.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
