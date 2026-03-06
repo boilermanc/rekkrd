@@ -102,7 +102,9 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
           cmp = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
           break;
         case 'condition':
-          cmp = (CONDITION_ORDER[a.condition as ConditionGrade] ?? 99) - (CONDITION_ORDER[b.condition as ConditionGrade] ?? 99);
+          const aOrder = CONDITION_ORDER[a.condition as ConditionGrade] ?? 99;
+          const bOrder = CONDITION_ORDER[b.condition as ConditionGrade] ?? 99;
+          cmp = aOrder - bOrder;
           break;
         case 'plays':
           cmp = (a.play_count || 0) - (b.play_count || 0);
@@ -283,7 +285,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                 {/* Condition (hidden on mobile) */}
                 <div className="hidden md:block" role="cell">
                   {album.condition ? (
-                    <span className="inline-flex items-center text-[8px] font-mono font-bold uppercase tracking-wider rounded-full px-2 py-0.5 bg-paper-dark text-ink">
+                    <span className="inline-flex items-center text-[8px] font-mono tracking-wide rounded-full px-2 py-0.5 bg-paper-dark text-ink/60">
                       {CONDITION_BY_VALUE[album.condition as ConditionGrade].shortLabel}
                     </span>
                   ) : null}
