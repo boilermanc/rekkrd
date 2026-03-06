@@ -93,7 +93,7 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
           <button
             onClick={onClose}
             aria-label="Close grading sheet"
-            className="w-8 h-8 rounded-full bg-paper-dark flex items-center justify-center hover:bg-ink/10 transition-colors"
+            className="w-8 h-8 rounded-full bg-paper-dark flex items-center justify-center hover:bg-ink/10 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
           >
             <svg className="w-4 h-4 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -106,7 +106,7 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
           <div className="bg-paper-dark rounded-xl p-1 inline-flex">
             <button
               onClick={() => setMode('checklist')}
-              className={`px-4 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors ${
+              className={`px-4 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-1 ${
                 mode === 'checklist'
                   ? 'bg-ink text-pearl-beige'
                   : 'text-ink/60 hover:text-ink'
@@ -116,7 +116,7 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
             </button>
             <button
               onClick={() => setMode('guide')}
-              className={`px-4 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors ${
+              className={`px-4 py-2 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-1 ${
                 mode === 'guide'
                   ? 'bg-ink text-pearl-beige'
                   : 'text-ink/60 hover:text-ink'
@@ -154,8 +154,10 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
                       return (
                         <button
                           key={option.score}
+                          role="radio"
+                          aria-checked={isSelected}
                           onClick={() => handleAnswer(question.id, option.score)}
-                          className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
+                          className={`w-full text-left p-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
                             isSelected
                               ? isCD
                                 ? 'border-blue-slate bg-blue-slate/10'
@@ -267,7 +269,7 @@ const GradingSheet: React.FC<GradingSheetProps> = ({
                     </div>
                     <button
                       onClick={handleApplyGrade}
-                      className={`px-6 py-3 rounded-lg font-mono text-[10px] tracking-widest uppercase ${
+                      className={`px-6 py-3 rounded-lg font-mono text-[10px] tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
                         isCD
                           ? 'bg-blue-slate text-white hover:bg-blue-slate/90'
                           : 'bg-burnt-peach text-white hover:bg-burnt-peach/90'

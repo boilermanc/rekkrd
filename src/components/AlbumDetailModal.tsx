@@ -474,11 +474,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
           <div className="bg-paper border-b border-paper-darker -mx-6 md:-mx-12 px-6 md:px-12 mb-8" role="tablist">
             <div className="flex gap-6">
               <button
+                id="about-tab"
                 role="tab"
                 aria-selected={activeTab === 'about'}
                 aria-controls="about-panel"
                 onClick={() => setActiveTab('about')}
-                className={`font-mono text-xs tracking-widest uppercase py-4 border-b-2 transition-colors ${
+                className={`font-mono text-xs tracking-widest uppercase py-4 border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
                   activeTab === 'about'
                     ? 'text-burnt-peach border-burnt-peach'
                     : 'text-ink/60 border-transparent hover:text-ink/80'
@@ -487,11 +488,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 About
               </button>
               <button
+                id="my-copy-tab"
                 role="tab"
                 aria-selected={activeTab === 'my-copy'}
                 aria-controls="my-copy-panel"
                 onClick={() => setActiveTab('my-copy')}
-                className={`font-mono text-xs tracking-widest uppercase py-4 border-b-2 transition-colors ${
+                className={`font-mono text-xs tracking-widest uppercase py-4 border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 ${
                   activeTab === 'my-copy'
                     ? 'text-burnt-peach border-burnt-peach'
                     : 'text-ink/60 border-transparent hover:text-ink/80'

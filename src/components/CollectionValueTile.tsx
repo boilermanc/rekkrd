@@ -223,7 +223,7 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
           {/* CTA */}
           <button
             onClick={onStartGrading}
-            className="px-4 py-2 bg-burnt-peach/10 border border-burnt-peach/30 text-burnt-peach font-mono text-[8px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/20 transition-colors"
+            className="px-4 py-2 bg-burnt-peach/10 border border-burnt-peach/30 text-burnt-peach font-mono text-[8px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
           >
             Start Grading →
           </button>
@@ -246,7 +246,7 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
           <p className="font-serif text-[11px] text-ink/60 italic mb-4">
             See what your collection is worth — upgrade to Enthusiast to unlock live Discogs pricing.
           </p>
-          <button className="px-4 py-2 bg-burnt-peach/10 border border-burnt-peach/30 text-burnt-peach font-mono text-[8px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/20 transition-colors">
+          <button className="px-4 py-2 bg-burnt-peach/10 border border-burnt-peach/30 text-burnt-peach font-mono text-[8px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/20 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
             Upgrade to Enthusiast
           </button>
         </div>
@@ -285,7 +285,14 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
 
           {/* Progress bar */}
           <div className="mb-2">
-            <div className="h-1 bg-paper-dark rounded-full overflow-hidden">
+            <div
+              role="progressbar"
+              aria-valuenow={gradedPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Collection grading progress"
+              className="h-1 bg-paper-dark rounded-full overflow-hidden"
+            >
               <div
                 className="h-full bg-gradient-to-r from-burnt-peach to-burnt-peach/80 transition-all duration-500"
                 style={{ width: `${gradedPercent}%` }}
@@ -307,7 +314,7 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
           </span>
           <button
             onClick={onStartGrading}
-            className="font-mono text-[9px] text-burnt-peach tracking-wide hover:underline"
+            className="font-mono text-[9px] text-burnt-peach tracking-wide hover:underline focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 rounded"
           >
             Grade now →
           </button>
@@ -419,7 +426,7 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="font-mono text-[7px] text-ink/60 hover:text-ink hover:underline transition-colors disabled:opacity-50"
+            className="font-mono text-[7px] text-ink/60 hover:text-ink hover:underline transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2 rounded"
           >
             {loading ? 'Refreshing...' : 'Refresh →'}
           </button>

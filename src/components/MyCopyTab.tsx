@@ -134,7 +134,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
               {/* Edit button */}
               <button
                 onClick={() => setGradingSheetOpen(true)}
-                className="px-4 py-2 border-2 border-burnt-peach text-burnt-peach font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/10 transition-colors"
+                aria-label="Edit condition grade"
+                className="px-4 py-2 border-2 border-burnt-peach text-burnt-peach font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/10 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
               >
                 Edit
               </button>
@@ -148,7 +149,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
               </p>
               <button
                 onClick={() => setGradingSheetOpen(true)}
-                className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors"
+                className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2"
               >
                 Grade Now
               </button>
@@ -166,7 +167,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                 <p className="font-serif text-[13px] italic mb-4">
                   Upgrade to Enthusiast to unlock live Discogs pricing.
                 </p>
-                <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors">
+                <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
                   Upgrade to Enthusiast
                 </button>
               </div>
@@ -177,7 +178,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                 <p className="font-serif text-[13px] italic mb-4">
                   Link your Discogs account to unlock marketplace pricing.
                 </p>
-                <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors">
+                <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors focus:outline-none focus:ring-2 focus:ring-burnt-peach focus:ring-offset-2">
                   Connect Discogs
                 </button>
               </div>
