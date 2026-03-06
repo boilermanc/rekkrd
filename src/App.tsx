@@ -30,6 +30,7 @@ import DiscogsConnect from './components/DiscogsConnect';
 import DiscogsCollectionBrowser from './components/DiscogsCollectionBrowser';
 import WantlistView from './components/WantlistView';
 import CollectionValueDashboard from './components/CollectionValueDashboard';
+import CollectionValueTile from './components/CollectionValueTile';
 import PriceAlertsView from './components/PriceAlertsView';
 import CollectionInsightsCard from './components/CollectionInsightsCard';
 import ProfilePage from './components/ProfilePage';
@@ -696,6 +697,22 @@ const App: React.FC = () => {
               <p className="text-[9px] font-label text-th-text3 tracking-widest uppercase mb-1">Era Spotlight</p>
               <h3 className="text-xl font-bold text-th-text">{stats.topDecade?.[0] || 'N/A'}</h3>
             </div>
+          </div>
+
+          {/* Collection Value Tile */}
+          <div className="mt-6">
+            <CollectionValueTile
+              albums={albums}
+              userPlan={plan}
+              discogsConnected={discogsConnected}
+              onStartGrading={() => {
+                // Navigate to first ungraded album
+                const firstUngraded = albums.find(a => !a.condition);
+                if (firstUngraded) {
+                  setSelectedAlbum(firstUngraded);
+                }
+              }}
+            />
           </div>
         </div>
       )}

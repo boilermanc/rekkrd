@@ -4,7 +4,7 @@ import { CONDITION_ORDER, CONDITION_BY_VALUE, type ConditionGrade } from '../con
 
 interface CollectionValueTileProps {
   albums: Album[];
-  userPlan: 'collector' | 'curator' | 'archivist';
+  userPlan: 'collector' | 'curator' | 'enthusiast';
   discogsConnected: boolean;
   onStartGrading?: () => void;
 }
@@ -45,7 +45,7 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
   const gradedCount = gradedAlbums.length;
   const gradedPercent = totalAlbums > 0 ? Math.round((gradedCount / totalAlbums) * 100) : 0;
 
-  const shouldFetchPrices = userPlan === 'archivist' && discogsConnected;
+  const shouldFetchPrices = userPlan === 'enthusiast' && discogsConnected;
 
   // Fetch prices for graded albums with discogs_release_id
   const fetchPrices = async (bustCache = false) => {
@@ -244,10 +244,10 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
           </div>
           <h3 className="font-display text-[15px] text-ink/60 mb-2">Unlock Value Estimates</h3>
           <p className="font-serif text-[11px] text-ink/60 italic mb-4">
-            See what your collection is worth — upgrade to Archivist to unlock live Discogs pricing.
+            See what your collection is worth — upgrade to Enthusiast to unlock live Discogs pricing.
           </p>
           <button className="px-4 py-2 bg-burnt-peach/10 border border-burnt-peach/30 text-burnt-peach font-mono text-[8px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/20 transition-colors">
-            Upgrade to Archivist
+            Upgrade to Enthusiast
           </button>
         </div>
       </div>

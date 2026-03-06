@@ -6,7 +6,7 @@ import GradingSheet from './GradingSheet';
 interface MyCopyTabProps {
   album: Album;
   onUpdate: (updates: Partial<Album>) => Promise<void>;
-  userPlan: 'collector' | 'curator' | 'archivist';
+  userPlan: 'collector' | 'curator' | 'enthusiast';
   discogsConnected: boolean;
 }
 
@@ -111,7 +111,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                   See what your copy is worth based on live Discogs marketplace data.
                 </p>
                 <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors">
-                  Upgrade to Archivist
+                  Upgrade to Enthusiast
                 </button>
               </div>
             ) : !discogsConnected ? (
