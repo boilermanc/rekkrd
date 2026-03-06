@@ -68,7 +68,8 @@ interface AppModalsProps {
   setShowScanFailed: (show: boolean) => void;
   setCurrentView: React.Dispatch<React.SetStateAction<ViewMode>>;
 
-  // Discogs release detail
+  // Discogs
+  discogsConnected: boolean;
   discogsReleaseId: number | null;
   setDiscogsReleaseId: (id: number | null) => void;
 }
@@ -83,6 +84,7 @@ const AppModals: React.FC<AppModalsProps> = ({
   duplicatePending, handleDuplicateAddAnyway, handleDuplicateCancel,
   pendingScan, handleScanConfirm, handleScanCancel,
   showScanFailed, setShowScanFailed, setCurrentView,
+  discogsConnected,
   discogsReleaseId, setDiscogsReleaseId,
 }) => (
   <>
@@ -114,6 +116,7 @@ const AppModals: React.FC<AppModalsProps> = ({
           setIsStudioOpen(true);
         }}
         onAddToWantlist={handleAddToWantlist}
+        discogsConnected={discogsConnected}
       />
     )}
     {upgradeFeature && (

@@ -43,6 +43,7 @@ interface AlbumDetailModalProps {
   onUpgradeRequired?: (feature: string) => void;
   onMoreLikeThis?: (album: Album) => void;
   onAddToWantlist?: (album: Album) => void;
+  discogsConnected?: boolean;
 }
 
 const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
@@ -58,6 +59,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   onUpgradeRequired,
   onMoreLikeThis,
   onAddToWantlist,
+  discogsConnected = false,
 }) => {
   const { showToast } = useToast();
   const { plan } = useSubscription();
@@ -907,7 +909,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 }
               }}
               userPlan={plan}
-              discogsConnected={false}
+              discogsConnected={discogsConnected}
               onUpgradeRequired={onUpgradeRequired}
             />
           </div>

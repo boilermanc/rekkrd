@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Album } from '../types';
 import { CONDITION_BY_VALUE, type ConditionGrade } from '../constants/conditionGrades';
+import { supabase } from '../services/supabaseService';
 import GradingSheet from './GradingSheet';
+
+interface PriceData {
+  [key: string]: { value: number };
+}
 
 interface MyCopyTabProps {
   album: Album;
@@ -21,8 +26,44 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
   const [gradingSheetOpen, setGradingSheetOpen] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [showDetailsOverride, setShowDetailsOverride] = useState(false);
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [priceValue, setPriceValue] = useState<number | null>(null);
 
   const conditionInfo = album.condition ? CONDITION_BY_VALUE[album.condition as ConditionGrade] : null;
+  const shouldFetchPrice = userPlan === 'enthusiast' && discogsConnected && !!album.condition && !!album.discogs_release_id;
+
+  useEffect(() => {
+    if (!shouldFetchPrice) return;
+
+    let cancelled = false;
+    const fetchPrice = async () => {
+      setPriceLoading(true);
+      try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (supabase) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+          }
+        }
+        const res = await fetch(`/api/discogs-price?releaseId=${album.discogs_release_id}`, { headers });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { prices: PriceData };
+        if (cancelled) return;
+
+        const discogsKey = conditionInfo?.discogsKey;
+        const value = discogsKey && data.prices[discogsKey]?.value;
+        setPriceValue(value || null);
+      } catch {
+        // Silently fail — card will show $— fallback
+      } finally {
+        if (!cancelled) setPriceLoading(false);
+      }
+    };
+
+    void fetchPrice();
+    return () => { cancelled = true; };
+  }, [shouldFetchPrice, album.discogs_release_id, album.condition]);
 
   // Check if this is truly empty (first-time state)
   const isCompletelyEmpty = !album.condition && !album.purchase_price && !album.copy_notes && !album.acquired_from;
@@ -208,16 +249,31 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                   <div className="font-mono text-[10px] tracking-[2px] uppercase text-white/35 mb-1.5">
                     Est. Value ({album.condition})
                   </div>
-                  <div className="font-display text-[36px] text-[#e8dab2] leading-none" style={{ letterSpacing: '-1.5px' }}>$—</div>
-                  <div className="font-mono text-[10px] text-white/25 mt-1.5">—</div>
+                  {priceLoading ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-5 h-5 border-2 border-[#e8dab2]/30 border-t-[#e8dab2] rounded-full animate-spin" />
+                      <span className="font-mono text-[11px] text-white/30">Fetching...</span>
+                    </div>
+                  ) : (
+                    <div className="font-display text-[36px] text-[#e8dab2] leading-none" style={{ letterSpacing: '-1.5px' }}>
+                      {priceValue ? `$${priceValue.toFixed(2)}` : '$—'}
+                    </div>
+                  )}
+                  <div className="font-mono text-[10px] text-white/25 mt-1.5">
+                    {priceValue ? 'Discogs median' : album.discogs_release_id ? 'No price data' : 'No Discogs link'}
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="font-mono text-[9px] tracking-[1.5px] uppercase text-white/25 border border-white/10 px-2.5 py-1 rounded mb-1.5 inline-block">
                     Discogs
                   </div>
-                  <a href="#" className="font-mono text-[10px] text-burnt-peach/70 block">
-                    View on Discogs →
-                  </a>
+                  {album.discogs_url ? (
+                    <a href={album.discogs_url} target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-burnt-peach/70 block hover:text-burnt-peach transition-colors">
+                      View on Discogs →
+                    </a>
+                  ) : (
+                    <span className="font-mono text-[10px] text-white/20 block">No link</span>
+                  )}
                 </div>
               </div>
             )}

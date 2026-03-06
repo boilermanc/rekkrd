@@ -1391,6 +1391,7 @@ const App: React.FC = () => {
         showScanFailed={showScanFailed}
         setShowScanFailed={setShowScanFailed}
         setCurrentView={setCurrentView}
+        discogsConnected={discogsConnected}
         discogsReleaseId={discogsReleaseId}
         setDiscogsReleaseId={setDiscogsReleaseId}
       />
