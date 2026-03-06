@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { XMLParser } from 'fast-xml-parser';
 
 const router = express.Router();
 
@@ -435,6 +436,127 @@ router.get('/price', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('Price lookup error:', error);
+    res.json({ available: false });
+  }
+});
+
+// GET /ebay?q={query}
+router.get('/ebay', async (req: Request, res: Response) => {
+  if (!rateLimit(req, res, 30)) return;
+
+  let { q } = req.query;
+  if (!q || typeof q !== 'string') {
+    return res.status(400).json({ error: 'Query parameter required' });
+  }
+
+  // Append 'vinyl' if not already in query
+  if (!q.toLowerCase().includes('vinyl')) {
+    q = `${q} vinyl`;
+  }
+
+  const cacheKey = `ebay-${q}`;
+  const now = Date.now();
+
+  // Check cache (6hr TTL)
+  const cached = cache.get(cacheKey);
+  if (cached && now < cached.expires) {
+    return res.json({ ...cached.data, cached: true });
+  }
+
+  const EBAY_APP_ID = process.env.EBAY_APP_ID;
+  if (!EBAY_APP_ID) {
+    return res.json({ available: false });
+  }
+
+  try {
+    const params = new URLSearchParams({
+      'OPERATION-NAME': 'findCompletedItems',
+      'SERVICE-VERSION': '1.0.0',
+      'SECURITY-APPNAME': EBAY_APP_ID,
+      'RESPONSE-DATA-FORMAT': 'XML',
+      'REST-PAYLOAD': 'true',
+      'keywords': q,
+      'itemFilter(0).name': 'SoldItemsOnly',
+      'itemFilter(0).value': 'true',
+      'paginationInput.entriesPerPage': '50',
+      'sortOrder': 'EndTimeSoonest'
+    });
+
+    const url = `https://svcs.ebay.com/services/search/FindingService/v1?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return res.json({ available: false });
+    }
+
+    const xmlText = await response.text();
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const parsed = parser.parse(xmlText);
+
+    // Navigate to items array
+    const items = parsed?.findCompletedItemsResponse?.searchResult?.item;
+    if (!items || !Array.isArray(items)) {
+      return res.json({ available: false });
+    }
+
+    // Extract prices and filter
+    const prices: number[] = [];
+    const excludeTerms = ['cd', 'cassette', '8-track', '8track', 'dvd', 'vhs', '45 rpm', '45rpm', '"7', "7'"];
+
+    for (const item of items) {
+      const title = (item.title || '').toLowerCase();
+
+      // Skip if title contains excluded terms
+      if (excludeTerms.some(term => title.includes(term))) {
+        continue;
+      }
+
+      // Extract price
+      const priceValue =
+        item.sellingStatus?.convertedCurrentPrice?.['__value__'] ||
+        item.sellingStatus?.currentPrice?.['__value__'] ||
+        '0';
+
+      const price = parseFloat(priceValue);
+      if (price > 0) {
+        prices.push(price);
+      }
+    }
+
+    if (prices.length === 0) {
+      return res.json({ available: false });
+    }
+
+    // Sort and strip outliers
+    prices.sort((a, b) => a - b);
+    const removeCount = Math.floor(prices.length * 0.10);
+    const trimmed = removeCount > 0
+      ? prices.slice(removeCount, prices.length - removeCount)
+      : prices;
+
+    if (trimmed.length === 0) {
+      return res.json({ available: false });
+    }
+
+    const result = {
+      low: trimmed[0],
+      high: trimmed[trimmed.length - 1],
+      median: trimmed[Math.floor(trimmed.length / 2)],
+      count: trimmed.length,
+      available: true,
+      cached: false
+    };
+
+    // Cache for 6 hours
+    cache.set(cacheKey, {
+      data: result,
+      expires: now + (6 * 60 * 60 * 1000)
+    });
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('eBay lookup error:', error);
     res.json({ available: false });
   }
 });
