@@ -158,7 +158,7 @@ const PlanBadge: React.FC<PlanBadgeProps> = ({ albumCount, onUpgrade }) => {
     <div ref={panelRef} className="relative flex items-center">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative px-2.5 py-1 rounded-full font-semibold text-xs tracking-widest uppercase border transition-all hover:brightness-110 cursor-pointer ${badgeClasses}`}
+        className={`relative px-3.5 py-1 rounded-full font-semibold text-xs tracking-widest uppercase border transition-all hover:brightness-110 cursor-pointer ${badgeClasses}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >

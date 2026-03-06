@@ -26,6 +26,7 @@ interface AppHeaderProps {
   theme: string;
   toggleTheme: () => void;
   signOut: () => void;
+  filterDropdown?: React.ReactNode;
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
@@ -35,7 +36,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   isFilterPanelOpen, setIsFilterPanelOpen,
   canUse, setUpgradeFeature,
   navigate, wantlistCount, priceAlertCount, albumCount, activeFilterCount,
-  theme, toggleTheme, signOut,
+  theme, toggleTheme, signOut, filterDropdown,
 }) => (
   <header className="sticky top-0 z-40 glass-morphism border-b border-th-surface/[0.10] px-4 md:px-6 py-4">
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -100,6 +101,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             </button>
           )}
         </div>
+        {filterDropdown}
         <button
           onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
           className={`p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'list' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
