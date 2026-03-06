@@ -172,7 +172,10 @@ export const supabaseService = {
       'title', 'artist', 'year', 'genre', 'cover_url', 'original_photo_url',
       'description', 'tracklist', 'tags', 'condition', 'personal_notes',
       'price_low', 'price_median', 'price_high', 'play_count',
-      'discogs_url', 'discogs_release_id', 'musicbrainz_url', 'sample_url', 'barcode', 'format', 'matrix',
+      'discogs_url', 'discogs_release_id', 'musicbrainz_url', 'sample_url', 'barcode', 'format', 'matrix', 'label',
+      // My Copy fields (Batch 37)
+      'purchase_price', 'acquired_date', 'acquired_from', 'copy_notes',
+      'pressing_country', 'pressing_year', 'catalog_number', 'is_for_sale',
     ];
 
     const dbUpdates: Record<string, unknown> = {};

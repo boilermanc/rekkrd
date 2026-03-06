@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Album } from '../types';
 import { proxyImageUrl } from '../services/imageProxy';
-import { CONDITION_ORDER } from '../../constants/conditionGrades';
+import { CONDITION_ORDER, CONDITION_BY_VALUE, type ConditionGrade } from '../constants/conditionGrades';
 import { FORMAT_COLORS, FORMAT_DEFAULT, type MediaFormat } from '../../constants/formatTypes';
 import Pagination from './Pagination';
 
@@ -102,7 +102,9 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
           cmp = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
           break;
         case 'condition':
-          cmp = (CONDITION_ORDER[a.condition || ''] ?? 99) - (CONDITION_ORDER[b.condition || ''] ?? 99);
+          const aOrder = CONDITION_ORDER[a.condition as ConditionGrade] ?? 99;
+          const bOrder = CONDITION_ORDER[b.condition as ConditionGrade] ?? 99;
+          cmp = aOrder - bOrder;
           break;
         case 'plays':
           cmp = (a.play_count || 0) - (b.play_count || 0);
@@ -281,7 +283,13 @@ const CollectionList: React.FC<CollectionListProps> = ({ albums, onSelect, onDel
                 </div>
 
                 {/* Condition (hidden on mobile) */}
-                <p className="text-th-text3 text-xs truncate hidden md:block" role="cell">{album.condition || '—'}</p>
+                <div className="hidden md:block" role="cell">
+                  {album.condition ? (
+                    <span className="inline-flex items-center text-[8px] font-mono tracking-wide rounded-full px-2 py-0.5 bg-paper-dark text-ink/60">
+                      {CONDITION_BY_VALUE[album.condition as ConditionGrade].shortLabel}
+                    </span>
+                  ) : null}
+                </div>
 
                 {/* Value (hidden on mobile) */}
                 <p className={`text-xs font-medium hidden md:block ${album.price_median ? 'text-[#f0a882]' : 'text-th-text3/50'}`} role="cell">

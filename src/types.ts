@@ -17,6 +17,7 @@ export interface NewAlbum {
   sample_url?: string;
   barcode?: string;
   format?: string;
+  label?: string;
   // Collector fields
   condition?: string;
   personal_notes?: string;
@@ -25,6 +26,15 @@ export interface NewAlbum {
   price_high?: number;
   play_count?: number;
   matrix?: string;
+  // My Copy fields (Batch 37)
+  purchase_price?: number;
+  acquired_date?: string;
+  acquired_from?: string;
+  copy_notes?: string;
+  pressing_country?: string;
+  pressing_year?: number;
+  catalog_number?: string;
+  is_for_sale?: boolean;
 }
 
 /** A saved album — always has an id and created_at from the database. */
