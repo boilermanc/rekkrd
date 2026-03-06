@@ -721,12 +721,100 @@ const SpenndTool: React.FC = () => {
     );
   }
 
-  // Placeholder for results
-  return (
-    <div className="max-w-xl mx-auto bg-paper rounded-2xl p-8 shadow-sm">
-      <p className="text-ink font-serif">Step {step} - will be implemented in next prompt</p>
-    </div>
-  );
+  // Step 4: Results - streamlined implementation
+  if (step === 'results' && grade) {
+    const gradeInfo = CONDITION_BY_VALUE[grade];
+    const fmt = (n: number | null) => n ? `$${Math.round(n)}` : '--';
+
+    return (
+      <div className="max-w-2xl mx-auto space-y-4 px-4">
+        {/* Session nudge */}
+        {recordsChecked >= 3 && !nudgeDismissed && (
+          <div className="bg-pearl-beige border border-burnt-peach/30 rounded-2xl p-5">
+            <div className="font-serif text-[15px] font-bold text-ink mb-1">
+              You've checked {recordsChecked} records.
+            </div>
+            <p className="font-serif text-[13px] text-ink/60 mb-4">
+              Rekkrd tracks your whole collection automatically.
+            </p>
+            <div className="flex gap-3">
+              <a href="/signup" className="bg-burnt-peach text-white rounded-full py-2 px-5 font-serif text-[13px]">
+                Start free →
+              </a>
+              <button onClick={() => setNudgeDismissed(true)} className="text-sm text-ink/60 underline">
+                Keep going
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Grade card */}
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <div className="font-display text-[64px] text-ink leading-none">{gradeInfo.shortLabel}</div>
+          <div className="font-serif text-[20px] text-ink/60 mt-1">{gradeInfo.label}</div>
+          <div className="font-serif text-[14px] italic text-ink/60 mt-1">{gradeInfo.description}</div>
+        </div>
+
+        {/* Pricing panel */}
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <h3 className="font-display text-[20px] text-ink mb-4">What it's worth</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div className="font-mono text-[9px] uppercase text-ink/60">DISCOGS</div>
+              {priceData?.available ? (
+                <div className="flex gap-4 mt-2">
+                  <div>
+                    <div className="font-display text-[24px] text-ink">{fmt(priceData.median)}</div>
+                    <div className="font-mono text-[9px] text-ink/60">MEDIAN</div>
+                  </div>
+                </div>
+              ) : <p className="text-ink/60 text-sm mt-2">Loading...</p>}
+            </div>
+            <div>
+              <div className="font-mono text-[9px] uppercase text-ink/60">EBAY</div>
+              {ebayData?.available ? (
+                <div className="flex gap-4 mt-2">
+                  <div>
+                    <div className="font-display text-[24px] text-ink">{fmt(ebayData.median)}</div>
+                    <div className="font-mono text-[9px] text-ink/60">MEDIAN</div>
+                  </div>
+                </div>
+              ) : <p className="text-ink/60 text-sm mt-2">Loading...</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Check another */}
+        <button
+          onClick={() => {
+            setStep('search');
+            setSelectedRelease(null);
+            setGrade(null);
+            setAnswers({});
+            setSelectedFormat(null);
+          }}
+          className="w-full bg-paper-dark text-ink rounded-full py-3 font-serif"
+        >
+          Check Another Record
+        </button>
+
+        {/* Soft sell */}
+        <div className="mt-8 pt-8 border-t text-center">
+          <div className="font-mono text-[9px] text-ink/60 uppercase mb-2">FROM THE MAKERS OF SPENND</div>
+          <h3 className="font-display text-[24px] text-ink mb-2">Do you have more than one?</h3>
+          <p className="font-serif text-[14px] text-ink/60 max-w-sm mx-auto mb-4">
+            Rekkrd tracks your whole collection — condition grading, live pricing, and gear catalog.
+          </p>
+          <a href="/signup" className="inline-block bg-burnt-peach text-white rounded-full py-3 px-6 font-serif">
+            Start your collection free →
+          </a>
+          <p className="font-mono text-[10px] text-ink/60 mt-2">No credit card. Free up to 100 albums.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default SpenndTool;
