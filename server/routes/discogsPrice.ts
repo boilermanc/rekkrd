@@ -1,23 +1,34 @@
 import { Router, type Request, type Response } from 'express';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 import { discogsRequest } from '../services/discogsService.js';
+import { requireAuthWithUser, type AuthResult } from '../middleware/auth.js';
+import { requirePlan } from '../lib/subscription.js';
 
 const router = Router();
 const CACHE_TTL_HOURS = 24;
 
-router.get('/api/discogs-price', async (req: Request, res: Response) => {
-  const { releaseId } = req.query;
+router.get(
+  '/api/discogs-price',
+  requireAuthWithUser,
+  async (req: Request, res: Response) => {
+    const { userId } = (req as typeof req & { auth: AuthResult }).auth;
 
-  if (!releaseId || typeof releaseId !== 'string' || !/^\d+$/.test(releaseId)) {
-    res.status(400).json({ error: 'Invalid release ID' });
-    return;
-  }
+    // Enthusiast only - pricing is a premium feature
+    const sub = await requirePlan(userId, 'enthusiast', res);
+    if (!sub) return;
 
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    res.status(503).json({ error: 'Supabase admin not configured' });
-    return;
-  }
+    const { releaseId } = req.query;
+
+    if (!releaseId || typeof releaseId !== 'string' || !/^\d+$/.test(releaseId)) {
+      res.status(400).json({ error: 'Invalid release ID' });
+      return;
+    }
+
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      res.status(503).json({ error: 'Supabase admin not configured' });
+      return;
+    }
 
   try {
     // Check cache first
@@ -62,6 +73,7 @@ router.get('/api/discogs-price', async (req: Request, res: Response) => {
     console.error('Price fetch error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
+  }
+);
 
 export default router;
