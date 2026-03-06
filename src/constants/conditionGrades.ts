@@ -169,11 +169,13 @@ export const CD_CHECKLIST = [
 
 // Score → grade mapping
 // Total score 0 = M, 1 = NM, 2-3 = VG+, 4-5 = VG, 6-7 = G+, 8+ = G
-export function scoreToGrade(total: number): ConditionGrade {
-  if (total === 0) return 'M';
-  if (total === 1) return 'NM';
-  if (total <= 3) return 'VG+';
-  if (total <= 5) return 'VG';
-  if (total <= 7) return 'G+';
-  return 'G';
+export function scoreToGrade(totalScore: number): ConditionGrade {
+  if (totalScore === 0) return 'M';
+  if (totalScore === 1) return 'NM';
+  if (totalScore <= 3) return 'VG+';
+  if (totalScore <= 5) return 'VG';
+  if (totalScore <= 7) return 'G+';
+  if (totalScore <= 9) return 'G';
+  if (totalScore <= 11) return 'F';
+  return 'P';
 }
