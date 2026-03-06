@@ -162,9 +162,9 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             {userPlan === 'collector' || userPlan === 'curator' ? (
               /* Upgrade prompt */
               <div className="bg-ink text-pearl-beige rounded-xl p-6">
-                <h5 className="font-display text-[18px] mb-2">Unlock Value Estimates</h5>
+                <h5 className="font-display text-[18px] mb-2">See what your collection is worth</h5>
                 <p className="font-serif text-[13px] italic mb-4">
-                  See what your copy is worth based on live Discogs marketplace data.
+                  Upgrade to Enthusiast to unlock live Discogs pricing.
                 </p>
                 <button className="px-6 py-2 bg-burnt-peach text-white font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-burnt-peach/90 transition-colors">
                   Upgrade to Enthusiast
