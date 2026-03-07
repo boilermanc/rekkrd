@@ -325,6 +325,9 @@ const App: React.FC = () => {
     (async () => {
       try {
         const existing = await getProfile(user.id);
+        if (existing?.discogs_username) {
+          setDiscogsConnected(true);
+        }
         if (!existing) {
           // Capture UTM params from sessionStorage (set by /welcome page)
           const utmFields: Record<string, string> = {};
