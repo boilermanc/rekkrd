@@ -20,6 +20,16 @@ function isAllowedUrl(rawUrl: string): boolean {
   return ALLOWED_HOSTS.some(host => parsed.hostname === host || parsed.hostname.endsWith('.' + host));
 }
 
+// 1x1 transparent PNG returned when upstream fails, so <img> tags render cleanly.
+const TRANSPARENT_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+function sendFallback(res: import('express').Response): void {
+  res.status(200).set('Content-Type', 'image/png').send(TRANSPARENT_PNG);
+}
+
 const router = Router();
 
 // Auth intentionally skipped: this endpoint is called via <img> src attributes in the
@@ -59,18 +69,18 @@ router.get('/api/image-proxy', async (req, res) => {
 
       const location = upstream.headers.get('location');
       if (!location) {
-        res.status(502).json({ error: 'Redirect with no location header' });
+        sendFallback(res);
         return;
       }
 
       const resolvedLocation = new URL(location, currentUrl).href;
       if (!isAllowedUrl(resolvedLocation)) {
-        res.status(403).json({ error: 'Redirect target not allowed' });
+        sendFallback(res);
         return;
       }
 
       if (hop === 2) {
-        res.status(403).json({ error: 'Too many redirects' });
+        sendFallback(res);
         return;
       }
 
@@ -78,18 +88,18 @@ router.get('/api/image-proxy', async (req, res) => {
     }
 
     if (!upstream) {
-      res.status(502).json({ error: 'No response from upstream' });
+      sendFallback(res);
       return;
     }
 
     if (!upstream.ok) {
-      res.status(upstream.status).json({ error: 'Upstream fetch failed' });
+      sendFallback(res);
       return;
     }
 
     const contentType = upstream.headers.get('content-type');
     if (!contentType || !contentType.startsWith('image/')) {
-      res.status(502).json({ error: 'Upstream returned non-image content type' });
+      sendFallback(res);
       return;
     }
 
@@ -100,7 +110,7 @@ router.get('/api/image-proxy', async (req, res) => {
     res.status(200).send(buffer);
   } catch (error) {
     console.error('Image proxy error:', error);
-    res.status(502).json({ error: 'Failed to fetch image' });
+    sendFallback(res);
   }
 });
 

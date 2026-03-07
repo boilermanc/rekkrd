@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="400" height="400">
+  <defs>
+    <radialGradient id="recordGrad" cx="40%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#3a3028"/>
+      <stop offset="100%" stop-color="#1a1410"/>
+    </radialGradient>
+    <radialGradient id="labelGrad" cx="40%" cy="36%" r="60%">
+      <stop offset="0%" stop-color="#e87a4e"/>
+      <stop offset="100%" stop-color="#c05828"/>
+    </radialGradient>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#2a2016" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Outer disc -->
+  <circle cx="50" cy="50" r="44" fill="url(#recordGrad)" filter="url(#shadow)"/>
+
+  <!-- Groove rings -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#252015" stroke-width="0.6" opacity="0.9"/>
+  <circle cx="50" cy="50" r="39" fill="none" stroke="#252015" stroke-width="0.55" opacity="0.85"/>
+  <circle cx="50" cy="50" r="36" fill="none" stroke="#252015" stroke-width="0.55" opacity="0.8"/>
+  <circle cx="50" cy="50" r="33" fill="none" stroke="#252015" stroke-width="0.5" opacity="0.75"/>
+  <circle cx="50" cy="50" r="30" fill="none" stroke="#252015" stroke-width="0.5" opacity="0.7"/>
+  <circle cx="50" cy="50" r="27" fill="none" stroke="#252015" stroke-width="0.45" opacity="0.65"/>
+  <circle cx="50" cy="50" r="24" fill="none" stroke="#252015" stroke-width="0.45" opacity="0.6"/>
+  <circle cx="50" cy="50" r="21.5" fill="none" stroke="#252015" stroke-width="0.4" opacity="0.5"/>
+
+  <!-- Subtle sheen on record surface -->
+  <ellipse cx="34" cy="30" rx="12" ry="6" fill="rgba(255,255,255,0.03)" transform="rotate(-35 34 30)"/>
+
+  <!-- Center label -->
+  <circle cx="50" cy="50" r="16" fill="url(#labelGrad)"/>
+
+  <!-- Label inner ring detail -->
+  <circle cx="50" cy="50" r="16" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.6"/>
+  <circle cx="50" cy="50" r="13.5" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.5"/>
+
+  <!-- $ symbol -->
+  <text
+    x="50"
+    y="56.5"
+    text-anchor="middle"
+    font-family="Playfair Display, Georgia, serif"
+    font-size="20"
+    font-weight="700"
+    fill="rgba(255,255,255,0.92)"
+    letter-spacing="-0.5"
+  >$</text>
+
+
+
+</svg>

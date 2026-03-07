@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import type { ViewMode } from '../hooks/useAppNavigation';
 import type { GatedFeature } from '../contexts/SubscriptionContext';
 import PlanBadge from './PlanBadge';
-import { BarChart3, Bell, Headphones, TrendingUp, User } from 'lucide-react';
+import NavToolsDropdown from './NavToolsDropdown';
+import { User } from 'lucide-react';
 
 interface AppHeaderProps {
   resetView: () => void;
@@ -117,157 +118,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             </svg>
           )}
         </button>
-        <button
-          onClick={() => navigate('/listening-room')}
-          className="hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text"
-          title="Listening Room"
-        >
-          <Headphones className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => setCurrentView('stakkd')}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${(currentView as ViewMode) === 'stakkd' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Stakkd — your gear"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            {/* Speaker outline icon */}
-            <rect x="5" y="2" width="14" height="20" rx="2" />
-            <circle cx="12" cy="14" r="4" />
-            <circle cx="12" cy="6" r="2" />
-          </svg>
-        </button>
-        <button
-          onClick={() => setCurrentView('discogs')}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'discogs' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Browse Discogs"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 2a10 10 0 0 1 7.07 2.93" />
-            <path d="M12 6a6 6 0 0 1 4.24 1.76" />
-          </svg>
-        </button>
-        <button
-          onClick={() => setCurrentView('wantlist')}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 relative ${currentView === 'wantlist' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Wantlist"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-            <path d="M12 11h4" />
-            <path d="M12 16h4" />
-            <path d="M8 11h.01" />
-            <path d="M8 16h.01" />
-          </svg>
-          {wantlistCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#dd6e42] text-th-text text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-              {wantlistCount}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setCurrentView('value-dashboard')}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'value-dashboard' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Collection Value"
-        >
-          <TrendingUp className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => {
-            if (!canUse('analytics')) {
-              setUpgradeFeature('analytics');
-              return;
-            }
-            setCurrentView('analytics');
-          }}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 relative ${currentView === 'analytics' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Collection Analytics"
-        >
-          <BarChart3 className="w-5 h-5" />
-          {!canUse('analytics') && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-th-accent/80 flex items-center justify-center">
-              <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setCurrentView('price-alerts')}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 relative ${(currentView as ViewMode) === 'price-alerts' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Price Alerts"
-        >
-          <Bell className="w-5 h-5" />
-          {priceAlertCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#dd6e42] text-th-text text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-              {priceAlertCount}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setCurrentView('spins')}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 ${currentView === 'spins' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Spins — listening history"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 8.5a6 6 0 0 1 12 0c0 3-2 4.5-2 7a2 2 0 0 1-2 2h-1a1 1 0 0 1-1-1v-1" />
-            <path d="M10.5 8.5a1.5 1.5 0 0 1 3 0c0 1.5-1.5 2-1.5 3.5" />
-          </svg>
-        </button>
-        <button
-          onClick={() => {
-            if (!canUse('shelf_organizer')) {
-              setUpgradeFeature('shelf_organizer');
-              return;
-            }
-            setCurrentView('shelves');
-          }}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 relative ${currentView === 'shelves' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Shelves — organize your storage"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-          </svg>
-          {!canUse('shelf_organizer') && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-th-accent/80 flex items-center justify-center">
-              <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => {
-            if (!canUse('bulk_import')) {
-              setUpgradeFeature('bulk_import');
-              return;
-            }
-            setCurrentView('bulk-import');
-          }}
-          className={`hidden md:flex p-3 rounded-full border transition-all flex-shrink-0 relative ${currentView === 'bulk-import' ? 'bg-[#dd6e42] border-[#dd6e42] text-th-text shadow-lg' : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text'}`}
-          title="Import & Export"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          {!canUse('bulk_import') && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-th-accent/80 flex items-center justify-center">
-              <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </span>
-          )}
-        </button>
+        <NavToolsDropdown
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          canUse={canUse}
+          setUpgradeFeature={setUpgradeFeature}
+          navigate={navigate}
+          wantlistCount={wantlistCount}
+          priceAlertCount={priceAlertCount}
+        />
         {(currentView === 'grid' || currentView === 'list') && (
           <button
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
