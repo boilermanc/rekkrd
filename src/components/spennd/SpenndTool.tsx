@@ -1016,7 +1016,7 @@ const SpenndTool: React.FC = () => {
               You've checked {recordsChecked} records.
             </div>
             <p className="font-serif text-[13px] text-ink/60 mb-4">
-              Rekkrd tracks your whole collection automatically.
+              Rekk<span className="text-[#c45a30]">r</span>d tracks your whole collection automatically.
             </p>
             <div className="flex gap-3">
               <a href="/signup" className="bg-[#5a8a6e] text-white rounded-full py-2 px-5 font-serif text-[13px] hover:bg-[#3d6b54] transition-colors">
@@ -1086,7 +1086,7 @@ const SpenndTool: React.FC = () => {
           <div className="font-mono text-[11px] text-ink/60 uppercase mb-2">FROM THE MAKERS OF SPEN<span className="text-[#5a8a6e]">N</span>D</div>
           <h3 className="font-display text-[24px] text-ink mb-2">Do you have more than one?</h3>
           <p className="font-serif text-sm text-ink max-w-sm mx-auto mb-4">
-            Rekkrd tracks your whole collection — condition grading, live pricing, and gear catalog.
+            Rekk<span className="text-[#c45a30]">r</span>d tracks your whole collection — condition grading, live pricing, and gear catalog.
           </p>
           <a href="/signup" className="inline-block bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors">
             Start your collection free →

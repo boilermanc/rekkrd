@@ -158,17 +158,17 @@ const SpenndLandingPage: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-paper-dark border-t border-paper-dark py-8 px-6 text-center">
-        <p className="font-mono text-[10px] text-ink/60 mb-2">
-          Spennd is a free tool by Rekkrd
+      <footer className="bg-paper-dark border-t border-paper-dark py-10 px-6 text-center">
+        <p className="font-mono text-[13px] text-ink/60 mb-3">
+          Spen<span className="text-[#5a8a6e]">n</span>d is a free tool by Rekk<span className="text-[#c45a30]">r</span>d
         </p>
-        <div className="flex justify-center gap-3 font-mono text-[10px] text-ink/60">
+        <div className="flex justify-center gap-3 font-mono text-[13px] text-ink/60">
           <Link to="/" className="hover:text-ink transition-colors">
-            Rekkrd
+            Rekk<span className="text-[#c45a30]">r</span>d
           </Link>
           <span>·</span>
           <Link to="/sellr" className="hover:text-ink transition-colors">
-            Sellr
+            Sel<span className="text-[#4f6d7a]">l</span>r
           </Link>
           <span>·</span>
           <a href="mailto:hello@rekkrd.com" className="hover:text-ink transition-colors">
@@ -176,11 +176,11 @@ const SpenndLandingPage: React.FC = () => {
           </a>
         </div>
         <div className="mt-4 flex items-center justify-center gap-1.5">
-          <span className="font-serif text-[12px] text-ink/60">Part of the</span>
-          <Link to="/" className="font-display text-[12px] text-ink/60 hover:text-ink transition-colors">
-            Rekkrd
+          <span className="font-serif text-[14px] text-ink/60">Part of the</span>
+          <Link to="/" className="font-display text-[14px] text-ink/60 hover:text-ink transition-colors">
+            Rekk<span className="text-[#c45a30]">r</span>d
           </Link>
-          <span className="font-serif text-[12px] text-ink/60">family</span>
+          <span className="font-serif text-[14px] text-ink/60">family</span>
         </div>
       </footer>
     </div>

@@ -326,7 +326,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
               /* Value display — dark card */
               <div className="bg-[#2a2016] rounded-2xl flex items-center justify-between p-4 md:p-[22px_24px]" style={{ boxShadow: '0 4px 20px rgba(42,32,22,0.2)' }}>
                 <div>
-                  <div className="font-mono text-[10px] tracking-[2px] uppercase text-white/35 mb-1.5">
+                  <div className="font-mono text-[10px] tracking-[2px] uppercase text-white/60 mb-1.5">
                     Est. Value ({album.condition})
                   </div>
                   {priceLoading ? (
@@ -339,12 +339,12 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                       {priceValue ? `$${priceValue.toFixed(2)}` : '$—'}
                     </div>
                   )}
-                  <div className="font-mono text-[10px] text-white/25 mt-1.5">
+                  <div className="font-mono text-[10px] text-white/50 mt-1.5">
                     {priceValue ? priceLabel : priceLoading ? '' : resolvedReleaseId ? 'No price data' : 'No Discogs match'}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-mono text-[9px] tracking-[1.5px] uppercase text-white/25 border border-white/10 px-2.5 py-1 rounded mb-1.5 inline-block">
+                  <div className="font-mono text-[9px] tracking-[1.5px] uppercase text-white/45 border border-white/20 px-2.5 py-1 rounded mb-1.5 inline-block">
                     Discogs
                   </div>
                   {resolvedUrl ? (
@@ -352,7 +352,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                       View on Discogs →
                     </a>
                   ) : (
-                    <span className="font-mono text-[10px] text-white/20 block">{priceLoading ? '' : 'No link'}</span>
+                    <span className="font-mono text-[10px] text-white/40 block">{priceLoading ? '' : 'No link'}</span>
                   )}
                 </div>
               </div>

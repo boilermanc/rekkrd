@@ -49,7 +49,7 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ displayName, onDisplayNameCha
   return (
     <div className="w-full flex flex-col items-center text-center">
       <h2 className="font-display text-4xl md:text-5xl font-bold text-[#dd6e42] mb-3">
-        Welcome to Rekkrd
+        Welcome to Rekk<span className="text-[#c45a30]">r</span>d
       </h2>
       <p className="text-th-text3 text-lg mb-10">
         Let's set up your collector profile. It only takes a minute.

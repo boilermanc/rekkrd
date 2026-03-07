@@ -74,7 +74,7 @@ const ShelfGuideModal: React.FC<ShelfGuideModalProps> = ({ isOpen, onClose }) =>
             <div className={`sog-panel${activeTab === 'quickstart' ? ' active' : ''}`}>
               <div className="sog-eyebrow">// Getting Started</div>
               <h2>Shelf Organizer<br /><em>Quick Start</em></h2>
-              <p>The Shelf Organizer lets you mirror your real-world vinyl storage inside Rekkrd. Define your physical shelves, choose how you want your records sorted, and let the app figure out exactly where each album belongs. Then fine-tune with drag-and-drop.</p>
+              <p>The Shelf Organizer lets you mirror your real-world vinyl storage inside Rekk<span className="text-[#c45a30]">r</span>d. Define your physical shelves, choose how you want your records sorted, and let the app figure out exactly where each album belongs. Then fine-tune with drag-and-drop.</p>
 
               <h3>Setting Up Your First Shelf</h3>
               <p>Head to the <strong>Setup</strong> tab and follow these steps to get your first shelf configured in under a minute.</p>
