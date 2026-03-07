@@ -181,7 +181,7 @@ mountRouter('coversRouter', coversRouter);
 mountRouter('lyricsRouter', lyricsRouter);
 mountRouter('uploadCoverRouter', uploadCoverRouter);
 mountRouter('imageProxyRouter', imageProxyRouter);
-mountRouter('spenndRouter', spenndRouter);
+app.use('/api/spennd', spenndRouter);
 mountRouter('subscriptionRouter', subscriptionRouter);
 mountRouter('checkoutRouter', checkoutRouter);
 mountRouter('customerPortalRouter', customerPortalRouter);
