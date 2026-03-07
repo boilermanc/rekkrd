@@ -61,7 +61,7 @@ const SpenndHeader: React.FC = () => {
               </Link>
 
               <Link to="/signup" onClick={() => setSellrOpen(false)}>
-                <button className="w-full mt-2 border border-[#4f6d7a] text-[#4f6d7a] rounded-full py-2.5 px-4 font-mono text-[12px] font-medium hover:bg-[#4f6d7a]/10 transition-colors">
+                <button className="w-full mt-2 border border-[#5a8a6e] text-[#5a8a6e] rounded-full py-2.5 px-4 font-mono text-[12px] font-medium hover:bg-[#5a8a6e]/10 transition-colors">
                   Sign Up Free →
                 </button>
               </Link>
@@ -71,7 +71,7 @@ const SpenndHeader: React.FC = () => {
           {/* Sign Up button */}
           <Link
             to="/signup"
-            className="bg-burnt-peach text-white rounded-full py-1.5 px-3 sm:py-2 sm:px-4 font-mono text-[12px] font-medium hover:opacity-90 transition-opacity"
+            className="bg-[#5a8a6e] text-white rounded-full py-1.5 px-3 sm:py-2 sm:px-4 font-mono text-[12px] font-medium hover:bg-[#3d6b54] transition-colors"
           >
             Sign Up Free →
           </Link>

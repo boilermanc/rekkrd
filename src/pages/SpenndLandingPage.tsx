@@ -17,8 +17,14 @@ const SpenndLandingPage: React.FC = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="min-h-[70vh] flex items-center px-6 py-16">
-          <div className="max-w-4xl mx-auto">
+        <section className="min-h-[70vh] flex items-center px-6 py-16 relative overflow-hidden">
+          <img
+            src="/spennd-watermark.svg"
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none select-none opacity-60"
+            aria-hidden="true"
+            alt=""
+          />
+          <div className="max-w-4xl mx-auto relative">
             <div className="flex items-center justify-between mb-4">
               <div className="font-mono text-[11px] text-ink uppercase tracking-widest">
                 SPENND
@@ -42,7 +48,7 @@ const SpenndLandingPage: React.FC = () => {
 
             <button
               onClick={scrollToTool}
-              className="mt-8 bg-burnt-peach text-white font-serif text-[16px] rounded-full py-4 px-8 hover:opacity-90 transition-opacity"
+              className="mt-8 bg-[#5a8a6e] text-white font-serif text-[16px] rounded-full py-4 px-8 hover:bg-[#3d6b54] transition-colors"
             >
               Check My Record →
             </button>
@@ -59,7 +65,7 @@ const SpenndLandingPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Card 1 */}
               <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <div className="font-display text-[48px] text-burnt-peach">1</div>
+                <div className="font-display text-[48px] text-[#5a8a6e]">1</div>
                 <h3 className="font-serif text-[16px] font-bold text-ink mt-2">
                   Find your record
                 </h3>
@@ -70,7 +76,7 @@ const SpenndLandingPage: React.FC = () => {
 
               {/* Card 2 */}
               <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <div className="font-display text-[48px] text-burnt-peach">2</div>
+                <div className="font-display text-[48px] text-[#5a8a6e]">2</div>
                 <h3 className="font-serif text-[16px] font-bold text-ink mt-2">
                   Identify your pressing
                 </h3>
@@ -81,7 +87,7 @@ const SpenndLandingPage: React.FC = () => {
 
               {/* Card 3 */}
               <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <div className="font-display text-[48px] text-burnt-peach">3</div>
+                <div className="font-display text-[48px] text-[#5a8a6e]">3</div>
                 <h3 className="font-serif text-[16px] font-bold text-ink mt-2">
                   Grade the condition
                 </h3>
@@ -100,10 +106,10 @@ const SpenndLandingPage: React.FC = () => {
           </p>
 
           <div className="flex justify-center flex-wrap gap-3">
-            <span className="border border-burnt-peach text-burnt-peach font-mono text-[11px] rounded-full px-3 py-1">
+            <span className="border border-[#5a8a6e] text-[#5a8a6e] font-mono text-[11px] rounded-full px-3 py-1">
               Discogs Marketplace
             </span>
-            <span className="border border-burnt-peach text-burnt-peach font-mono text-[11px] rounded-full px-3 py-1">
+            <span className="border border-[#5a8a6e] text-[#5a8a6e] font-mono text-[11px] rounded-full px-3 py-1">
               eBay Completed Sales
             </span>
           </div>

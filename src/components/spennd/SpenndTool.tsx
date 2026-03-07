@@ -209,20 +209,20 @@ const SpenndTool: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           placeholder="e.g. Elvis Costello Armed Forces"
-          className="w-full bg-paper-dark rounded-xl py-3 px-4 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-burnt-peach"
+          className="w-full bg-paper-dark rounded-xl py-3 px-4 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e]"
         />
 
         <button
           onClick={handleSearch}
           disabled={searchLoading}
-          className="mt-3 bg-burnt-peach text-white rounded-full py-2 px-5 font-serif hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="mt-3 bg-[#5a8a6e] text-white rounded-full py-2 px-5 font-serif hover:bg-[#3d6b54] transition-colors disabled:opacity-50"
         >
           Search →
         </button>
 
         {searchLoading && (
           <div className="flex justify-center mt-4">
-            <Loader2 className="animate-spin text-burnt-peach" size={24} />
+            <Loader2 className="animate-spin text-[#5a8a6e]" size={24} />
           </div>
         )}
 
@@ -231,7 +231,7 @@ const SpenndTool: React.FC = () => {
             <p className="text-amber-800 font-serif text-[13px]">{searchError}</p>
             <button
               onClick={handleSearch}
-              className="mt-2 text-burnt-peach font-serif text-[13px] underline"
+              className="mt-2 text-[#5a8a6e] font-serif text-[13px] underline"
             >
               Retry
             </button>
@@ -317,7 +317,7 @@ const SpenndTool: React.FC = () => {
               value={labelInputs.labelName}
               onChange={(e) => setLabelInputs(prev => ({ ...prev, labelName: e.target.value }))}
               placeholder="e.g. Columbia, Parlophone, Warner Bros."
-              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-burnt-peach"
+              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e]"
             />
             <p className="mt-1 font-serif text-[12px] text-ink/60">
               The company name printed on the center label — usually at the top.
@@ -334,7 +334,7 @@ const SpenndTool: React.FC = () => {
               value={labelInputs.catalog}
               onChange={(e) => setLabelInputs(prev => ({ ...prev, catalog: e.target.value }))}
               placeholder="e.g. JC 35709 or BSK 3010"
-              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-burnt-peach"
+              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e]"
             />
             <p className="mt-1 font-serif text-[12px] text-ink/60">
               Usually on the left or right side of the label. Includes letters and numbers.
@@ -352,7 +352,7 @@ const SpenndTool: React.FC = () => {
               onChange={(e) => setLabelInputs(prev => ({ ...prev, year: e.target.value }))}
               disabled={labelInputs.yearUnknown}
               placeholder="e.g. 1979"
-              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-burnt-peach disabled:opacity-50"
+              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e] disabled:opacity-50"
             />
             <label className="flex items-center gap-2 mt-2">
               <input
@@ -376,7 +376,7 @@ const SpenndTool: React.FC = () => {
               onChange={(e) => setLabelInputs(prev => ({ ...prev, country: e.target.value }))}
               disabled={labelInputs.countryUnknown}
               placeholder="e.g. Made in USA"
-              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-burnt-peach disabled:opacity-50"
+              className="w-full bg-paper-dark rounded-xl py-2 px-3 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e] disabled:opacity-50"
             />
             <label className="flex items-center gap-2 mt-2">
               <input
@@ -409,7 +409,7 @@ const SpenndTool: React.FC = () => {
 
         <button
           onClick={handleLabelSubmit}
-          className="mt-6 w-full bg-burnt-peach text-white rounded-full py-3 px-6 font-serif hover:opacity-90 transition-opacity"
+          className="mt-6 w-full bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors"
         >
           Next: Find the Matrix →
         </button>
@@ -476,8 +476,8 @@ const SpenndTool: React.FC = () => {
             <svg width="160" height="160" viewBox="0 0 160 160">
               <circle cx="80" cy="80" r="75" fill="#2a2016" />
               <circle cx="80" cy="80" r="35" fill="#e8dab2" />
-              <circle cx="80" cy="80" r="55" fill="none" stroke="rgba(221,110,66,0.6)" strokeWidth="20" opacity="0.3" />
-              <text x="80" y="85" textAnchor="middle" fontSize="9" fill="#dd6e42" fontFamily="monospace">
+              <circle cx="80" cy="80" r="55" fill="none" stroke="rgba(90,138,110,0.6)" strokeWidth="20" opacity="0.3" />
+              <text x="80" y="85" textAnchor="middle" fontSize="9" fill="#5a8a6e" fontFamily="monospace">
                 matrix lives here
               </text>
             </svg>
@@ -517,7 +517,7 @@ const SpenndTool: React.FC = () => {
         ) : null}
 
         {/* Limitations */}
-        <div className="border-l-4 border-burnt-peach bg-paper-dark rounded-xl p-4 mb-5">
+        <div className="border-l-4 border-[#5a8a6e] bg-paper-dark rounded-xl p-4 mb-5">
           <div className="font-mono text-[10px] uppercase text-ink/60 mb-1">
             A NOTE ON MATRIX MATCHING
           </div>
@@ -541,7 +541,7 @@ const SpenndTool: React.FC = () => {
                 value={matrixInputs[side] || ''}
                 onChange={(e) => setMatrixInputs(prev => ({ ...prev, [side]: e.target.value }))}
                 disabled={matrixSkipped[side]}
-                className="w-full bg-paper-dark rounded-xl font-mono py-2 px-3 text-ink focus:outline-none focus:ring-2 focus:ring-burnt-peach disabled:opacity-50"
+                className="w-full bg-paper-dark rounded-xl font-mono py-2 px-3 text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e] disabled:opacity-50"
               />
               <label className="flex items-center gap-2 mt-2">
                 <input
@@ -566,7 +566,7 @@ const SpenndTool: React.FC = () => {
           <button
             onClick={handleMatrixSubmit}
             disabled={matrixLoading}
-            className="flex-1 bg-burnt-peach text-white rounded-full py-3 px-6 font-serif hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="flex-1 bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors disabled:opacity-50"
           >
             {matrixLoading ? 'Identifying...' : 'Identify My Pressing →'}
           </button>
@@ -606,7 +606,7 @@ const SpenndTool: React.FC = () => {
               <div className="mt-3 space-y-2">
                 {matrixResult.engineer_notes.map((note, idx) => (
                   <div key={idx} className="bg-pearl-beige rounded-xl p-3">
-                    <div className="font-mono text-[10px] uppercase text-burnt-peach mb-1">
+                    <div className="font-mono text-[10px] uppercase text-[#5a8a6e] mb-1">
                       {note.mark}
                     </div>
                     <p className="font-serif text-[12px] text-ink/60">
@@ -634,14 +634,14 @@ const SpenndTool: React.FC = () => {
           <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
             <button
               onClick={() => setSelectedFormat('vinyl')}
-              className="bg-white border-2 border-paper-dark hover:border-burnt-peach rounded-2xl p-6 text-center transition-colors"
+              className="bg-white border-2 border-paper-dark hover:border-[#5a8a6e] rounded-2xl p-6 text-center transition-colors"
             >
               <div className="text-[32px] mb-2">💿</div>
               <div className="font-serif text-ink">Vinyl</div>
             </button>
             <button
               onClick={() => setSelectedFormat('cd')}
-              className="bg-white border-2 border-paper-dark hover:border-burnt-peach rounded-2xl p-6 text-center transition-colors"
+              className="bg-white border-2 border-paper-dark hover:border-[#5a8a6e] rounded-2xl p-6 text-center transition-colors"
             >
               <div className="text-[32px] mb-2">📀</div>
               <div className="font-serif text-ink">CD</div>
@@ -658,7 +658,7 @@ const SpenndTool: React.FC = () => {
     return (
       <div className="max-w-xl mx-auto bg-paper rounded-2xl p-8 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div className="font-mono text-[10px] text-burnt-peach uppercase tracking-wide">
+          <div className="font-mono text-[10px] text-[#5a8a6e] uppercase tracking-wide">
             QUESTION {currentQuestionIndex + 1} OF {checklist.length}
           </div>
           <div className="inline-block bg-paper-dark text-ink font-mono text-[9px] rounded-full px-2 py-0.5 uppercase">
@@ -696,7 +696,7 @@ const SpenndTool: React.FC = () => {
               >
                 <div className="flex items-start gap-3">
                   <div className={`w-4 h-4 rounded-full border-[1.5px] flex-shrink-0 mt-0.5 flex items-center justify-center ${
-                    isSelected ? 'bg-burnt-peach border-burnt-peach' : 'border-paper-darker'
+                    isSelected ? 'bg-[#5a8a6e] border-[#5a8a6e]' : 'border-paper-darker'
                   }`}>
                     {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
@@ -730,7 +730,7 @@ const SpenndTool: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-4 px-4">
         {/* Session nudge */}
         {recordsChecked >= 3 && !nudgeDismissed && (
-          <div className="bg-pearl-beige border border-burnt-peach/30 rounded-2xl p-5">
+          <div className="bg-pearl-beige border border-[#5a8a6e]/30 rounded-2xl p-5">
             <div className="font-serif text-[15px] font-bold text-ink mb-1">
               You've checked {recordsChecked} records.
             </div>
@@ -738,7 +738,7 @@ const SpenndTool: React.FC = () => {
               Rekkrd tracks your whole collection automatically.
             </p>
             <div className="flex gap-3">
-              <a href="/signup" className="bg-burnt-peach text-white rounded-full py-2 px-5 font-serif text-[13px]">
+              <a href="/signup" className="bg-[#5a8a6e] text-white rounded-full py-2 px-5 font-serif text-[13px] hover:bg-[#3d6b54] transition-colors">
                 Start free →
               </a>
               <button onClick={() => setNudgeDismissed(true)} className="text-sm text-ink/60 underline">
@@ -805,7 +805,7 @@ const SpenndTool: React.FC = () => {
           <p className="font-serif text-[14px] text-ink/60 max-w-sm mx-auto mb-4">
             Rekkrd tracks your whole collection — condition grading, live pricing, and gear catalog.
           </p>
-          <a href="/signup" className="inline-block bg-burnt-peach text-white rounded-full py-3 px-6 font-serif">
+          <a href="/signup" className="inline-block bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors">
             Start your collection free →
           </a>
           <p className="font-mono text-[10px] text-ink/60 mt-2">No credit card. Free up to 100 albums.</p>
