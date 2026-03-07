@@ -23,7 +23,7 @@ const SpenndHeader: React.FC = () => {
         {/* Left side — Spennd brand */}
         <Link to="/spennd" className="flex items-center gap-2">
           <img src="/spennd-icon.svg" width={32} height={32} alt="Spennd" />
-          <span className="font-display text-[22px] text-ink font-semibold">Spennd</span>
+          <span className="font-display text-[22px] text-ink font-semibold">Spen<span className="text-[#5a8a6e]">n</span>d</span>
         </Link>
 
         {/* Right side */}
@@ -59,7 +59,7 @@ const SpenndHeader: React.FC = () => {
 
               {/* Sellr wordmark */}
               <div className="flex flex-col items-start leading-tight">
-                <span className="font-mono text-sm font-semibold text-[#4f6d7a] tracking-wide">Sellr</span>
+                <span className="font-mono text-sm font-semibold text-ink tracking-wide">Sel<span className="text-[#4f6d7a]">l</span>r</span>
                 <span className="font-mono text-[10px] text-[#4f6d7a]/60 tracking-wide">vinyl appraisals</span>
               </div>
 
@@ -77,20 +77,39 @@ const SpenndHeader: React.FC = () => {
 
             {/* Dropdown panel */}
             <div
-              className={`absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-paper-dark p-5 z-50 transition-all duration-200 ${
+              className={`absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-paper-dark p-5 z-50 transition-all duration-200 ${
                 sellrOpen
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-1 pointer-events-none'
               }`}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <img src="/spennd-icon.svg" width={20} height={20} alt="" />
-                <span className="font-mono text-[14px] text-[#4f6d7a] font-semibold">Sellr</span>
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="20" height="20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="50" cy="50" r="44" fill="#3a525d"/>
+                  <circle cx="50" cy="50" r="16" fill="#4f6d7a"/>
+                  <circle cx="50" cy="50" r="4" fill="#1e3540" opacity="0.6"/>
+                </svg>
+                <span className="font-mono text-[15px] text-ink font-semibold">Sel<span className="text-[#4f6d7a]">l</span>r</span>
               </div>
 
-              <p className="font-serif text-[13px] text-ink/60 mb-4">
-                The vinyl appraisal marketplace. List your records for appraisal, get real offers from collectors.
+              <p className="font-serif text-[13px] text-ink/70 mb-3">
+                The vinyl appraisal tool from the makers of Spen<span className="text-[#5a8a6e]">n</span>d. Know what your collection is really worth.
               </p>
+
+              <ul className="space-y-1.5 mb-4">
+                <li className="flex items-start gap-2 font-serif text-[12px] text-ink/60">
+                  <span className="text-[#4f6d7a] mt-0.5">&#10003;</span>
+                  AI-powered condition grading &amp; pricing
+                </li>
+                <li className="flex items-start gap-2 font-serif text-[12px] text-ink/60">
+                  <span className="text-[#4f6d7a] mt-0.5">&#10003;</span>
+                  Live Discogs market data on every record
+                </li>
+                <li className="flex items-start gap-2 font-serif text-[12px] text-ink/60">
+                  <span className="text-[#4f6d7a] mt-0.5">&#10003;</span>
+                  Full collection or single-lot appraisals
+                </li>
+              </ul>
 
               <Link to="/sellr" onClick={() => setSellrOpen(false)}>
                 <button className="w-full bg-[#4f6d7a] text-white rounded-full py-2.5 px-4 font-mono text-[12px] font-medium hover:opacity-90 transition-opacity">
@@ -98,21 +117,13 @@ const SpenndHeader: React.FC = () => {
                 </button>
               </Link>
 
-              <Link to="/signup" onClick={() => setSellrOpen(false)}>
-                <button className="w-full mt-2 border border-[#5a8a6e] text-[#5a8a6e] rounded-full py-2.5 px-4 font-mono text-[12px] font-medium hover:bg-[#5a8a6e]/10 transition-colors">
+              <Link to="/sellr/signup" onClick={() => setSellrOpen(false)}>
+                <button className="w-full mt-2 border border-[#4f6d7a] text-[#4f6d7a] rounded-full py-2.5 px-4 font-mono text-[12px] font-medium hover:bg-[#4f6d7a]/10 transition-colors">
                   Sign Up Free →
                 </button>
               </Link>
             </div>
           </div>
-
-          {/* Sign Up button */}
-          <Link
-            to="/signup"
-            className="bg-[#5a8a6e] text-white rounded-full py-1.5 px-3 sm:py-2 sm:px-4 font-mono text-[12px] font-medium hover:bg-[#3d6b54] transition-colors"
-          >
-            Sign Up Free →
-          </Link>
         </div>
       </div>
     </header>

@@ -94,11 +94,11 @@
 }
 
 .landing-page .nav-logo span span {
-  color:var(--peach);
+  color:var(--peach-dark);
 }
 
 .landing-page .brand-name {
-  color:var(--peach);
+  color:var(--peach-dark);
   font-weight:600;
 }
 

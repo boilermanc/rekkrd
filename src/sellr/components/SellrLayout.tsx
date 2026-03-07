@@ -58,7 +58,7 @@ const SellrLayout: React.FC<SellrLayoutProps> = ({ children }) => {
           <Link to="/sellr" className="flex items-center gap-2">
             <SellrLogo className="w-6 h-6" />
             <span className="font-display text-2xl tracking-tight text-sellr-blue">
-              Sellr
+              Sel<span className="text-[#4f6d7a]">l</span>r
             </span>
           </Link>
           <a

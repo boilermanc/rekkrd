@@ -704,7 +704,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, preview
             </svg>
           </div>
           <span className="font-display text-lg font-bold text-th-text tracking-tight">
-            Rekk<span className="text-[#dd6e42]">r</span>d
+            Rekk<span className="text-[#c45a30]">r</span>d
           </span>
           {previewMode && (
             <span className="ml-2 bg-[#dd6e42] text-white text-[10px] font-label tracking-wider uppercase px-2 py-0.5 rounded">

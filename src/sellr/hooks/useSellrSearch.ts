@@ -13,6 +13,7 @@ export interface SellrSearchResult {
   cover_image: string;
   catno: string;
   lowest_price: number | null;
+  notes: string | null;
 }
 
 interface UseSellrSearchOptions {
@@ -83,6 +84,7 @@ export function useSellrSearch({ sessionId, onRecordAdded }: UseSellrSearchOptio
           cover_image: (r.cover_image as string) || '',
           catno: (r.catno as string) || '',
           lowest_price: null, // Populated when user fetches release details
+          notes: null, // Populated when user fetches release details
         };
       });
 
@@ -123,6 +125,14 @@ export function useSellrSearch({ sessionId, onRecordAdded }: UseSellrSearchOptio
             priceHigh = priceLow != null ? Math.round(priceLow * 2.5 * 100) / 100 : null;
           }
           if (release.labels?.[0]?.name) label = release.labels[0].name;
+
+          // Capture release notes and update the result in state
+          const notes = (release.notes as string | null) ?? null;
+          if (notes) {
+            setResults(prev => prev.map(r =>
+              r.id === result.id ? { ...r, notes } : r
+            ));
+          }
         }
       } catch {
         // Non-fatal — save without pricing

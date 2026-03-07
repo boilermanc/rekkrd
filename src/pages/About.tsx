@@ -20,9 +20,9 @@ const About: React.FC = () => {
             <circle cx="12" cy="12" r="8" fill="none" stroke="#3a3530" strokeWidth="0.3" opacity="0.4"/>
             <circle cx="12" cy="12" r="6.5" fill="none" stroke="#3a3530" strokeWidth="0.3" opacity="0.3"/>
             <circle cx="12" cy="12" r="5.2" fill="#1a1916"/>
-            <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#D47A62">R</text>
+            <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#c45a30">R</text>
           </svg>
-          Rekk<span style={{ color: '#D47A62' }}>r</span>d
+          Rekk<span style={{ color: '#c45a30' }}>r</span>d
         </Link>
         <ul className="about-nav-links">
           <li><Link to="/">Collection</Link></li>
@@ -188,9 +188,9 @@ const About: React.FC = () => {
             <circle cx="12" cy="12" r="8" fill="none" stroke="#3a3530" strokeWidth="0.3" opacity="0.4"/>
             <circle cx="12" cy="12" r="6.5" fill="none" stroke="#3a3530" strokeWidth="0.3" opacity="0.3"/>
             <circle cx="12" cy="12" r="5.2" fill="#1a1916"/>
-            <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#D47A62">R</text>
+            <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#c45a30">R</text>
           </svg>
-          Rekk<span style={{ color: '#D47A62' }}>r</span>d
+          Rekk<span style={{ color: '#c45a30' }}>r</span>d
         </p>
         <p className="footer-copy">&copy; {new Date().getFullYear()} <a href="https://sweetwater.technology" target="_blank" rel="noopener noreferrer">Sweetwater Technology</a>. All rights reserved.</p>
       </footer>

@@ -394,6 +394,11 @@ const ScanPage: React.FC = () => {
                           <p className="text-xs text-sellr-charcoal/40">
                             {[result.year, result.label, result.format].filter(Boolean).join(' · ')}
                           </p>
+                          {result.notes && (
+                            <div className="mt-2 text-xs text-sellr-charcoal/60 leading-relaxed line-clamp-3 font-['Inter']">
+                              {result.notes}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => handleAddResult(result)}

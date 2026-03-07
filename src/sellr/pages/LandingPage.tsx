@@ -276,7 +276,7 @@ const LandingPage: React.FC = () => {
                 <circle cx="12" cy="12" r="5.2" fill="#2a3d46"/>
                 <text x="12" y="12.5" textAnchor="middle" dominantBaseline="central" fontFamily="Georgia,serif" fontWeight="bold" fontSize="7" fill="#dd6e42">R</text>
               </svg>
-              <span className="font-display text-lg text-sellr-charcoal">Rekk<span className="text-sellr-amber">r</span>d</span>
+              <span className="font-display text-lg text-sellr-charcoal">Rekk<span className="text-[#c45a30]">r</span>d</span>
             </a>
             <p className="text-sm text-sellr-charcoal/60 leading-relaxed">
               The AI-powered vinyl collection manager for serious crate diggers and casual collectors alike.

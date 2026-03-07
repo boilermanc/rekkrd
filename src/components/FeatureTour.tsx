@@ -405,7 +405,7 @@ const FeatureTour: React.FC<FeatureTourProps> = ({ onComplete, onClose }) => {
             </svg>
           </div>
           <span className="font-display text-lg font-bold text-th-text tracking-tight">
-            Rekk<span className="text-[#dd6e42]">r</span>d
+            Rekk<span className="text-[#c45a30]">r</span>d
           </span>
         </div>
 

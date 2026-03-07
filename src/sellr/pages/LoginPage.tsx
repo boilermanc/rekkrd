@@ -113,7 +113,7 @@ const LoginPage: React.FC = () => {
           <div className="bg-sellr-surface rounded-xl p-8 shadow-md">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="font-display text-[28px] text-sellr-blue">Sellr</h1>
+              <h1 className="font-display text-[28px] text-sellr-blue">Sel<span className="text-[#4f6d7a]">l</span>r</h1>
               <p className="mt-1 text-sm text-sellr-charcoal/60">Welcome back</p>
             </div>
 

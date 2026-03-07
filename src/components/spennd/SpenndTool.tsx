@@ -1083,7 +1083,7 @@ const SpenndTool: React.FC = () => {
 
         {/* Soft sell */}
         <div className="mt-8 pt-8 border-t text-center">
-          <div className="font-mono text-[9px] text-ink/60 uppercase mb-2">FROM THE MAKERS OF SPENND</div>
+          <div className="font-mono text-[11px] text-ink/60 uppercase mb-2">FROM THE MAKERS OF SPEN<span className="text-[#5a8a6e]">N</span>D</div>
           <h3 className="font-display text-[24px] text-ink mb-2">Do you have more than one?</h3>
           <p className="font-serif text-sm text-ink max-w-sm mx-auto mb-4">
             Rekkrd tracks your whole collection — condition grading, live pricing, and gear catalog.
@@ -1091,7 +1091,7 @@ const SpenndTool: React.FC = () => {
           <a href="/signup" className="inline-block bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors">
             Start your collection free →
           </a>
-          <p className="font-mono text-[10px] text-ink/60 mt-2">No credit card. Free up to 100 albums.</p>
+          <p className="font-mono text-[12px] text-ink/60 mt-2">No credit card. Free up to 100 albums.</p>
         </div>
       </div>
     );
