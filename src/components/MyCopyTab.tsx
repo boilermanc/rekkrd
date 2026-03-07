@@ -30,37 +30,81 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
   const [priceValue, setPriceValue] = useState<number | null>(null);
 
   const conditionInfo = album.condition ? CONDITION_BY_VALUE[album.condition as ConditionGrade] : null;
-  const shouldFetchPrice = userPlan === 'enthusiast' && discogsConnected && !!album.condition && !!album.discogs_release_id;
+  const canFetchPrice = userPlan === 'enthusiast' && discogsConnected && !!album.condition;
+  const [resolvedReleaseId, setResolvedReleaseId] = useState<number | null>(album.discogs_release_id ?? null);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(album.discogs_url ?? null);
+
+  // Keep resolved values in sync if album prop changes (e.g. after save)
+  useEffect(() => {
+    if (album.discogs_release_id) setResolvedReleaseId(album.discogs_release_id);
+    if (album.discogs_url) setResolvedUrl(album.discogs_url);
+  }, [album.discogs_release_id, album.discogs_url]);
 
   useEffect(() => {
-    console.log('[MyCopyTab] Price fetch check:', {
-      userPlan,
-      discogsConnected,
-      condition: album.condition,
-      discogs_release_id: album.discogs_release_id,
-      discogs_url: album.discogs_url,
-      shouldFetchPrice,
-    });
-
-    if (!shouldFetchPrice) return;
+    if (!canFetchPrice) return;
 
     let cancelled = false;
+
+    const getAuthHeaders = async (): Promise<Record<string, string>> => {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      }
+      return headers;
+    };
+
+    const resolveReleaseId = async (headers: Record<string, string>): Promise<number | null> => {
+      if (album.discogs_release_id) return album.discogs_release_id;
+
+      // Search Discogs by artist + title
+      console.log('[MyCopyTab] No release ID — searching Discogs for:', album.artist, album.title);
+      const params = new URLSearchParams({
+        artist: album.artist,
+        title: album.title,
+        type: 'release',
+        per_page: '1',
+      });
+      const searchRes = await fetch(`/api/discogs/search?${params}`, { headers });
+      if (!searchRes.ok) return null;
+
+      const searchData = await searchRes.json() as { results: Array<{ id: number; uri: string }> };
+      const firstResult = searchData.results?.[0];
+      if (!firstResult) {
+        console.log('[MyCopyTab] No Discogs results found');
+        return null;
+      }
+
+      console.log('[MyCopyTab] Found Discogs release:', firstResult.id);
+      const discogsUrl = `https://www.discogs.com/release/${firstResult.id}`;
+
+      // Save back to album so we don't search again
+      setResolvedReleaseId(firstResult.id);
+      setResolvedUrl(discogsUrl);
+      onUpdate({ discogs_release_id: firstResult.id, discogs_url: discogsUrl }).catch(() => {});
+
+      return firstResult.id;
+    };
+
     const fetchPrice = async () => {
       setPriceLoading(true);
-      console.log('[MyCopyTab] Fetching price for releaseId:', album.discogs_release_id);
       try {
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (supabase) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.access_token) {
-            headers['Authorization'] = `Bearer ${session.access_token}`;
-          }
+        const headers = await getAuthHeaders();
+        if (cancelled) return;
+
+        const releaseId = await resolveReleaseId(headers);
+        if (!releaseId || cancelled) {
+          setPriceLoading(false);
+          return;
         }
-        const res = await fetch(`/api/discogs-price?releaseId=${album.discogs_release_id}`, { headers });
+
+        console.log('[MyCopyTab] Fetching price for releaseId:', releaseId);
+        const res = await fetch(`/api/discogs-price?releaseId=${releaseId}`, { headers });
         console.log('[MyCopyTab] Price response status:', res.status);
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as { prices: PriceData };
-        console.log('[MyCopyTab] Price data:', data);
         if (cancelled) return;
 
         const discogsKey = conditionInfo?.discogsKey;
@@ -76,7 +120,7 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
 
     void fetchPrice();
     return () => { cancelled = true; };
-  }, [shouldFetchPrice, album.discogs_release_id, album.condition]);
+  }, [canFetchPrice, album.discogs_release_id, album.condition]);
 
   // Check if this is truly empty (first-time state)
   const isCompletelyEmpty = !album.condition && !album.purchase_price && !album.copy_notes && !album.acquired_from;
@@ -273,19 +317,19 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
                     </div>
                   )}
                   <div className="font-mono text-[10px] text-white/25 mt-1.5">
-                    {priceValue ? 'Discogs median' : album.discogs_release_id ? 'No price data' : 'No Discogs link'}
+                    {priceValue ? 'Discogs median' : priceLoading ? '' : resolvedReleaseId ? 'No price data' : 'No Discogs match'}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-mono text-[9px] tracking-[1.5px] uppercase text-white/25 border border-white/10 px-2.5 py-1 rounded mb-1.5 inline-block">
                     Discogs
                   </div>
-                  {album.discogs_url ? (
-                    <a href={album.discogs_url} target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-burnt-peach/70 block hover:text-burnt-peach transition-colors">
+                  {resolvedUrl ? (
+                    <a href={resolvedUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-burnt-peach/70 block hover:text-burnt-peach transition-colors">
                       View on Discogs →
                     </a>
                   ) : (
-                    <span className="font-mono text-[10px] text-white/20 block">No link</span>
+                    <span className="font-mono text-[10px] text-white/20 block">{priceLoading ? '' : 'No link'}</span>
                   )}
                 </div>
               </div>
