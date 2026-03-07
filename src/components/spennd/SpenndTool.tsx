@@ -69,9 +69,18 @@ const SpenndTool: React.FC = () => {
   const [grade, setGrade] = useState<ConditionGrade | null>(null);
   const [conflictNote, setConflictNote] = useState<string | null>(null);
 
+  // Release notes state
+  const [releaseNotes, setReleaseNotes] = useState<string | null>(null);
+  const [notesExpanded, setNotesExpanded] = useState(false);
+
   // Results state (placeholders for now)
   const [priceData, setPriceData] = useState<PriceData | null>(null);
   const [ebayData, setEbayData] = useState<EbayData | null>(null);
+
+  // Reset notesExpanded when release changes
+  useEffect(() => {
+    setNotesExpanded(false);
+  }, [selectedRelease]);
 
   // Step 1: Search
   const combinedQuery = `${artistQuery} ${titleQuery}`.trim();
@@ -98,7 +107,21 @@ const SpenndTool: React.FC = () => {
 
   const handleSelectRelease = (release: DiscogsRelease) => {
     setSelectedRelease(release);
-    setStep('label');
+    setReleaseNotes(null);
+
+    // Fetch notes early via matrix endpoint
+    const params = new URLSearchParams({
+      release_id: release.id.toString(),
+      matrix_a: '',
+      matrix_b: ''
+    });
+    fetch(`/api/spennd/matrix?${params}`)
+      .then(r => r.json())
+      .then((data: MatrixResult) => {
+        setReleaseNotes(data.notes ?? null);
+        setMatrixResult(data);
+      })
+      .catch(() => {});
   };
 
   // Step 2a: Label
@@ -146,6 +169,7 @@ const SpenndTool: React.FC = () => {
           const response = await fetch(`/api/spennd/matrix?${params}`);
           const data: MatrixResult = await response.json();
           setMatrixResult(data);
+          setReleaseNotes(data.notes ?? null);
         } catch (error) {
           console.error('Matrix pre-load error:', error);
         }
@@ -169,6 +193,7 @@ const SpenndTool: React.FC = () => {
       const response = await fetch(`/api/spennd/matrix?${params}`);
       const data: MatrixResult = await response.json();
       setMatrixResult(data);
+      setReleaseNotes(data.notes ?? null);
 
       // Show result briefly, then advance
       setTimeout(() => {
@@ -289,7 +314,7 @@ const SpenndTool: React.FC = () => {
           </div>
         )}
 
-        {searchResults.length > 0 && (
+        {!selectedRelease && searchResults.length > 0 && (
           <>
             <div className="mt-4 flex flex-col gap-2">
               {searchResults.map((result) => (
@@ -321,7 +346,60 @@ const SpenndTool: React.FC = () => {
           </>
         )}
 
-        {!searchLoading && searchResults.length === 0 && combinedQuery && !searchError && (
+        {selectedRelease && (
+          <div className="mt-4">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-paper-dark">
+              <img
+                src={selectedRelease.thumb || '/placeholder-vinyl.png'}
+                alt=""
+                className="w-10 h-10 rounded-lg object-cover"
+              />
+              <div className="flex-1">
+                <div className="font-serif text-[14px] text-ink font-medium">
+                  {selectedRelease.artist} — {selectedRelease.title}
+                </div>
+                <div className="font-mono text-[11px] text-ink/60">
+                  {selectedRelease.year} · {selectedRelease.label} · {selectedRelease.country}
+                </div>
+              </div>
+            </div>
+
+            {releaseNotes && (
+              <div className="mt-3 bg-white border border-paper-dark rounded-xl
+                p-4 text-sm font-['Lora'] text-ink leading-relaxed">
+                <p className="font-mono text-[10px] uppercase tracking-wide
+                  text-[#5a8a6e] mb-1.5">Discogs Notes</p>
+                <p className={`text-ink-soft ${notesExpanded ? '' : 'line-clamp-4'}`}>
+                  {releaseNotes}
+                </p>
+                {!notesExpanded && (
+                  <button
+                    onClick={() => setNotesExpanded(true)}
+                    className="text-xs text-[#5a8a6e] underline underline-offset-2
+                      mt-1 font-mono"
+                  >
+                    Read more
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={() => setStep('label')}
+              className="mt-4 w-full bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors"
+            >
+              Continue →
+            </button>
+            <button
+              onClick={() => { setSelectedRelease(null); setReleaseNotes(null); setMatrixResult(null); }}
+              className="mt-2 w-full text-sm text-ink/60 underline"
+            >
+              Choose a different pressing
+            </button>
+          </div>
+        )}
+
+        {!selectedRelease && !searchLoading && searchResults.length === 0 && combinedQuery && !searchError && (
           <p className="mt-3 font-serif text-[13px] italic text-ink/60">
             Nothing found for '{artistQuery}{titleQuery ? ` — ${titleQuery}` : ''}'. Try checking the spelling, or search with just the artist name.
           </p>
@@ -336,6 +414,8 @@ const SpenndTool: React.FC = () => {
         <button
           onClick={() => {
             setSelectedRelease(null);
+            setReleaseNotes(null);
+            setMatrixResult(null);
             setStep('search');
           }}
           className="text-sm text-ink/60 underline mb-4"
@@ -350,6 +430,26 @@ const SpenndTool: React.FC = () => {
         <p className="font-serif text-base text-ink mb-4 max-w-prose">
           Before we look at the matrix, the label on your record already tells us a lot. Pick up the record, look at the center paper label, and answer these questions.
         </p>
+
+        {releaseNotes && (
+          <div className="bg-white border border-paper-dark rounded-xl
+            p-4 mb-4 text-sm font-['Lora'] text-ink leading-relaxed">
+            <p className="font-mono text-[10px] uppercase tracking-wide
+              text-[#5a8a6e] mb-1.5">About This Pressing</p>
+            <p className={`text-ink-soft ${notesExpanded ? '' : 'line-clamp-4'}`}>
+              {releaseNotes}
+            </p>
+            {!notesExpanded && (
+              <button
+                onClick={() => setNotesExpanded(true)}
+                className="text-xs text-[#5a8a6e] underline underline-offset-2
+                  mt-1 font-mono"
+              >
+                Read more
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="bg-pearl-beige rounded-xl p-3 mb-5">
           <p className="font-serif text-sm text-ink">
@@ -922,6 +1022,8 @@ const SpenndTool: React.FC = () => {
           onClick={() => {
             setStep('search');
             setSelectedRelease(null);
+            setReleaseNotes(null);
+            setMatrixResult(null);
             setGrade(null);
             setAnswers({});
             setSelectedFormat(null);

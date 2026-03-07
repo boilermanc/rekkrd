@@ -356,7 +356,8 @@ router.get('/matrix', async (req: Request, res: Response) => {
       engineer_notes,
       is_double_album,
       all_known_matrices,
-      no_matrix_data
+      no_matrix_data,
+      notes: (data.notes as string | null) ?? null
     });
 
   } catch (error) {
@@ -368,7 +369,8 @@ router.get('/matrix', async (req: Request, res: Response) => {
       engineer_notes: [],
       is_double_album: false,
       all_known_matrices: [],
-      no_matrix_data: true
+      no_matrix_data: true,
+      notes: null
     });
   }
 });

@@ -22,6 +22,7 @@ export interface MatrixResult {
   is_double_album: boolean;
   all_known_matrices: string[];
   no_matrix_data: boolean;
+  notes: string | null;
 }
 
 export interface PriceData {
