@@ -12,7 +12,8 @@ const SpenndTool: React.FC = () => {
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [artistQuery, setArtistQuery] = useState('');
+  const [titleQuery, setTitleQuery] = useState('');
   const [searchResults, setSearchResults] = useState<DiscogsRelease[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -47,15 +48,17 @@ const SpenndTool: React.FC = () => {
   const [ebayData, setEbayData] = useState<EbayData | null>(null);
 
   // Step 1: Search
+  const combinedQuery = `${artistQuery} ${titleQuery}`.trim();
+
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+    if (!combinedQuery) return;
 
     setSearchLoading(true);
     setSearchError(null);
     setSearchResults([]);
 
     try {
-      const response = await fetch(`/api/spennd/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`/api/spennd/search?q=${encodeURIComponent(combinedQuery)}`);
       if (!response.ok) throw new Error('Search failed');
 
       const data = await response.json();
@@ -199,26 +202,48 @@ const SpenndTool: React.FC = () => {
         <h3 className="font-display text-[24px] text-ink mb-2">
           What record do you have?
         </h3>
-        <p className="font-serif text-[14px] text-ink/60 mb-4">
-          Type the artist and album title
-        </p>
 
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder="e.g. Elvis Costello Armed Forces"
-          className="w-full bg-paper-dark rounded-xl py-3 px-4 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e]"
-        />
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wide text-[#5a8a6e] mb-1">
+              Artist
+            </label>
+            <input
+              type="text"
+              value={artistQuery}
+              onChange={(e) => setArtistQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="e.g. Fleetwood Mac"
+              className="w-full bg-paper-dark rounded-xl py-3 px-4 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wide text-[#5a8a6e] mb-1 mt-1">
+              Album Title
+            </label>
+            <input
+              type="text"
+              value={titleQuery}
+              onChange={(e) => setTitleQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="e.g. Rumours"
+              className="w-full bg-paper-dark rounded-xl py-3 px-4 font-serif text-ink focus:outline-none focus:ring-2 focus:ring-[#5a8a6e]"
+            />
+          </div>
+        </div>
 
         <button
           onClick={handleSearch}
-          disabled={searchLoading}
-          className="mt-3 bg-[#5a8a6e] text-white rounded-full py-2 px-5 font-serif hover:bg-[#3d6b54] transition-colors disabled:opacity-50"
+          disabled={searchLoading || !combinedQuery}
+          className="mt-3 w-full sm:w-auto bg-[#5a8a6e] text-white rounded-full py-3 px-6 font-serif hover:bg-[#3d6b54] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Search →
         </button>
+
+        <p className="font-serif text-[13px] italic text-[#5a8a6e]/70 mt-2">
+          Enter the artist name and album title separately for best results.
+        </p>
 
         {searchLoading && (
           <div className="flex justify-center mt-4">
@@ -270,9 +295,9 @@ const SpenndTool: React.FC = () => {
           </>
         )}
 
-        {!searchLoading && searchResults.length === 0 && searchQuery && !searchError && (
+        {!searchLoading && searchResults.length === 0 && combinedQuery && !searchError && (
           <p className="mt-3 font-serif text-[13px] italic text-ink/60">
-            Nothing found. Try simpler — just the artist name, or just the album title. Leave out words like 'the' or 'and'.
+            Nothing found for '{artistQuery}{titleQuery ? ` — ${titleQuery}` : ''}'. Try checking the spelling, or search with just the artist name.
           </p>
         )}
       </div>

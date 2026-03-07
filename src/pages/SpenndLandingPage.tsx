@@ -18,12 +18,39 @@ const SpenndLandingPage: React.FC = () => {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="min-h-[70vh] flex items-center px-6 py-16 relative overflow-hidden">
-          <img
-            src="/spennd-watermark.svg"
-            className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none select-none opacity-60"
+          <svg
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none select-none"
             aria-hidden="true"
-            alt=""
-          />
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 800 800"
+          >
+            <defs>
+              <radialGradient id="wmRecordGrad" cx="40%" cy="38%" r="55%">
+                <stop offset="0%" stopColor="#3a3028"/>
+                <stop offset="100%" stopColor="#1a1410"/>
+              </radialGradient>
+              <radialGradient id="wmLabelGrad" cx="40%" cy="36%" r="60%">
+                <stop offset="0%" stopColor="#6fa88a"/>
+                <stop offset="100%" stopColor="#3d6b54"/>
+              </radialGradient>
+            </defs>
+            <circle cx="400" cy="400" r="380" fill="url(#wmRecordGrad)" opacity="0.08"/>
+            <circle cx="400" cy="400" r="370" fill="none" stroke="#2a2016" strokeWidth="3" opacity="0.07"/>
+            <circle cx="400" cy="400" r="352" fill="none" stroke="#2a2016" strokeWidth="2.5" opacity="0.07"/>
+            <circle cx="400" cy="400" r="334" fill="none" stroke="#2a2016" strokeWidth="2.5" opacity="0.06"/>
+            <circle cx="400" cy="400" r="316" fill="none" stroke="#2a2016" strokeWidth="2.5" opacity="0.06"/>
+            <circle cx="400" cy="400" r="298" fill="none" stroke="#2a2016" strokeWidth="2" opacity="0.06"/>
+            <circle cx="400" cy="400" r="280" fill="none" stroke="#2a2016" strokeWidth="2" opacity="0.05"/>
+            <circle cx="400" cy="400" r="262" fill="none" stroke="#2a2016" strokeWidth="2" opacity="0.05"/>
+            <circle cx="400" cy="400" r="244" fill="none" stroke="#2a2016" strokeWidth="1.5" opacity="0.05"/>
+            <circle cx="400" cy="400" r="226" fill="none" stroke="#2a2016" strokeWidth="1.5" opacity="0.05"/>
+            <circle cx="400" cy="400" r="210" fill="none" stroke="#2a2016" strokeWidth="1.5" opacity="0.04"/>
+            <circle cx="400" cy="400" r="130" fill="url(#wmLabelGrad)" opacity="0.1"/>
+            <circle cx="400" cy="400" r="130" fill="none" stroke="#5a8a6e" strokeWidth="1" opacity="0.08"/>
+            <circle cx="400" cy="400" r="108" fill="none" stroke="#5a8a6e" strokeWidth="0.8" opacity="0.06"/>
+            <text x="400" y="452" textAnchor="middle" fontFamily="Playfair Display, Georgia, serif"
+              fontSize="160" fontWeight="700" fill="#5a8a6e" opacity="0.07">$</text>
+          </svg>
           <div className="max-w-4xl mx-auto relative">
             <div className="flex items-center justify-between mb-4">
               <div className="font-mono text-[11px] text-ink uppercase tracking-widest">
