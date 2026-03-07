@@ -5,9 +5,35 @@ import { ConditionGrade, VINYL_CHECKLIST, CD_CHECKLIST, CONDITION_BY_VALUE, scor
 
 type Step = 'search' | 'label' | 'matrix' | 'grading' | 'results';
 
+const FieldTip = ({ children }: { children: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-block ml-1.5 align-middle">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="w-4 h-4 rounded-full bg-[#5a8a6e]/20 text-[#5a8a6e]
+          text-[10px] font-mono font-bold flex items-center justify-center
+          hover:bg-[#5a8a6e]/30 transition-colors focus:outline-none
+          focus:ring-1 focus:ring-[#5a8a6e]"
+        aria-label="Help"
+      >?</button>
+      {open && (
+        <div className="absolute left-0 top-6 z-50 w-64 bg-white
+          border border-paper-dark rounded-xl shadow-lg p-3
+          text-sm text-ink font-['Lora'] leading-relaxed">
+          {children}
+        </div>
+      )}
+    </span>
+  );
+};
+
 const SpenndTool: React.FC = () => {
   // State
   const [step, setStep] = useState<Step>('search');
+  const [exampleOpen, setExampleOpen] = useState(false);
   const [recordsChecked, setRecordsChecked] = useState(0);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
@@ -331,11 +357,49 @@ const SpenndTool: React.FC = () => {
           </p>
         </div>
 
+        <button
+          onClick={() => setExampleOpen(o => !o)}
+          className="flex items-center gap-2 text-sm text-[#5a8a6e]
+            font-mono underline underline-offset-2 mb-4"
+        >
+          {exampleOpen ? '▾' : '▸'} See a real label example
+        </button>
+
+        {exampleOpen && (
+          <div className="bg-white border border-paper-dark rounded-xl
+            p-4 mb-5 text-sm font-['Lora'] text-ink leading-relaxed">
+            <p className="font-semibold mb-2">
+              Elvis Costello — Armed Forces (US, 1979)
+            </p>
+            <ul className="flex flex-col gap-1.5 text-ink-soft">
+              <li><span className="font-mono text-[#5a8a6e] text-xs">
+                LABEL NAME</span> — Columbia (red label)</li>
+              <li><span className="font-mono text-[#5a8a6e] text-xs">
+                CATALOG NUMBER</span> — JC 35709 (left side of label)</li>
+              <li><span className="font-mono text-[#5a8a6e] text-xs">
+                YEAR</span> — ℗ 1978 (right side near center)</li>
+              <li><span className="font-mono text-[#5a8a6e] text-xs">
+                COUNTRY</span> — Made in USA</li>
+              <li><span className="font-mono text-[#5a8a6e] text-xs">
+                NOTE</span> — "AL 35709" on the right side is NOT the catalog
+                number — that's the matrix identifier. You'll enter that in
+                the next step.</li>
+            </ul>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           {/* Label Name */}
           <div>
             <label className="block font-mono text-xs uppercase tracking-wide text-[#5a8a6e] mb-1">
               Label Name
+              <FieldTip>
+                Look at the color and name of the center paper circle on the record
+                itself — not the sleeve. The label name is usually printed at the top
+                in large text. Common examples: Columbia (red label), Parlophone
+                (red/black), Warner Bros. (tan/gold), Harvest (green), RCA (orange).
+                The color alone can tell you a lot.
+              </FieldTip>
             </label>
             <input
               type="text"
@@ -353,6 +417,14 @@ const SpenndTool: React.FC = () => {
           <div>
             <label className="block font-mono text-xs uppercase tracking-wide text-[#5a8a6e] mb-1">
               Catalog Number
+              <FieldTip>
+                The catalog number is printed on the left or right side of the center
+                label — usually a mix of letters and numbers like "JC 35709" or
+                "BSK 3010". On the Elvis Costello Armed Forces label for example,
+                "JC 35709" appears on the left side. Don't confuse it with "AL 35709"
+                which appears on the right — that's the matrix identifier, not the
+                catalog number.
+              </FieldTip>
             </label>
             <input
               type="text"
@@ -370,6 +442,13 @@ const SpenndTool: React.FC = () => {
           <div>
             <label className="block font-mono text-xs uppercase tracking-wide text-[#5a8a6e] mb-1">
               Year
+              <FieldTip>
+                Look for a ℗ symbol (phonogram copyright) followed by a year — e.g.
+                "℗ 1978". This is the year the recording was copyrighted, which is
+                often (but not always) the original release year. It's usually in
+                small print on the right side of the label near the center hole.
+                Some labels print "© 1978" instead — either counts.
+              </FieldTip>
             </label>
             <input
               type="text"
@@ -394,6 +473,13 @@ const SpenndTool: React.FC = () => {
           <div>
             <label className="block font-mono text-xs uppercase tracking-wide text-[#5a8a6e] mb-1">
               Country
+              <FieldTip>
+                Look for text saying "Made in USA", "Printed in UK", "Fabricado en
+                México" or similar — usually in very small print near the edge of the
+                label or around the center hole. Some labels don't print this at all,
+                especially older pressings. If you can't find it, check the sleeve
+                — it's sometimes printed on the back cover or inner sleeve instead.
+              </FieldTip>
             </label>
             <input
               type="text"
@@ -557,6 +643,28 @@ const SpenndTool: React.FC = () => {
             <div key={side}>
               <div className="font-mono text-xs uppercase tracking-wide text-[#5a8a6e] mb-1">
                 SIDE {side} MATRIX
+                {side === 'A' && (
+                  <FieldTip>
+                    The matrix is hand-etched or stamped into the vinyl itself — not
+                    printed on the label. Hold the record at eye level and tilt it toward
+                    a light. Look at the shiny ring between where the last song ends and
+                    where the center label begins. You'll see small characters scratched
+                    in. For Armed Forces for example, look for something like
+                    "AL 35709-1A" — the "AL" prefix, catalog number, side number, and
+                    a letter indicating the stamper. Type exactly what you see including
+                    any dashes or letters after the number.
+                  </FieldTip>
+                )}
+                {side === 'B' && (
+                  <FieldTip>
+                    Flip the record over and repeat — look at the dead wax on the B side
+                    label. The B side matrix usually has a "2" instead of "1" in the
+                    sequence — e.g. "AL 35709-2A". You may also see additional markings
+                    like "STERLING" or "RL" — these are mastering engineer signatures and
+                    are worth noting. Type everything you see and we'll sort out what's
+                    what.
+                  </FieldTip>
+                )}
               </div>
               <div className="font-mono text-[9px] italic text-ink/60 mb-2">
                 Look near the {side} label
