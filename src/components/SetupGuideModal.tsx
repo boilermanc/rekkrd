@@ -278,12 +278,12 @@ const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ guide, loading, isOpe
                   <div className="glass-morphism rounded-xl border border-th-surface/[0.06] divide-y divide-th-surface/[0.06]">
                     {guide.settings.map((s, i) => (
                       <div key={i} className="p-4 space-y-1">
-                        <div className="flex items-baseline justify-between gap-4">
-                          <div>
+                        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-4">
+                          <div className="min-w-0">
                             <span className="text-th-text font-bold text-sm">{s.gear}</span>
                             <span className="text-th-text3/70 text-sm"> — {s.setting}</span>
                           </div>
-                          <span className="text-[#f0a882] font-bold text-sm whitespace-nowrap">{s.recommended_value}</span>
+                          <span className="text-[#f0a882] font-bold text-sm">{s.recommended_value}</span>
                         </div>
                         <p className="text-th-text/70 text-xs leading-relaxed">{s.explanation}</p>
                       </div>
