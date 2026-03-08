@@ -18,6 +18,8 @@ import { sortBySignalFlow } from '../config/signalChainOrder';
 import SignalChainDiagram from './stakkd/SignalChainDiagram';
 import MyRoomsSection from './stakkd/MyRoomsSection';
 import ChainInsightsPanel from './stakkd/ChainInsightsPanel';
+import SystemGoalsStep from './stakkd/SystemGoalsStep';
+import type { SystemGoals } from './stakkd/SystemGoalsStep';
 import { Sparkles, HelpCircle } from 'lucide-react';
 import StakkdOnboarding from './StakkdOnboarding';
 import StakkdGuideModal from './StakkdGuideModal';
@@ -166,6 +168,8 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
   const [chainAnalysis, setChainAnalysis] = useState<ChainAnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const analysisCacheRef = useRef<AnalysisCache | null>(null);
+  const [systemGoals, setSystemGoals] = useState<SystemGoals | null>(null);
+  const [showGoalsStep, setShowGoalsStep] = useState(false);
 
   // Saved guides state
   const [savedGuides, setSavedGuides] = useState<SavedGuide[]>([]);
@@ -493,11 +497,11 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
 
   // ── Chain Analysis ──────────────────────────────────────────────
 
-  const handleAnalyzeChain = useCallback(async () => {
-    // Check client-side cache
+  const handleAnalyzeChain = useCallback(async (goals?: SystemGoals | null) => {
+    // Check client-side cache (only when no goals — goals change the prompt)
     const currentHash = hashGear(gear);
     const cached = analysisCacheRef.current;
-    if (cached && cached.gearHash === currentHash && Date.now() - cached.timestamp < ANALYSIS_CACHE_TTL) {
+    if (!goals && cached && cached.gearHash === currentHash && Date.now() - cached.timestamp < ANALYSIS_CACHE_TTL) {
       setChainAnalysis(cached.analysis);
       showToast('Analysis loaded from cache.', 'success');
       return;
@@ -516,10 +520,13 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
         notes: g.notes,
       }));
 
+      const body: Record<string, unknown> = { gear: payload };
+      if (goals) body.goals = goals;
+
       const resp = await fetch('/api/analyze-chain', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ gear: payload }),
+        body: JSON.stringify(body),
       });
 
       if (!resp.ok) {
@@ -530,8 +537,10 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
       const analysis: ChainAnalysisResult = await resp.json();
       setChainAnalysis(analysis);
 
-      // Update cache
-      analysisCacheRef.current = { gearHash: currentHash, analysis, timestamp: Date.now() };
+      // Update cache (skip caching when goals were provided)
+      if (!goals) {
+        analysisCacheRef.current = { gearHash: currentHash, analysis, timestamp: Date.now() };
+      }
 
       showToast('Analysis complete.', 'success');
     } catch (err) {
@@ -946,7 +955,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
           {/* Analyze button — only with 2+ gear */}
           {gear.length >= 2 && (
             <button
-              onClick={handleAnalyzeChain}
+              onClick={() => setShowGoalsStep(true)}
               disabled={isAnalyzing}
               aria-label="Analyze your signal chain for compatibility and recommendations"
               aria-busy={isAnalyzing}
@@ -1123,6 +1132,22 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
         isOpen={signalChainGuideOpen}
         onClose={() => setSignalChainGuideOpen(false)}
       />
+
+      {/* System Goals step — shown before AI analysis */}
+      {showGoalsStep && (
+        <SystemGoalsStep
+          gearItems={gear.map(g => ({ id: g.id, name: `${g.brand} ${g.model}` }))}
+          onComplete={(goals) => {
+            setSystemGoals(goals);
+            setShowGoalsStep(false);
+            handleAnalyzeChain(goals);
+          }}
+          onSkip={() => {
+            setShowGoalsStep(false);
+            handleAnalyzeChain(null);
+          }}
+        />
+      )}
 
       {/* Upgrade banner for free-tier users */}
       {isFreeTier && !bannerDismissed && (

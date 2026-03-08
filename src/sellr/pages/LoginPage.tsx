@@ -5,6 +5,27 @@ import SellrLayout from '../components/SellrLayout';
 import { useSellrMeta } from '../hooks/useSellrMeta';
 import Turnstile from '../../components/Turnstile';
 
+const PasswordToggle = ({ visible, onClick }: { visible: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="absolute right-3 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-80"
+    aria-label={visible ? 'Hide password' : 'Show password'}
+    tabIndex={-1}
+  >
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="#1a6b8a" strokeWidth="1.5" fill="none" />
+      <circle cx="12" cy="12" r="7.5" stroke="#1a6b8a" strokeWidth="0.75" opacity="0.5" fill="none" />
+      <circle cx="12" cy="12" r="5.5" stroke="#1a6b8a" strokeWidth="0.75" opacity="0.4" fill="none" />
+      <circle cx="12" cy="12" r="3.5" fill="#1a6b8a" opacity="0.4" />
+      <circle cx="12" cy="12" r="1.2" fill="#4f6d7a" />
+      {visible && (
+        <line x1="4" y1="4" x2="20" y2="20" stroke="#1a6b8a" strokeWidth="2" strokeLinecap="round" />
+      )}
+    </svg>
+  </button>
+);
+
 const LoginPage: React.FC = () => {
   useSellrMeta({
     title: 'Sign In',
@@ -16,6 +37,7 @@ const LoginPage: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -170,16 +192,19 @@ const LoginPage: React.FC = () => {
                   <label htmlFor="sellr-login-password" className="block text-sm font-medium text-sellr-charcoal mb-1.5">
                     Password
                   </label>
-                  <input
-                    id="sellr-login-password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full bg-white border border-sellr-charcoal/10 rounded-lg p-3 text-sm text-sellr-charcoal placeholder:text-sellr-charcoal/40 focus:outline-none focus:ring-2 focus:ring-sellr-blue transition-colors"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      id="sellr-login-password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="w-full bg-white border border-sellr-charcoal/10 rounded-lg p-3 pr-10 text-sm text-sellr-charcoal placeholder:text-sellr-charcoal/40 focus:outline-none focus:ring-2 focus:ring-sellr-blue transition-colors"
+                      placeholder="••••••••"
+                    />
+                    <PasswordToggle visible={showPassword} onClick={() => setShowPassword(v => !v)} />
+                  </div>
                   <div className="text-right mt-1">
                     <Link
                       to="/reset-password"

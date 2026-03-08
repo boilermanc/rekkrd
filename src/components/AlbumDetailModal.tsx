@@ -233,43 +233,12 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
     showToast('Pressing details applied.', 'success');
   };
 
-  const collectionStats = useMemo(() => {
-    const genreCount = allAlbums.filter(a => a.genre === album.genre).length;
-    const sortedAlbums = [...allAlbums].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-    const indexInArchive = sortedAlbums.findIndex(a => a.id === album.id) + 1;
-
-    return {
-      genreCount,
-      indexInArchive,
-      totalInCrate: allAlbums.length
-    };
-  }, [allAlbums, album]);
-
   const relatedAlbums = useMemo(() => {
     return allAlbums
       .filter(a => a.id !== album.id && (a.genre === album.genre || a.artist === album.artist))
       .slice(0, 10);
   }, [allAlbums, album]);
 
-  const handlePlaySample = () => {
-    const currentPlays = album.play_count || 0;
-    onUpdateAlbum?.(album.id, { play_count: currentPlays + 1 });
-    void engagementService.logEvent(album.id, 'play_logged');
-    if (album.sample_url) {
-      try {
-        const parsed = new URL(album.sample_url);
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-          showToast('Invalid sample URL.', 'error');
-          return;
-        }
-        window.open(album.sample_url, '_blank', 'noopener,noreferrer');
-      } catch {
-        showToast('Invalid sample URL.', 'error');
-      }
-    } else {
-      showToast('Sample playback not available.', 'info');
-    }
-  };
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'Not Recorded';
@@ -610,9 +579,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 </svg>
                 {spinRecorded ? 'Spin Logged!' : isSpinning ? 'Spinning' : 'Now Spinning'}
               </button>
-              <button onClick={handlePlaySample} className="flex-1 border border-th-surface/[0.10] text-th-text font-bold py-4 rounded-xl hover:bg-th-surface/[0.08] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3">
-                Listen Sample
-              </button>
+
               <button
                 onClick={() => onMoreLikeThis?.(album)}
                 className="flex items-center justify-center gap-3 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
@@ -623,7 +590,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                 </svg>
                 SESSION
               </button>
-              {onAddToWantlist && (
+              {onAddToWantlist && !album.created_at && (
                 <button
                   onClick={() => onAddToWantlist(album)}
                   className="flex items-center justify-center gap-3 flex-1 py-4 rounded-xl bg-th-surface/[0.08] border border-th-surface/[0.15] text-th-text3 hover:text-th-text hover:border-th-text font-label text-[10px] tracking-widest uppercase font-bold transition-all active:scale-95"
@@ -662,18 +629,6 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
                       <p className="text-sm font-bold text-th-text font-mono">{album.matrix}</p>
                     </div>
                   )}
-                </div>
-              </div>
-              <div className="glass-morphism p-6 rounded-2xl border border-th-surface/[0.06] space-y-6">
-                <h5 className="text-th-text3 text-[9px] uppercase tracking-widest border-b border-th-surface/[0.06] pb-2">Density</h5>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-[9px] uppercase tracking-widest text-th-text3">
-                    <span>{album.genre} Presence</span>
-                    <span>{collectionStats.genreCount} items</span>
-                  </div>
-                  <div className="h-1 w-full bg-th-surface/[0.04] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#dd6e42]" style={{width: `${(collectionStats.genreCount/collectionStats.totalInCrate)*100}%`}}></div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -805,17 +760,21 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
               <section>
                 <div className="flex items-center gap-1.5 mb-4">
                   <h4 className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase">Deadwax / Matrix</h4>
-                  <div className="relative group">
-                    <span
+                  <div className="relative">
+                    <button
+                      type="button"
                       className="text-th-muted cursor-help text-xs"
                       aria-label="What is deadwax?"
+                      onClick={() => setShowMatrixTip(v => !v)}
                     >
                       ⓘ
-                    </span>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-th-surface border border-th-surface/20 p-2.5 text-xs text-th-muted shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-10">
-                      The etching scratched into the runout groove of a vinyl record.
-                      Identifies the specific pressing — e.g. BSK-3010 1A TML-M.
-                    </div>
+                    </button>
+                    {showMatrixTip && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-th-surface border border-th-surface/20 p-2.5 text-xs text-th-muted shadow-lg z-10">
+                        The etching scratched into the runout groove of a vinyl record.
+                        Identifies the specific pressing — e.g. BSK-3010 1A TML-M.
+                      </div>
+                    )}
                   </div>
                 </div>
                 <input

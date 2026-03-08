@@ -127,7 +127,7 @@ router.post(
     }
 
     try {
-      const { gear } = req.body;
+      const { gear, goals } = req.body;
 
       // Validate gear array
       if (!Array.isArray(gear) || gear.length === 0) {
@@ -164,12 +164,43 @@ router.post(
         return parts.join(' | ');
       }).join('\n');
 
+      // Build optional system goals context
+      let goalsContext = '';
+      if (goals && typeof goals === 'object') {
+        const { useCases, listeningPriority, specialistRoles } = goals as {
+          useCases?: string[];
+          listeningPriority?: string;
+          specialistRoles?: { gearId: string; gearName: string; role: string }[];
+        };
+        if (Array.isArray(useCases) && useCases.length > 0) {
+          goalsContext += `\nUser system goals and context:\n`;
+          goalsContext += `- Use cases: ${useCases.join(', ')}\n`;
+        }
+        if (typeof listeningPriority === 'string' && listeningPriority) {
+          if (!goalsContext) goalsContext += `\nUser system goals and context:\n`;
+          goalsContext += `- Listening priority: ${listeningPriority}\n`;
+        }
+        if (Array.isArray(specialistRoles) && specialistRoles.length > 0) {
+          if (!goalsContext) goalsContext += `\nUser system goals and context:\n`;
+          goalsContext += `- Specialist component roles:\n`;
+          for (const r of specialistRoles) {
+            if (r.gearName) {
+              goalsContext += `  • ${r.gearName}: ${r.role || 'specialist/dedicated role'}\n`;
+            }
+          }
+        }
+        if (goalsContext) {
+          goalsContext += `\nIMPORTANT: Respect these stated roles. Do not recommend removing or replacing components the user has identified as serving a specific purpose. Frame recommendations around the user's goals, not a generic ideal setup.\n`;
+        }
+      }
+
       const systemPrompt =
         'You are an expert audio equipment consultant specializing in hi-fi, vinyl playback, and home audio systems. '
         + 'You analyze signal chains — the path audio takes from source to speakers — and provide practical advice.\n\n'
         + 'The valid gear categories in signal chain order are:\n'
         + SIGNAL_CHAIN_CATEGORIES.map((c, i) => `${i + 1}. ${c}`).join('\n')
         + '\n\n'
+        + goalsContext
         + 'Analyze the following gear list and return a JSON assessment.\n\n'
         + 'Rules:\n'
         + '- overall_rating must be one of: "excellent", "good", "needs_attention", "incomplete"\n'
