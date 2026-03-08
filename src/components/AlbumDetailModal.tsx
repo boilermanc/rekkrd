@@ -69,6 +69,7 @@ const AlbumDetailModal: React.FC<AlbumDetailModalProps> = ({
   useFocusTrap(modalRef, stableOnClose);
   const [notes, setNotes] = useState(album.personal_notes || '');
   const [matrix, setMatrix] = useState(album.matrix || '');
+  const [showMatrixTip, setShowMatrixTip] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [pressingResults, setPressingResults] = useState<PressingResult[] | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
