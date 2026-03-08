@@ -298,16 +298,16 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             aria-hidden="true"
           />
 
-          {/* Search panel */}
+          {/* Search panel — full height with sticky header + footer */}
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Search collection"
             tabIndex={-1}
-            className={`relative z-10 flex flex-col transition-transform duration-200 ease-out ${overlayVisible ? 'translate-y-0' : '-translate-y-full'}`}
+            className={`relative z-10 flex flex-col h-full transition-transform duration-200 ease-out ${overlayVisible ? 'translate-y-0' : '-translate-y-full'}`}
           >
-            {/* Header row */}
-            <div className="flex items-center gap-3 px-4 py-4 bg-th-bg border-b border-th-surface/[0.10]">
+            {/* Sticky header: back + search input */}
+            <div className="flex items-center gap-3 px-4 py-4 bg-th-bg border-b border-th-surface/[0.10] flex-shrink-0">
               <button
                 onClick={closeMobileSearch}
                 className="p-2 rounded-full text-th-text2 hover:text-th-text active:bg-th-surface/[0.06] transition-colors flex-shrink-0"
@@ -318,7 +318,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 </svg>
               </button>
 
-              {/* Large search input */}
               <div className="flex-1 relative">
                 <input
                   ref={mobileSearchInputRef}
@@ -346,9 +345,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
             </div>
 
-            {/* Filter options */}
+            {/* Scrollable filter options */}
             {filters && setFilter && clearAllFilters && available && (
-              <div className="bg-th-bg overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - 100px)' }}>
+              <div className="flex-1 bg-th-bg overflow-y-auto overscroll-contain">
                 <FilterPanel
                   filters={filters}
                   setFilter={setFilter}
@@ -359,6 +358,16 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 />
               </div>
             )}
+
+            {/* Sticky footer: Show Results button */}
+            <div className="flex-shrink-0 bg-th-bg border-t border-th-surface/[0.10] px-4 py-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+              <button
+                onClick={closeMobileSearch}
+                className="w-full bg-[#dd6e42] text-white rounded-full py-3.5 text-base font-label tracking-wide active:bg-[#c45a30] transition-colors"
+              >
+                Show Results
+              </button>
+            </div>
           </div>
         </div>
       )}
