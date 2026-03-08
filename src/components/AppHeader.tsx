@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import type { ViewMode } from '../hooks/useAppNavigation';
+import type { CollectionFilters } from '../hooks/useCollectionFilters';
 import type { GatedFeature } from '../contexts/SubscriptionContext';
 import PlanBadge from './PlanBadge';
 import NavToolsDropdown from './NavToolsDropdown';
+import { FilterPanel } from './FilterDropdown';
 import { User } from 'lucide-react';
 
 interface AppHeaderProps {
@@ -28,6 +30,17 @@ interface AppHeaderProps {
   toggleTheme: () => void;
   signOut: () => void;
   filterDropdown?: React.ReactNode;
+  filters?: CollectionFilters;
+  setFilter?: <K extends keyof CollectionFilters>(key: K, value: CollectionFilters[K]) => void;
+  clearAllFilters?: () => void;
+  available?: {
+    genres: string[];
+    formats: string[];
+    decades: string[];
+    conditions: string[];
+    labels: string[];
+    tags: string[];
+  };
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
@@ -38,6 +51,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   canUse, setUpgradeFeature,
   navigate, wantlistCount, priceAlertCount, albumCount, activeFilterCount,
   theme, toggleTheme, signOut, filterDropdown,
+  filters, setFilter, clearAllFilters, available,
 }) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -332,14 +346,19 @@ const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
             </div>
 
-            {/* Hint */}
-            <div className="px-6 pt-6 pb-4 bg-th-bg">
-              <p className="text-th-text3/60 text-sm">
-                {searchQuery
-                  ? 'Filtering your collection…'
-                  : 'Type to search titles, artists, genres, and more.'}
-              </p>
-            </div>
+            {/* Filter options */}
+            {filters && setFilter && clearAllFilters && available && (
+              <div className="bg-th-bg overflow-y-auto overscroll-contain" style={{ maxHeight: 'calc(100vh - 100px)' }}>
+                <FilterPanel
+                  filters={filters}
+                  setFilter={setFilter}
+                  clearAll={clearAllFilters}
+                  activeFilterCount={activeFilterCount}
+                  available={available}
+                  onClose={closeMobileSearch}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

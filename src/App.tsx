@@ -637,6 +637,17 @@ const App: React.FC = () => {
         theme={theme}
         toggleTheme={toggleTheme}
         signOut={signOut}
+        filters={filters}
+        setFilter={setFilter}
+        clearAllFilters={clearAllFilters}
+        available={{
+          genres: availableOptions.availableGenres,
+          formats: availableOptions.availableFormats,
+          decades: availableOptions.availableDecades,
+          conditions: availableOptions.availableConditions,
+          labels: availableOptions.availableLabels,
+          tags: availableOptions.availableTags,
+        }}
         filterDropdown={
           (currentView === 'grid' || currentView === 'list') ? (
             <FilterDropdown

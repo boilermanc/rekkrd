@@ -3,7 +3,7 @@ import { SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { CONDITION_GRADES } from '../constants/conditionGrades';
 import type { CollectionFilters } from '../hooks/useCollectionFilters';
 
-interface FilterDropdownProps {
+export interface FilterDropdownProps {
   filters: CollectionFilters;
   setFilter: <K extends keyof CollectionFilters>(key: K, value: CollectionFilters[K]) => void;
   clearAll: () => void;
@@ -305,6 +305,16 @@ function FilterPanelContent({
       )}
     </>
   );
+}
+
+/** Standalone filter panel for use outside the dropdown (e.g. mobile search overlay). */
+export function FilterPanel({ onClose, ...props }: FilterDropdownProps & { onClose: () => void }) {
+  const sortedConditions = props.available.conditions.slice().sort((a, b) => {
+    const ai = GOLDMINE_ORDER.indexOf(a as typeof GOLDMINE_ORDER[number]);
+    const bi = GOLDMINE_ORDER.indexOf(b as typeof GOLDMINE_ORDER[number]);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+  return <FilterPanelContent {...props} sortedConditions={sortedConditions} onClose={onClose} />;
 }
 
 export default function FilterDropdown(props: FilterDropdownProps) {
