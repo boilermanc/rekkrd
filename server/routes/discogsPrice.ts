@@ -65,15 +65,20 @@ router.get(
         try {
           const stats = await discogsRequest<{
             lowest_price?: { value: number; currency: string };
+            median_price?: { value: number; currency: string };
+            highest_price?: { value: number; currency: string };
             num_for_sale?: number;
           }>(`/marketplace/stats/${releaseId}`, {});
 
           // Convert stats into a price-suggestions-like shape so the frontend works
-          if (stats.lowest_price) {
-            data = { _stats: { lowest_price: stats.lowest_price.value, num_for_sale: stats.num_for_sale ?? 0 } };
-          } else {
-            data = { _stats: { lowest_price: null, num_for_sale: 0 } };
-          }
+          data = {
+            _stats: {
+              lowest_price: stats.lowest_price?.value ?? null,
+              median_price: stats.median_price?.value ?? null,
+              highest_price: stats.highest_price?.value ?? null,
+              num_for_sale: stats.num_for_sale ?? 0,
+            }
+          };
           source = 'stats';
         } catch {
           res.status(404).json({ error: 'Release not found on Discogs' });

@@ -10,7 +10,12 @@ interface CollectionValueTileProps {
 }
 
 interface PriceData {
-  [key: string]: { value: number } | { lowest_price: number | null; num_for_sale: number };
+  [key: string]: { value: number } | {
+    lowest_price: number | null;
+    median_price: number | null;
+    highest_price: number | null;
+    num_for_sale: number;
+  };
 }
 
 interface AlbumWithPrice extends Album {
@@ -67,8 +72,8 @@ const CollectionValueTile: React.FC<CollectionValueTileProps> = ({
           const conditionKey = CONDITION_BY_VALUE[album.condition as ConditionGrade]?.discogsKey;
           const conditionEntry = conditionKey ? priceData[conditionKey] : undefined;
           const conditionValue = conditionEntry && 'value' in conditionEntry ? conditionEntry.value : undefined;
-          const statsEntry = priceData._stats as { lowest_price: number | null; num_for_sale: number } | undefined;
-          const medianValue = conditionValue ?? statsEntry?.lowest_price ?? 0;
+          const statsEntry = priceData._stats as { lowest_price: number | null; median_price: number | null; highest_price: number | null; num_for_sale: number } | undefined;
+          const medianValue = conditionValue ?? statsEntry?.median_price ?? statsEntry?.lowest_price ?? 0;
 
           results.push({
             ...album,

@@ -5,7 +5,12 @@ import { supabase } from '../services/supabaseService';
 import GradingSheet from './GradingSheet';
 
 interface PriceData {
-  [key: string]: { value: number } | { lowest_price: number | null; num_for_sale: number };
+  [key: string]: { value: number } | {
+    lowest_price: number | null;
+    median_price: number | null;
+    highest_price: number | null;
+    num_for_sale: number;
+  };
 }
 
 interface MyCopyTabProps {
@@ -126,12 +131,22 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
           setPriceValue(conditionEntry.value);
           setPriceLabel('Discogs median');
         } else if (data.prices._stats) {
-          // Fallback: marketplace stats (lowest listing price)
-          const stats = data.prices._stats as { lowest_price: number | null; num_for_sale: number };
+          // Fallback: marketplace stats (prefer median over lowest)
+          const stats = data.prices._stats as {
+            lowest_price: number | null;
+            median_price: number | null;
+            highest_price: number | null;
+            num_for_sale: number;
+          };
           console.log('[MyCopyTab] Got stats fallback:', stats);
-          if (stats.lowest_price) {
-            setPriceValue(stats.lowest_price);
-            setPriceLabel(`From ${stats.num_for_sale} listing${stats.num_for_sale !== 1 ? 's' : ''}`);
+          const fallbackPrice = stats.median_price ?? stats.lowest_price;
+          if (fallbackPrice) {
+            setPriceValue(fallbackPrice);
+            setPriceLabel(
+              stats.median_price
+                ? 'Discogs median'
+                : `From ${stats.num_for_sale} listing${stats.num_for_sale !== 1 ? 's' : ''}`
+            );
           }
         }
       } catch (err) {
@@ -536,18 +551,18 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
             <div className="flex items-center justify-between border-b border-[#ede4d3]" style={{ padding: '12px 14px' }}>
               <span className="font-mono text-[10px] tracking-[1.5px] uppercase text-[#9a8f80]">Country</span>
               {editingField === 'pressing_country' ? (
-                <input
-                  type="text"
+                <select
                   autoFocus
                   defaultValue={album.pressing_country || ''}
+                  onChange={(e) => handleFieldUpdate('pressing_country', e.target.value || null)}
                   onBlur={(e) => handleFieldUpdate('pressing_country', e.target.value || null)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleFieldUpdate('pressing_country', e.currentTarget.value || null);
-                    }
-                  }}
                   className="font-serif text-[15px] text-[#2a2016] bg-transparent border-none outline-none text-right"
-                />
+                >
+                  <option value="">—</option>
+                  {['United States', 'United Kingdom', 'Germany', 'Japan', 'France', 'Italy', 'Netherlands', 'Canada', 'Australia', 'Brazil', 'Spain', 'Belgium', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Switzerland', 'Austria', 'Poland', 'Czechoslovakia', 'USSR', 'South Africa', 'New Zealand', 'Argentina', 'Mexico', 'Other'].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               ) : (
                 <span
                   onClick={() => setEditingField('pressing_country')}
@@ -564,6 +579,8 @@ const MyCopyTab: React.FC<MyCopyTabProps> = ({
               {editingField === 'pressing_year' ? (
                 <input
                   type="number"
+                  min={1900}
+                  max={2030}
                   autoFocus
                   defaultValue={album.pressing_year || ''}
                   onBlur={(e) => handleFieldUpdate('pressing_year', parseInt(e.target.value) || null)}

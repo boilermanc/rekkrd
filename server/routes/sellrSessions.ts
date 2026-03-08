@@ -1,8 +1,8 @@
 import { Router, type Request, type Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import { sendSessionCreatedEmail } from '../sellrEmails.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
 import { errorResponse } from '../utils/errorResponse.js';
+import { getSlotStatus } from '../sellrSlots.js';
 
 const router = Router();
 
@@ -54,16 +54,9 @@ router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
       .maybeSingle();
 
     if (!existingActive) {
-      const { data: slotsData, error: slotsErr } = await supabase
-        .rpc('sellr_slots_available', { uid: user.id });
+      const slotStatus = await getSlotStatus(user.id);
 
-      if (slotsErr) {
-        console.error('[sellr] Failed to check slots:', slotsErr.message);
-        errorResponse(res, 500, 'Failed to verify slot availability');
-        return;
-      }
-
-      if (slotsData === 0) {
+      if (slotStatus.slots_remaining <= 0) {
         res.status(402).json({ error: 'No slots remaining', code: 'NO_SLOTS' });
         return;
       }
