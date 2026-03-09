@@ -26,7 +26,7 @@ router.post(
     if (!sub) return;
 
     try {
-      const { gear } = req.body;
+      const { gear, goals } = req.body;
 
       if (!Array.isArray(gear)) {
         res.status(400).json({ error: 'Missing gear array' });
@@ -68,10 +68,40 @@ router.post(
         return line;
       }).join('\n');
 
+      // Build optional goals context
+      let goalsContext = '';
+      if (goals && typeof goals === 'object') {
+        const { useCases, listeningPriority, specialistRoles } = goals as {
+          useCases?: string[];
+          listeningPriority?: string;
+          specialistRoles?: { gearId: string; gearName: string; role: string }[];
+        };
+        if (Array.isArray(useCases) && useCases.length > 0) {
+          goalsContext += `\nUser system goals and context:\n`;
+          goalsContext += `- Use cases: ${useCases.join(', ')}\n`;
+        }
+        if (typeof listeningPriority === 'string' && listeningPriority) {
+          if (!goalsContext) goalsContext += `\nUser system goals and context:\n`;
+          goalsContext += `- Listening priority: ${listeningPriority}\n`;
+        }
+        if (Array.isArray(specialistRoles) && specialistRoles.length > 0) {
+          if (!goalsContext) goalsContext += `\nUser system goals and context:\n`;
+          goalsContext += `- Specialist component roles:\n`;
+          for (const r of specialistRoles) {
+            if (r.gearName) {
+              goalsContext += `  • ${r.gearName}: ${r.role || 'specialist/dedicated role'}\n`;
+            }
+          }
+        }
+        if (goalsContext) {
+          goalsContext += `\nIMPORTANT: Tailor the setup guide to the user's stated goals and use cases. Respect specialist roles — do not suggest removing or bypassing components the user has identified as serving a specific purpose.\n`;
+        }
+      }
+
       const prompt = `You are an expert audio engineer and hi-fi setup consultant. A user has the following audio gear, listed in their preferred signal chain order:
 
 ${gearDescription}
-
+${goalsContext}
 Generate a comprehensive wiring and setup guide for this specific combination of equipment. Return JSON with these fields:
 
 1. signal_chain: string[] — The recommended signal path in order. Each entry should be formatted as "Brand Model (Category)", e.g. "Technics SL-1200MK7 (Turntable)". If the user's order makes sense, preserve it. If it doesn't (e.g. speakers before amp), correct it and note why in the warnings.

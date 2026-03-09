@@ -343,12 +343,15 @@ export const geminiService = {
     }
   },
 
-  async generateSetupGuide(gear: Array<{ category: string; brand: string; model: string; specs?: Record<string, unknown> }>): Promise<SetupGuide> {
+  async generateSetupGuide(gear: Array<{ category: string; brand: string; model: string; specs?: Record<string, unknown> }>, goals?: { useCases: string[]; listeningPriority: string; specialistRoles: { gearId: string; gearName: string; role: string }[] }): Promise<SetupGuide> {
     try {
+      const body: Record<string, unknown> = { gear };
+      if (goals) body.goals = goals;
+
       const response = await fetch('/api/setup-guide', {
         method: 'POST',
         headers: await getAuthHeaders(),
-        body: JSON.stringify({ gear }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {

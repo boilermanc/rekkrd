@@ -170,6 +170,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
   const analysisCacheRef = useRef<AnalysisCache | null>(null);
   const [systemGoals, setSystemGoals] = useState<SystemGoals | null>(null);
   const [showGoalsStep, setShowGoalsStep] = useState(false);
+  const goalsActionRef = useRef<'analyze' | 'guide'>('analyze');
 
   // Saved guides state
   const [savedGuides, setSavedGuides] = useState<SavedGuide[]>([]);
@@ -460,7 +461,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
 
   // ── Setup Guide ─────────────────────────────────────────────────
 
-  const handleGenerateGuide = useCallback(async () => {
+  const handleGenerateGuide = useCallback(async (goals?: SystemGoals | null) => {
     // Plan gate — free users get upgrade prompt
     if (!canUse('setup_guide')) {
       onUpgradeRequired?.('setup_guide');
@@ -479,7 +480,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
         model: g.model,
         specs: g.specs,
       }));
-      const guide = await geminiService.generateSetupGuide(payload);
+      const guide = await geminiService.generateSetupGuide(payload, goals ?? undefined);
       setSetupGuide(guide);
     } catch (err) {
       if (err instanceof UpgradeRequiredError) {
@@ -771,7 +772,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
             Signal Chain Guide
           </button>
           <button
-            onClick={gear.length >= 2 ? handleGenerateGuide : undefined}
+            onClick={gear.length >= 2 ? () => { goalsActionRef.current = 'guide'; setShowGoalsStep(true); } : undefined}
             disabled={gear.length < 2 || isGuideLoading}
             title={gear.length === 0
               ? 'Add gear to your Stakkd to generate a setup guide'
@@ -955,7 +956,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
           {/* Analyze button — only with 2+ gear */}
           {gear.length >= 2 && (
             <button
-              onClick={() => setShowGoalsStep(true)}
+              onClick={() => { goalsActionRef.current = 'analyze'; setShowGoalsStep(true); }}
               disabled={isAnalyzing}
               aria-label="Analyze your signal chain for compatibility and recommendations"
               aria-busy={isAnalyzing}
@@ -1133,18 +1134,26 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
         onClose={() => setSignalChainGuideOpen(false)}
       />
 
-      {/* System Goals step — shown before AI analysis */}
+      {/* System Goals step — shown before AI analysis or setup guide */}
       {showGoalsStep && (
         <SystemGoalsStep
           gearItems={gear.map(g => ({ id: g.id, name: `${g.brand} ${g.model}` }))}
           onComplete={(goals) => {
             setSystemGoals(goals);
             setShowGoalsStep(false);
-            handleAnalyzeChain(goals);
+            if (goalsActionRef.current === 'guide') {
+              handleGenerateGuide(goals);
+            } else {
+              handleAnalyzeChain(goals);
+            }
           }}
           onSkip={() => {
             setShowGoalsStep(false);
-            handleAnalyzeChain(null);
+            if (goalsActionRef.current === 'guide') {
+              handleGenerateGuide(null);
+            } else {
+              handleAnalyzeChain(null);
+            }
           }}
         />
       )}
