@@ -2,7 +2,6 @@ import { Router, type Request, type Response } from 'express';
 import { sendSessionCreatedEmail } from '../sellrEmails.js';
 import { requireSupabaseAdmin } from '../lib/supabaseAdmin.js';
 import { errorResponse } from '../utils/errorResponse.js';
-import { getSlotStatus } from '../sellrSlots.js';
 
 const router = Router();
 
@@ -43,26 +42,10 @@ router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
       return;
     }
 
-    // ── Slots check ──
-    // Allow creation if user already has an active session (returning to continue)
-    const { data: existingActive } = await supabase
-      .from('sellr_sessions')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .limit(1)
-      .maybeSingle();
-
-    if (!existingActive) {
-      const slotStatus = await getSlotStatus(user.id);
-
-      if (slotStatus.slots_remaining <= 0) {
-        res.status(402).json({ error: 'No slots remaining', code: 'NO_SLOTS' });
-        return;
-      }
-    }
-
     // ── Create session ──
+    // Slots are enforced at scan time (sellrRecords.ts), not session creation.
+    // The session must exist before checkout so the session ID can be passed
+    // to Stripe. Slots are added by the payment webhook after checkout.
     const insert: Record<string, unknown> = { status: 'active', user_id: user.id };
     if (email && typeof email === 'string') insert.email = email;
     if (tier) insert.tier = tier;
