@@ -353,64 +353,115 @@ const StepPickPlan: React.FC<StepProps> = ({ state, setState, onNext }) => {
 
 // ── Step 3 — How to Scan ─────────────────────────────────────────────
 
-const SCAN_TIPS = [
-  {
-    icon: Sun,
-    iconColor: 'text-sellr-amber',
-    title: 'Good lighting makes all the difference',
-    body: 'Natural light or a well-lit room works best. Avoid harsh shadows across the album cover.',
-  },
-  {
-    icon: ScanLine,
-    iconColor: 'text-sellr-blue',
-    title: 'Photograph straight on',
-    body: 'Hold your phone parallel to the record. The full cover should fill the frame — no angles.',
-  },
-  {
-    icon: Tag,
-    iconColor: 'text-sellr-sage',
-    title: 'Show the label if you can',
-    body: 'Flipping to show the record label helps identify pressings and can significantly affect value.',
-  },
-] as const;
-
 type ScanMethod = 'camera' | 'search';
+
+const SCAN_TIPS: Record<ScanMethod, { icon: typeof Camera; iconColor: string; title: string; body: string }[]> = {
+  camera: [
+    {
+      icon: Sun,
+      iconColor: 'text-sellr-amber',
+      title: 'Good lighting makes all the difference',
+      body: 'Natural light or a well-lit room works best. Avoid harsh shadows across the album cover.',
+    },
+    {
+      icon: ScanLine,
+      iconColor: 'text-sellr-blue',
+      title: 'Photograph straight on',
+      body: 'Hold your phone parallel to the record. The full cover should fill the frame — no angles.',
+    },
+    {
+      icon: Tag,
+      iconColor: 'text-sellr-sage',
+      title: 'Show the label if you can',
+      body: 'Flipping to show the record label helps identify pressings and can significantly affect value.',
+    },
+  ],
+  search: [
+    {
+      icon: Search,
+      iconColor: 'text-sellr-blue',
+      title: 'Search by artist and title',
+      body: 'Type the artist name and album title. Sellr will find matching releases on Discogs automatically.',
+    },
+    {
+      icon: Tag,
+      iconColor: 'text-sellr-sage',
+      title: 'Pick the right pressing',
+      body: 'Multiple pressings may appear — choose the one that matches your copy for the most accurate pricing.',
+    },
+    {
+      icon: Sun,
+      iconColor: 'text-sellr-amber',
+      title: 'Great for hard-to-photograph records',
+      body: 'Picture discs, box sets, or records without standard covers are easier to add by title.',
+    },
+  ],
+};
 
 const SCAN_METHODS: {
   id: ScanMethod;
   icon: typeof Camera;
   label: string;
-  subtext: string;
 }[] = [
   {
     id: 'camera',
     icon: Camera,
     label: 'Photograph Records',
-    subtext: 'Point and shoot — AI identifies the record instantly',
   },
   {
     id: 'search',
     icon: Search,
     label: 'Search by Title',
-    subtext: 'Type the artist and title to find and add records',
   },
 ];
 
 const StepHowToScan: React.FC<StepProps> = ({ onNext }) => {
   const [method, setMethod] = useState<ScanMethod>('camera');
 
+  const tips = SCAN_TIPS[method];
+
   return (
     <div>
       <h2 className="font-display text-[clamp(1.5rem,5vw,2rem)] leading-tight text-sellr-charcoal text-center">
-        Scanning your records
+        Adding your records
       </h2>
       <p className="mt-3 text-sellr-charcoal/60 text-center">
-        Get the best results with these quick tips.
+        Choose a method to see tips for getting the best results.
       </p>
 
-      {/* Tip cards */}
-      <div className="mt-10 space-y-3">
-        {SCAN_TIPS.map((tip) => {
+      {/* Scan method selector */}
+      <div className="mt-8">
+        <div className="grid grid-cols-2 gap-3">
+          {SCAN_METHODS.map((opt) => {
+            const Icon = opt.icon;
+            const active = method === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setMethod(opt.id)}
+                className={`flex flex-col items-center text-center p-4 rounded-lg transition-all duration-150 ${
+                  active
+                    ? 'bg-sellr-blue/5 border-2 border-sellr-blue'
+                    : 'bg-sellr-surface border-2 border-transparent hover:border-sellr-blue/40'
+                }`}
+              >
+                <Icon
+                  className="w-7 h-7 text-sellr-blue mb-2"
+                  strokeWidth={1.5}
+                />
+                <span className="font-semibold text-sellr-charcoal text-sm">
+                  {opt.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tip cards — swap based on selected method */}
+      <div className="mt-6 space-y-3">
+        {tips.map((tip) => {
           const Icon = tip.icon;
           return (
             <div
@@ -434,48 +485,12 @@ const StepHowToScan: React.FC<StepProps> = ({ onNext }) => {
         })}
       </div>
 
-      {/* Scan method selector */}
-      <div className="mt-10">
-        <p className="font-display text-lg text-sellr-charcoal text-center mb-4">
-          How would you like to add records?
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SCAN_METHODS.map((opt) => {
-            const Icon = opt.icon;
-            const active = method === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setMethod(opt.id)}
-                className={`flex flex-col items-center text-center p-5 rounded-lg transition-all duration-150 ${
-                  active
-                    ? 'bg-sellr-blue/5 border-2 border-sellr-blue'
-                    : 'bg-sellr-surface border-2 border-transparent hover:border-sellr-blue/40'
-                }`}
-              >
-                <Icon
-                  className="w-7 h-7 text-sellr-blue mb-2"
-                  strokeWidth={1.5}
-                />
-                <span className="font-semibold text-sellr-charcoal">
-                  {opt.label}
-                </span>
-                <span className="mt-1 text-xs text-sellr-charcoal/60">
-                  {opt.subtext}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       <button
         type="button"
         onClick={onNext}
         className="mt-10 w-full min-h-[52px] bg-sellr-amber text-white font-medium rounded hover:bg-sellr-amber-light transition-colors text-base"
       >
-        Got It — Start Scanning
+        Continue
       </button>
     </div>
   );
