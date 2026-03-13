@@ -16,22 +16,20 @@ function getSessionCookie(req: Request): string | undefined {
 }
 
 // ── POST /api/sellr/sessions ─────────────────────────────────────────
-// Creates a new session. Requires Supabase auth.
+// Creates a new session. Auth is optional — if a valid JWT is provided,
+// user_id is linked; otherwise the session is anonymous.
 router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
   try {
-    // ── Auth: verify Supabase JWT ──
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) {
-      errorResponse(res, 401, 'Authentication required');
-      return;
-    }
-
     const supabase = requireSupabaseAdmin();
 
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !user) {
-      errorResponse(res, 401, 'Invalid or expired token');
-      return;
+    // ── Optional auth: link user_id if JWT provided ──
+    let userId: string | undefined;
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+      if (!authErr && user) {
+        userId = user.id;
+      }
     }
 
     const { email, tier } = req.body ?? {};
@@ -46,7 +44,8 @@ router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
     // Slots are enforced at scan time (sellrRecords.ts), not session creation.
     // The session must exist before checkout so the session ID can be passed
     // to Stripe. Slots are added by the payment webhook after checkout.
-    const insert: Record<string, unknown> = { status: 'active', user_id: user.id };
+    const insert: Record<string, unknown> = { status: 'active' };
+    if (userId) insert.user_id = userId;
     if (email && typeof email === 'string') insert.email = email;
     if (tier) insert.tier = tier;
 

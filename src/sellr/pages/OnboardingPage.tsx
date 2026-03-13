@@ -36,18 +36,18 @@ const VALID_TIERS = ['starter', 'standard', 'full'] as const;
 
 // ── Session creation (mirrors ScanPage pattern) ──────────────────────
 
-async function createSession(tier: string | undefined, token: string): Promise<string> {
+async function createSession(tier: string | undefined, token?: string): Promise<string> {
   const body: Record<string, string> = {};
   if (tier && VALID_TIERS.includes(tier as typeof VALID_TIERS[number])) {
     body.tier = tier;
   }
 
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch('/api/sellr/sessions', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
@@ -779,15 +779,9 @@ const OnboardingPage: React.FC = () => {
     setCompleting(true);
 
     try {
-      // Get current Supabase session JWT
+      // Get current Supabase session JWT (optional — session works without auth)
       const { data: authData } = await supabase!.auth.getSession();
-      const token = authData.session?.access_token;
-
-      if (!token) {
-        // User not logged in — redirect to signup, then back here
-        navigate('/sellr/signup?redirect=/sellr/start', { replace: true });
-        return;
-      }
+      const token = authData.session?.access_token ?? undefined;
 
       const tier = wizardState.tier ?? undefined;
       const sessionId = await createSession(tier, token);
