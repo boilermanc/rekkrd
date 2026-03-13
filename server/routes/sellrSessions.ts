@@ -22,6 +22,19 @@ router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
   try {
     const supabase = requireSupabaseAdmin();
 
+    // ── Optional auth: link user_id if JWT provided ──
+    let userId: string | undefined;
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+      if (!authErr && user) {
+        userId = user.id;
+        console.log('[sellr] Session auth resolved user_id:', userId, 'email:', user.email);
+      } else {
+        console.warn('[sellr] Session auth failed:', authErr?.message);
+      }
+    }
+
     const { email, tier } = req.body ?? {};
 
     // Validate tier if provided
@@ -34,10 +47,8 @@ router.post('/api/sellr/sessions', async (req: Request, res: Response) => {
     // Slots are enforced at scan time (sellrRecords.ts), not session creation.
     // The session must exist before checkout so the session ID can be passed
     // to Stripe. Slots are added by the payment webhook after checkout.
-    // NOTE: user_id linking is skipped for now — FK constraint on auth.users
-    // fails due to a suspected Supabase project config mismatch. Re-enable
-    // once SUPABASE_SERVICE_ROLE_KEY on VPS is verified.
     const insert: Record<string, unknown> = { status: 'active' };
+    if (userId) insert.user_id = userId;
     if (email && typeof email === 'string') insert.email = email;
     if (tier) insert.tier = tier;
 
