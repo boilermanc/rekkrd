@@ -30,6 +30,7 @@ import adminRouter from './routes/admin.js';
 import blogRouter from './routes/blog.js';
 import gearRouter from './routes/gear.js';
 import identifyGearRouter from './routes/identifyGear.js';
+import identifyLabelRouter from './routes/identifyLabel.js';
 import findManualRouter from './routes/findManual.js';
 import setupGuideRouter from './routes/setupGuide.js';
 import setupGuideSaveRouter from './routes/setupGuideSave.js';
@@ -85,7 +86,7 @@ const _routerMap: Record<string, unknown> = {
   identifyRouter, metadataRouter, playlistRouter, coversRouter,
   lyricsRouter, uploadCoverRouter, imageProxyRouter, subscriptionRouter,
   checkoutRouter, pricesRouter, stripeWebhookRouter, customerPortalRouter,
-  adminRouter, blogRouter, gearRouter, identifyGearRouter,
+  adminRouter, blogRouter, gearRouter, identifyGearRouter, identifyLabelRouter,
   findManualRouter, setupGuideRouter, setupGuideSaveRouter, setupGuidePdfRouter, supportRouter, sitemapRouter, emailRouter,
   onboardingRouter, collectionRouter, authRouter, discogsRouter, discogsAuthRouter, discogsCollectionRouter, discogsImportRouter, discogsWantlistRouter, discogsPricingRouter, discogsPriceRouter, discogsPressingRouter, spenndRouter,
   collectionValueRouter, accountRouter, priceAlertsRouter, alertsCheckRouter,
@@ -193,6 +194,7 @@ mountRouter('adminRouter', adminRouter);
 mountRouter('blogRouter', blogRouter);
 mountRouter('gearRouter', gearRouter);
 mountRouter('identifyGearRouter', identifyGearRouter);
+mountRouter('identifyLabelRouter', identifyLabelRouter);
 mountRouter('findManualRouter', findManualRouter);
 mountRouter('setupGuideRouter', setupGuideRouter);
 // Setup guide save routes

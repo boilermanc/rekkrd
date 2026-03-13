@@ -2,6 +2,7 @@ import { discogsConfig } from '../lib/discogs.js';
 import type {
   DiscogsSearchParams,
   DiscogsSearchResponse,
+  DiscogsSearchResult,
   DiscogsRelease,
   DiscogsMasterRelease,
 } from '../../src/types/discogs.js';
@@ -115,6 +116,66 @@ export async function searchDiscogs(
     '/database/search',
     params as Record<string, string>,
   );
+}
+
+export async function searchDiscogsLabel(
+  catalogNumber: string | null,
+  labelName: string | null,
+  artist: string | null,
+  title: string | null,
+  _signal?: AbortSignal,
+): Promise<DiscogsSearchResult[]> {
+  const MAX = 5;
+
+  // Step 1: catalog number search
+  if (catalogNumber) {
+    const catnoResult = await discogsRequest<DiscogsSearchResponse>(
+      '/database/search',
+      { catno: catalogNumber, type: 'release', per_page: '10' },
+    );
+    if (catnoResult.results?.length) {
+      if (labelName) {
+        const labelLower = labelName.toLowerCase();
+        const validated = catnoResult.results.filter(r =>
+          r.label?.some(l => l.toLowerCase().includes(labelLower)),
+        );
+        if (validated.length) return validated.slice(0, MAX);
+      } else {
+        return catnoResult.results.slice(0, MAX);
+      }
+      // catno matched but label validation failed — fall through to Step 2
+    }
+  }
+
+  // Step 2: combined field search
+  const params: Record<string, string> = { type: 'release', per_page: String(MAX) };
+  if (labelName) params.label = labelName;
+  if (artist) params.artist = artist;
+  if (title) params.title = title;
+
+  // Only search if we have at least one field beyond type
+  if (Object.keys(params).length > 2 || labelName || artist || title) {
+    const combinedResult = await discogsRequest<DiscogsSearchResponse>(
+      '/database/search',
+      params,
+    );
+    if (combinedResult.results?.length) {
+      return combinedResult.results.slice(0, MAX);
+    }
+  }
+
+  // Step 3: artist + title fallback
+  if (artist && title) {
+    const fallbackResult = await discogsRequest<DiscogsSearchResponse>(
+      '/database/search',
+      { artist, title, type: 'release', per_page: String(MAX) },
+    );
+    if (fallbackResult.results?.length) {
+      return fallbackResult.results.slice(0, MAX);
+    }
+  }
+
+  return [];
 }
 
 export async function getRelease(id: number): Promise<DiscogsRelease> {

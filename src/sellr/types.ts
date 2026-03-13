@@ -25,6 +25,7 @@ export interface SellrRecord {
   price_median: number | null;
   price_high: number | null;
   ad_copy: string | null;
+  matrix: string | null;
 }
 
 export interface SellrOrder {

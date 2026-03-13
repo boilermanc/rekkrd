@@ -48,7 +48,7 @@ router.post('/api/sellr/records', async (req: Request, res: Response) => {
 
     const {
       session_id, title, artist, year, label, condition,
-      discogs_id, cover_image, price_low, price_median, price_high,
+      discogs_id, cover_image, price_low, price_median, price_high, matrix,
     } = req.body ?? {};
 
     if (!session_id || !title || !artist) {
@@ -94,6 +94,7 @@ router.post('/api/sellr/records', async (req: Request, res: Response) => {
         price_low: price_low ?? null,
         price_median: price_median ?? null,
         price_high: price_high ?? null,
+        matrix: typeof matrix === 'string' && matrix.trim() ? matrix.trim() : null,
       })
       .select('*')
       .single();

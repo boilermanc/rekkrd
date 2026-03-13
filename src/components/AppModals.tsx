@@ -24,6 +24,9 @@ interface AppModalsProps {
   isCameraOpen: boolean;
   setIsCameraOpen: (open: boolean) => void;
   handleCapture: (base64: string, scanMode?: ScanMode) => void;
+  showSideBPrompt: boolean;
+  confirmSideBAndScanA: () => void;
+  skipSideA: () => void;
 
   // Playlist Studio
   isStudioOpen: boolean;
@@ -62,6 +65,7 @@ interface AppModalsProps {
     barcode?: string,
     format?: string,
     discogsCoverUrl?: string,
+    matrix?: string,
   ) => Promise<void>;
   handleScanCancel: () => void;
   showScanFailed: boolean;
@@ -76,7 +80,7 @@ interface AppModalsProps {
 
 const AppModals: React.FC<AppModalsProps> = ({
   fileInputRef, handleFileUpload,
-  isCameraOpen, setIsCameraOpen, handleCapture,
+  isCameraOpen, setIsCameraOpen, handleCapture, showSideBPrompt, confirmSideBAndScanA, skipSideA,
   isStudioOpen, setIsStudioOpen, sessionSeedAlbum, setSessionSeedAlbum, albums,
   selectedAlbum, setSelectedAlbum, handleUpdateAlbum, handleToggleFavorite, handleAddToWantlist, canUse,
   upgradeFeature, setUpgradeFeature, pendingPriceId, setPendingPriceId,
@@ -96,7 +100,7 @@ const AppModals: React.FC<AppModalsProps> = ({
       className="hidden"
     />
 
-    {isCameraOpen && <CameraModal onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}
+    {isCameraOpen && <CameraModal onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} showSideBPrompt={showSideBPrompt} confirmSideBAndScanA={confirmSideBAndScanA} skipSideA={skipSideA} />}
     {isStudioOpen && <PlaylistStudio albums={albums} onClose={() => { setIsStudioOpen(false); setSessionSeedAlbum(null); }} seedAlbum={sessionSeedAlbum} />}
     {selectedAlbum && (
       <AlbumDetailModal

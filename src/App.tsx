@@ -132,6 +132,7 @@ const App: React.FC = () => {
     fileInputRef, handleCancelScan, handleKeepWaiting, handleCapture,
     handleFileUpload, handleDuplicateAddAnyway, handleDuplicateCancel,
     handleScanConfirm, handleScanCancel,
+    showSideBPrompt, confirmSideBAndScanA, skipSideA,
   } = useScanFlow({
     albums, setAlbums, setSelectedAlbum, setHeroBg, setUpgradeFeature,
     showToast, user, isSupabaseReady, albumLimitReached, canUse,
@@ -1377,6 +1378,9 @@ const App: React.FC = () => {
         isCameraOpen={isCameraOpen}
         setIsCameraOpen={setIsCameraOpen}
         handleCapture={handleCapture}
+        showSideBPrompt={showSideBPrompt}
+        confirmSideBAndScanA={confirmSideBAndScanA}
+        skipSideA={skipSideA}
         isStudioOpen={isStudioOpen}
         setIsStudioOpen={setIsStudioOpen}
         sessionSeedAlbum={sessionSeedAlbum}

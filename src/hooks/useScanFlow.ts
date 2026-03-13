@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import type { User } from '@supabase/supabase-js';
-import type { Album, ScanConfirmation, DiscogsMatch } from '../types';
+import type { Album, ScanConfirmation, DiscogsMatch, LabelScanResult } from '../types';
+import type { DiscogsSearchResult } from '../types/discogs';
 import type { ScanMode } from '../components/CameraModal';
 import { supabaseService, supabase } from '../services/supabaseService';
 import {
@@ -11,6 +12,7 @@ import {
   IdentificationFailedError,
   checkAlbumLimit,
 } from '../services/geminiService';
+import { searchDiscogsLabel } from '../services/discogsService';
 import { getAlbumPlacementInfo } from '../helpers/shelfHelpers';
 import type { GatedFeature } from '../contexts/SubscriptionContext';
 
@@ -55,6 +57,8 @@ export function useScanFlow(opts: UseScanFlowOptions) {
   const [duplicatePending, setDuplicatePending] = useState<DuplicatePendingData | null>(null);
   const [pendingScan, setPendingScan] = useState<{ scan: ScanConfirmation; base64: string } | null>(null);
   const [showScanFailed, setShowScanFailed] = useState(false);
+  const [sideBScanned, setSideBScanned] = useState<LabelScanResult | null>(null);
+  const [showSideBPrompt, setShowSideBPrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const clearScanTimers = () => {
@@ -97,6 +101,7 @@ export function useScanFlow(opts: UseScanFlowOptions) {
     barcodeParam?: string,
     formatParam?: string,
     discogsCoverUrl?: string,
+    matrixParam?: string,
   ) => {
     setProcessingStatus(`Appraising ${identity.title}...`);
     try {
@@ -120,6 +125,7 @@ export function useScanFlow(opts: UseScanFlowOptions) {
           discogs_url: `https://www.discogs.com/release/${discogsReleaseIdParam}`,
         }),
         ...(barcodeParam ? { barcode: barcodeParam } : {}),
+        ...(matrixParam ? { matrix: matrixParam } : {}),
         format: formatParam || 'Vinyl',
       });
 
@@ -163,6 +169,98 @@ export function useScanFlow(opts: UseScanFlowOptions) {
     }
   };
 
+  const mapDiscogsToMatches = (results: DiscogsSearchResult[]): DiscogsMatch[] =>
+    results.map(r => ({
+      id: r.id,
+      title: r.title,
+      year: r.year || '',
+      country: r.country || '',
+      format: r.format?.join(', ') || '',
+      thumb: r.thumb || '',
+      catno: r.catno || '',
+      label: r.label?.[0] || '',
+      matchType: 'text' as const,
+    }));
+
+  const buildLabelData = (labelResult: LabelScanResult) => ({
+    catalog_number: labelResult.catalog_number,
+    label_name: labelResult.label_name,
+    side: labelResult.side,
+    year: labelResult.year,
+    confidence_score: labelResult.confidence_score,
+  });
+
+  const buildLabelScanConfirmation = (
+    labelResult: LabelScanResult,
+    discogsResults: DiscogsSearchResult[],
+  ): ScanConfirmation => {
+    const topResult = discogsResults[0];
+    // Parse "Artist - Title" format from Discogs title
+    const discogsParts = topResult?.title?.split(' - ') || [];
+    const discogsArtist = discogsParts.length > 1 ? discogsParts[0].trim() : '';
+    const discogsTitle = discogsParts.length > 1 ? discogsParts.slice(1).join(' - ').trim() : topResult?.title || '';
+
+    return {
+      artist: discogsArtist || labelResult.artist || '',
+      title: discogsTitle || labelResult.album_title || '',
+      discogsMatches: mapDiscogsToMatches(discogsResults),
+      scanMode: 'label',
+      format: 'Vinyl',
+      labelData: buildLabelData(labelResult),
+    };
+  };
+
+  const processLabelScan = async (base64: string, signal: AbortSignal): Promise<boolean> => {
+    setProcessingStatus('Reading Label...');
+    const result = await geminiService.identifyLabel(base64, signal);
+
+    if (!result) {
+      showToast('Could not read the label. Try better lighting and fill the frame.', 'error');
+      return true;
+    }
+
+    if (result.confidence_score < 0.55) {
+      showToast('Label image too unclear. Move closer and reduce glare.', 'error');
+      return true;
+    }
+
+    if (result.side === 'B' || result.side === '2') {
+      setSideBScanned(result);
+      setShowSideBPrompt(true);
+      return true;
+    }
+
+    setProcessingStatus('Searching Discogs...');
+    const discogsResults = await searchDiscogsLabel(
+      result.catalog_number,
+      result.label_name,
+      result.artist,
+      result.album_title,
+      signal,
+    );
+
+    if (discogsResults.length === 0) {
+      showToast('No Discogs match found. You can add details manually.', 'info');
+      setPendingScan({
+        scan: {
+          artist: result.artist || '',
+          title: result.album_title || '',
+          scanMode: 'label',
+          format: 'Vinyl',
+          labelData: buildLabelData(result),
+        },
+        base64,
+      });
+      return true;
+    }
+
+    setPendingScan({
+      scan: buildLabelScanConfirmation(result, discogsResults),
+      base64,
+    });
+    return true;
+  };
+
   const processImage = async (base64: string, scanMode?: ScanMode) => {
     if (!isSupabaseReady) {
       showToast("Database not configured. Check your Supabase environment variables.", "error");
@@ -183,9 +281,21 @@ export function useScanFlow(opts: UseScanFlowOptions) {
 
     const abortController = new AbortController();
     scanAbortRef.current = abortController;
-    setProcessingStatus(scanMode === 'barcode' ? "Reading Barcode..." : "Identifying Record...");
+    setProcessingStatus(
+      scanMode === 'barcode' ? "Reading Barcode..."
+        : scanMode === 'label' ? "Reading Label..."
+        : "Identifying Record..."
+    );
     startScanTimers();
     try {
+      // Label scan branch — separate flow from cover/barcode
+      if (scanMode === 'label') {
+        await processLabelScan(base64, abortController.signal);
+        clearScanTimers();
+        setProcessingStatus(null);
+        return;
+      }
+
       const identity = await geminiService.identifyAlbum(base64, scanMode, abortController.signal);
       clearScanTimers();
       if (!identity) {
@@ -304,15 +414,62 @@ export function useScanFlow(opts: UseScanFlowOptions) {
     barcode?: string,
     format?: string,
     discogsCoverUrl?: string,
+    matrix?: string,
   ) => {
     if (!pendingScan) return;
     const { base64 } = pendingScan;
     setPendingScan(null);
-    await saveIdentifiedAlbum({ artist, title }, base64, confirmedDiscogsReleaseId, barcode, format, discogsCoverUrl);
+    await saveIdentifiedAlbum({ artist, title }, base64, confirmedDiscogsReleaseId, barcode, format, discogsCoverUrl, matrix);
   };
 
   const handleScanCancel = () => {
     setPendingScan(null);
+  };
+
+  const confirmSideBAndScanA = () => {
+    setShowSideBPrompt(false);
+    // sideBScanned stays in state so the user can scan Side A next
+  };
+
+  const skipSideA = async () => {
+    if (!sideBScanned) return;
+    const result = sideBScanned;
+    setShowSideBPrompt(false);
+    setSideBScanned(null);
+
+    setProcessingStatus('Searching Discogs...');
+    try {
+      const discogsResults = await searchDiscogsLabel(
+        result.catalog_number,
+        result.label_name,
+        result.artist,
+        result.album_title,
+      );
+
+      if (discogsResults.length === 0) {
+        showToast('No Discogs match found. You can add details manually.', 'info');
+        setPendingScan({
+          scan: {
+            artist: result.artist || '',
+            title: result.album_title || '',
+            scanMode: 'label',
+            format: 'Vinyl',
+            labelData: buildLabelData(result),
+          },
+          base64: '',
+        });
+      } else {
+        setPendingScan({
+          scan: buildLabelScanConfirmation(result, discogsResults),
+          base64: '',
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Something went wrong during Discogs lookup.', 'error');
+    } finally {
+      setProcessingStatus(null);
+    }
   };
 
   return {
@@ -334,5 +491,9 @@ export function useScanFlow(opts: UseScanFlowOptions) {
     handleDuplicateCancel,
     handleScanConfirm,
     handleScanCancel,
+    sideBScanned,
+    showSideBPrompt,
+    confirmSideBAndScanA,
+    skipSideA,
   };
 }

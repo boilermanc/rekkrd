@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { discogsRateLimiter } from '../middleware/discogsRateLimit.js';
 import { requireAuthWithUser } from '../middleware/auth.js';
-import { searchDiscogs, getRelease, getMasterRelease } from '../services/discogsService.js';
+import { searchDiscogs, searchDiscogsLabel, getRelease, getMasterRelease } from '../services/discogsService.js';
 import { discogsConfig } from '../lib/discogs.js';
 import type { DiscogsSearchParams } from '../../src/types/discogs.js';
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
@@ -62,6 +62,22 @@ router.get('/api/discogs/search', requireAuthWithUser, async (req, res) => {
   } catch (error) {
     console.error('[discogs] Search error:', error);
     res.status(500).json({ error: 'Failed to search Discogs' });
+  }
+});
+
+router.post('/api/discogs/label-search', requireAuthWithUser, async (req, res) => {
+  try {
+    const { catalog_number, label_name, artist, title } = req.body;
+    const results = await searchDiscogsLabel(
+      typeof catalog_number === 'string' ? catalog_number : null,
+      typeof label_name === 'string' ? label_name : null,
+      typeof artist === 'string' ? artist : null,
+      typeof title === 'string' ? title : null,
+    );
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error('[discogs] Label search error:', error);
+    res.status(500).json({ error: 'Failed to search Discogs by label' });
   }
 });
 

@@ -56,7 +56,7 @@ function rateLimit(req: Request, res: Response, limit: number): boolean {
 router.get('/search', async (req: Request, res: Response) => {
   if (!rateLimit(req, res, 30)) return;
 
-  const { q } = req.query;
+  const { q, catno } = req.query;
   if (!q || typeof q !== 'string') {
     return res.status(400).json({ error: 'Query parameter required' });
   }
@@ -72,7 +72,10 @@ router.get('/search', async (req: Request, res: Response) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
-    const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(q)}&type=release&format=vinyl`;
+    let url = `https://api.discogs.com/database/search?q=${encodeURIComponent(q)}&type=release&format=vinyl`;
+    if (catno && typeof catno === 'string') {
+      url += `&catno=${encodeURIComponent(catno)}`;
+    }
     const response = await fetch(url, {
       headers: {
         'Authorization': `Discogs key=${DISCOGS_KEY}, secret=${DISCOGS_SECRET}`,

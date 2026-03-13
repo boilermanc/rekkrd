@@ -1,21 +1,40 @@
 import { useState, useCallback } from 'react';
 import { useSellrAccount } from './useSellrAccount';
+import { supabase } from '../../services/supabaseService';
 import type { SellrRecord } from '../types';
+import type { LabelScanResult } from '../../types';
 
 interface UseSellrScannerOptions {
   sessionId: string | null;
   onRecordAdded?: (record: SellrRecord) => void;
 }
 
+export interface LabelScanMetadata {
+  sideB?: boolean;
+  labelResult?: LabelScanResult;
+  catalog_number?: string;
+  label?: string;
+  year?: string;
+  pressing_year?: number;
+  cover_url?: string;
+  price_low?: number;
+  price_median?: number;
+  price_high?: number;
+  discogs_url?: string;
+}
+
 interface UseSellrScannerReturn {
   scan: (base64DataUrl: string) => Promise<void>;
   scanFromFile: (file: File) => Promise<void>;
   scanFromUrl: (url: string) => Promise<void>;
+  scanFromLabel: (file: File) => Promise<LabelScanMetadata>;
   isScanning: boolean;
   scanError: string | null;
   tierLimitReached: boolean;
   noSlots: boolean;
   slotsRemaining: number;
+  sideB: boolean;
+  labelResult: LabelScanResult | null;
 }
 
 /** Convert a File to a base64 data URL. */
@@ -171,6 +190,8 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
   const [scanError, setScanError] = useState<string | null>(null);
   const [tierLimitReached, setTierLimitReached] = useState(false);
   const [noSlots, setNoSlots] = useState(false);
+  const [sideB, setSideB] = useState(false);
+  const [labelResult, setLabelResult] = useState<LabelScanResult | null>(null);
 
   const scan = useCallback(async (base64DataUrl: string) => {
     if (!sessionId) {
@@ -263,5 +284,105 @@ export function useSellrScanner({ sessionId, onRecordAdded }: UseSellrScannerOpt
     }
   }, [sessionId, scan]);
 
-  return { scan, isScanning, scanError, scanFromFile, scanFromUrl, tierLimitReached, noSlots, slotsRemaining };
+  const scanFromLabel = useCallback(async (file: File): Promise<LabelScanMetadata> => {
+    if (!sessionId) throw new Error('No active session');
+
+    // Read + resize
+    const base64DataUrl = await fileToBase64(file);
+    const resized = await resizeForScan(base64DataUrl);
+    const [header, base64Data] = resized.split(',');
+    const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+
+    // Auth header
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (supabase) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+    }
+
+    // Identify label
+    const res = await fetch('/api/identify-label', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ base64Data, mimeType }),
+    });
+
+    if (!res.ok) throw new Error('Label scan failed');
+
+    const result: LabelScanResult | null = await res.json();
+
+    if (!result || (typeof result.confidence_score === 'number' && result.confidence_score < 0.55)) {
+      throw new Error('Label image too unclear — move closer and reduce glare');
+    }
+
+    setLabelResult(result);
+
+    // Side B early return
+    if (result.side === 'B' || result.side === '2') {
+      setSideB(true);
+      return { sideB: true, labelResult: result };
+    }
+
+    setSideB(false);
+
+    // Fetch metadata with catalog_number
+    const artist = result.artist || '';
+    const title = result.album_title || '';
+
+    const metaRes = await fetch('/api/sellr/scan/metadata', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: sessionId,
+        artist,
+        title,
+        catalog_number: result.catalog_number ?? undefined,
+      }),
+    });
+
+    let metadata: {
+      year?: string;
+      label?: string;
+      cover_url?: string;
+      price_low?: number;
+      price_median?: number;
+      price_high?: number;
+      discogs_url?: string;
+    } = {};
+
+    if (metaRes.ok) {
+      const data = await metaRes.json();
+      metadata = {
+        year: typeof data.year === 'string' ? data.year : undefined,
+        label: typeof data.label === 'string' ? data.label : undefined,
+        cover_url: typeof data.cover_url === 'string' ? data.cover_url : undefined,
+        price_low: typeof data.price_low === 'number' ? data.price_low : undefined,
+        price_median: typeof data.price_median === 'number' ? data.price_median : undefined,
+        price_high: typeof data.price_high === 'number' ? data.price_high : undefined,
+        discogs_url: typeof data.discogs_url === 'string' ? data.discogs_url : undefined,
+      };
+    }
+
+    // Merge label fields over metadata
+    const yearStr = result.year ?? metadata.year;
+    const parsedYear = yearStr ? parseInt(yearStr, 10) : undefined;
+
+    return {
+      sideB: false,
+      labelResult: result,
+      catalog_number: result.catalog_number ?? undefined,
+      label: result.label_name ?? metadata.label,
+      year: yearStr,
+      pressing_year: parsedYear && !isNaN(parsedYear) ? parsedYear : undefined,
+      cover_url: metadata.cover_url,
+      price_low: metadata.price_low,
+      price_median: metadata.price_median,
+      price_high: metadata.price_high,
+      discogs_url: metadata.discogs_url,
+    };
+  }, [sessionId]);
+
+  return { scan, isScanning, scanError, scanFromFile, scanFromUrl, scanFromLabel, tierLimitReached, noSlots, slotsRemaining, sideB, labelResult };
 }

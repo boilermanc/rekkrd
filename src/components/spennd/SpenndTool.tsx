@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Loader2, Zap, Search, Info } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Loader2, Zap, Search, Info, ScanLine } from 'lucide-react';
+import { supabase } from '../../services/supabaseService';
 import { DiscogsRelease, LabelValidation, MatrixResult, PriceData, EbayData } from '../../types/spennd';
+import type { LabelScanResult } from '../../types';
 import { ConditionGrade, VINYL_CHECKLIST, CD_CHECKLIST, CONDITION_BY_VALUE, scoreToGrade } from '../../constants/conditionGrades';
+import LabelScanResultModal from '../LabelScanResultModal';
 
 type Step = 'search' | 'path' | 'label' | 'matrix' | 'grading' | 'results';
 
@@ -47,6 +50,14 @@ const SpenndTool: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selectedRelease, setSelectedRelease] = useState<DiscogsRelease | null>(null);
 
+  // Label scan state
+  const [labelScanning, setLabelScanning] = useState(false);
+  const [labelScanError, setLabelScanError] = useState<string | null>(null);
+  const [lastLabelScan, setLastLabelScan] = useState<LabelScanResult | null>(null);
+  const [showLabelModal, setShowLabelModal] = useState(false);
+  const [pendingLabelResult, setPendingLabelResult] = useState<LabelScanResult | null>(null);
+  const labelFileRef = useRef<HTMLInputElement>(null);
+
   // Label state
   const [labelInputs, setLabelInputs] = useState({
     labelName: '',
@@ -84,6 +95,113 @@ const SpenndTool: React.FC = () => {
   useEffect(() => {
     setNotesExpanded(false);
   }, [selectedRelease]);
+
+  // Label scan handler
+  const handleLabelScan = async (file: File) => {
+    setLabelScanning(true);
+    setLabelScanError(null);
+
+    try {
+      const base64DataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+
+      const [header, base64Data] = base64DataUrl.split(',');
+      const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      }
+
+      const res = await fetch('/api/identify-label', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ base64Data, mimeType }),
+      });
+
+      if (!res.ok) throw new Error('Label scan failed');
+
+      const result = await res.json();
+
+      if (!result) {
+        setLabelScanError('Could not read the label — try again');
+        return;
+      }
+
+      if (typeof result.confidence_score === 'number' && result.confidence_score < 0.55) {
+        setLabelScanError('Label image too unclear — try better lighting');
+        return;
+      }
+
+      // Show the label result modal for user to confirm
+      setPendingLabelResult(result as LabelScanResult);
+      setShowLabelModal(true);
+    } catch {
+      setLabelScanError('Could not read the label — try again');
+    } finally {
+      setLabelScanning(false);
+    }
+  };
+
+  // Label modal handlers
+  const handleLabelModalConfirm = async (_matrix: string) => {
+    if (!pendingLabelResult) return;
+    setShowLabelModal(false);
+
+    const result = pendingLabelResult;
+    setLastLabelScan(result);
+
+    if (result.artist) setArtistQuery(result.artist);
+    if (result.album_title) setTitleQuery(result.album_title);
+
+    // Trigger search with label data
+    if (result.artist || result.album_title) {
+      const query = `${result.artist || ''} ${result.album_title || ''}`.trim();
+      if (query) {
+        setSearchLoading(true);
+        setSearchError(null);
+        setSearchResults([]);
+        setSelectedRelease(null);
+        setReleaseNotes(null);
+        setMatrixResult(null);
+        setShowAllVersions(false);
+
+        try {
+          const params = new URLSearchParams({ q: query });
+          if (result.catalog_number) params.set('catno', result.catalog_number);
+          const response = await fetch(`/api/spennd/search?${params}`);
+          if (!response.ok) throw new Error('Search failed');
+          const data = await response.json();
+          setSearchResults(data);
+          if (data.length > 0) handleSelectRelease(data[0]);
+        } catch {
+          setSearchError("We're having trouble reaching the database. Try again in a moment.");
+        } finally {
+          setSearchLoading(false);
+        }
+      }
+    }
+
+    setPendingLabelResult(null);
+  };
+
+  const handleLabelModalRetry = () => {
+    setShowLabelModal(false);
+    setPendingLabelResult(null);
+    labelFileRef.current?.click();
+  };
+
+  const handleLabelModalCancel = () => {
+    setShowLabelModal(false);
+    setPendingLabelResult(null);
+  };
 
   // Step 1: Search
   const combinedQuery = `${artistQuery} ${titleQuery}`.trim();
@@ -297,6 +415,50 @@ const SpenndTool: React.FC = () => {
           </div>
         </div>
 
+        {/* ── Divider ──────────────────────────────────────────── */}
+        <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 h-px bg-[#5a8a6e]/20" />
+          <span className="text-xs font-mono uppercase tracking-wide text-[#5a8a6e]/60">or</span>
+          <div className="flex-1 h-px bg-[#5a8a6e]/20" />
+        </div>
+
+        {/* ── Scan Label ───────────────────────────────────────── */}
+        <input
+          ref={labelFileRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleLabelScan(file);
+            e.target.value = '';
+          }}
+          className="hidden"
+          aria-hidden="true"
+        />
+
+        <button
+          onClick={() => labelFileRef.current?.click()}
+          disabled={labelScanning}
+          className="w-full flex items-center justify-center gap-2 border border-[#5a8a6e] text-[#5a8a6e] rounded-full py-3 px-6 font-serif hover:bg-[#5a8a6e]/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {labelScanning ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Reading label...
+            </>
+          ) : (
+            <>
+              <ScanLine className="w-4 h-4" />
+              Scan Label
+            </>
+          )}
+        </button>
+
+        {labelScanError && (
+          <p className="mt-2 font-serif text-sm text-red-600">{labelScanError}</p>
+        )}
+
         <button
           onClick={handleSearch}
           disabled={searchLoading || !combinedQuery}
@@ -454,6 +616,23 @@ const SpenndTool: React.FC = () => {
             Nothing found for '{artistQuery}{titleQuery ? ` — ${titleQuery}` : ''}'. Try checking the spelling, or search with just the artist name.
           </p>
         )}
+
+        <LabelScanResultModal
+          isOpen={showLabelModal}
+          brand="spennd"
+          catalogNumber={pendingLabelResult?.catalog_number ?? null}
+          labelName={pendingLabelResult?.label_name ?? null}
+          artist={pendingLabelResult?.artist ?? null}
+          title={pendingLabelResult?.album_title ?? null}
+          year={pendingLabelResult?.year ?? null}
+          side={pendingLabelResult?.side ?? null}
+          confidenceScore={pendingLabelResult?.confidence_score ?? 0}
+          discogsMatch={null}
+          confirmLabel="Continue to Grading"
+          onConfirm={handleLabelModalConfirm}
+          onRetry={handleLabelModalRetry}
+          onCancel={handleLabelModalCancel}
+        />
       </div>
     );
   }
@@ -1123,6 +1302,16 @@ const SpenndTool: React.FC = () => {
           </div>
         )}
 
+        {/* Scan summary pill */}
+        {lastLabelScan?.catalog_number && lastLabelScan?.label_name && (
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 bg-[#5a8a6e]/10 text-[#5a8a6e] rounded-full px-3 py-1 font-mono text-xs">
+              <ScanLine className="w-3 h-3" />
+              Scanned: {lastLabelScan.catalog_number} · {lastLabelScan.label_name}
+            </span>
+          </div>
+        )}
+
         {/* Grade card */}
         <div className="bg-white rounded-2xl shadow-md p-6">
           <div className="font-display text-[64px] text-ink leading-none">{gradeInfo.shortLabel}</div>
@@ -1198,6 +1387,7 @@ const SpenndTool: React.FC = () => {
             setAnswers({});
             setSelectedFormat(null);
             setMode(null);
+            setLastLabelScan(null);
           }}
           className="w-full bg-paper-dark text-ink rounded-full py-3 font-serif"
         >

@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Camera, Search, Loader2, Plus, X, Check, AlertCircle } from 'lucide-react';
+import { Camera, Search, Loader2, Plus, X, Check, AlertCircle, ScanLine, Image } from 'lucide-react';
 import SellrLayout from '../components/SellrLayout';
 import SellrSidebar from '../components/SellrSidebar';
+import SideBPromptModal from '../../components/SideBPromptModal';
+import LabelScanResultModal from '../../components/LabelScanResultModal';
 import { useSellrMeta } from '../hooks/useSellrMeta';
 import { useSellrSession } from '../hooks/useSellrSession';
-import { useSellrScanner } from '../hooks/useSellrScanner';
+import { useSellrScanner, type LabelScanMetadata } from '../hooks/useSellrScanner';
 import { useSellrSearch, type SellrSearchResult } from '../hooks/useSellrSearch';
 import { SELLR_TIERS } from '../types';
 import type { SellrRecord } from '../types';
+import type { LabelScanResult } from '../../types';
 
 const STORAGE_KEY = 'sellr_session_id';
 const VALID_TIERS = ['starter', 'standard', 'full'] as const;
@@ -76,6 +79,17 @@ const ScanPage: React.FC = () => {
   // Search adding — track which result is being added
   const [addingId, setAddingId] = useState<number | null>(null);
 
+  // Scan mode toggle
+  const [scanMode, setScanMode] = useState<'cover' | 'label'>('cover');
+
+  // Label scan state
+  const [labelScanLoading, setLabelScanLoading] = useState(false);
+  const [labelScanError, setLabelScanError] = useState<string | null>(null);
+  const [showSideBPrompt, setShowSideBPrompt] = useState(false);
+  const [pendingSideBResult, setPendingSideBResult] = useState<LabelScanResult | null>(null);
+  const [pendingLabelRecord, setPendingLabelRecord] = useState<LabelScanMetadata | null>(null);
+  const [savingLabel, setSavingLabel] = useState(false);
+
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     clearTimeout(toastTimer.current);
@@ -137,14 +151,153 @@ const ScanPage: React.FC = () => {
   // ── File input ref ───────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      scanner.scanFromFile(file);
-      // Reset so the same file can be re-selected
-      e.target.value = '';
+  // ── Label scan helpers ──────────────────────────────────────────
+  const saveLabelRecord = useCallback(async (meta: LabelScanMetadata, matrix?: string) => {
+    if (!session?.id) return;
+    const artist = meta.labelResult?.artist || '';
+    const title = meta.labelResult?.album_title || '';
+
+    let discogs_id: string | null = null;
+    if (meta.discogs_url) {
+      const match = meta.discogs_url.match(/\/release\/(\d+)/);
+      if (match) discogs_id = match[1];
     }
-  };
+
+    const res = await fetch('/api/sellr/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: session.id,
+        title,
+        artist,
+        year: meta.pressing_year ?? null,
+        label: meta.label ?? null,
+        condition: 'VG',
+        discogs_id,
+        cover_image: meta.cover_url || null,
+        price_low: meta.price_low ?? null,
+        price_median: meta.price_median ?? null,
+        price_high: meta.price_high ?? null,
+        ...(matrix ? { matrix } : {}),
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: 'Save failed' }));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+
+    const record: SellrRecord = await res.json();
+    handleRecordAdded(record);
+  }, [session?.id, handleRecordAdded]);
+
+  const handleLabelFileChange = useCallback(async (file: File) => {
+    setLabelScanLoading(true);
+    setLabelScanError(null);
+    setPendingLabelRecord(null);
+
+    try {
+      const meta = await scanner.scanFromLabel(file);
+
+      if (meta.sideB && meta.labelResult) {
+        setPendingSideBResult(meta.labelResult);
+        setShowSideBPrompt(true);
+        return;
+      }
+
+      setPendingLabelRecord(meta);
+    } catch (err) {
+      setLabelScanError((err as Error).message || 'Label scan failed');
+    } finally {
+      setLabelScanLoading(false);
+    }
+  }, [scanner]);
+
+  const handleSideBSkip = useCallback(async () => {
+    setShowSideBPrompt(false);
+    if (!pendingSideBResult || !session?.id) return;
+
+    setLabelScanLoading(true);
+    setLabelScanError(null);
+
+    try {
+      // Fetch metadata using the Side B data
+      const artist = pendingSideBResult.artist || '';
+      const title = pendingSideBResult.album_title || '';
+
+      const metaRes = await fetch('/api/sellr/scan/metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: session.id,
+          artist,
+          title,
+          catalog_number: pendingSideBResult.catalog_number ?? undefined,
+        }),
+      });
+
+      let metadata: LabelScanMetadata = {
+        sideB: false,
+        labelResult: pendingSideBResult,
+      };
+
+      if (metaRes.ok) {
+        const data = await metaRes.json();
+        const yearStr = pendingSideBResult.year ?? (typeof data.year === 'string' ? data.year : undefined);
+        const parsedYear = yearStr ? parseInt(yearStr, 10) : undefined;
+        metadata = {
+          ...metadata,
+          catalog_number: pendingSideBResult.catalog_number ?? undefined,
+          label: pendingSideBResult.label_name ?? (typeof data.label === 'string' ? data.label : undefined),
+          year: yearStr,
+          pressing_year: parsedYear && !isNaN(parsedYear) ? parsedYear : undefined,
+          cover_url: typeof data.cover_url === 'string' ? data.cover_url : undefined,
+          price_low: typeof data.price_low === 'number' ? data.price_low : undefined,
+          price_median: typeof data.price_median === 'number' ? data.price_median : undefined,
+          price_high: typeof data.price_high === 'number' ? data.price_high : undefined,
+          discogs_url: typeof data.discogs_url === 'string' ? data.discogs_url : undefined,
+        };
+      }
+
+      setPendingLabelRecord(metadata);
+    } catch (err) {
+      setLabelScanError((err as Error).message || 'Save failed');
+    } finally {
+      setLabelScanLoading(false);
+      setPendingSideBResult(null);
+    }
+  }, [pendingSideBResult, session?.id]);
+
+  const handleSideBScanA = useCallback(() => {
+    setShowSideBPrompt(false);
+    // Keep pendingSideBResult — user will scan again with label mode
+  }, []);
+
+  const handleConfirmLabel = useCallback(async (matrix: string) => {
+    if (!pendingLabelRecord) return;
+    setSavingLabel(true);
+    setLabelScanError(null);
+    try {
+      await saveLabelRecord(pendingLabelRecord, matrix || undefined);
+      setPendingLabelRecord(null);
+    } catch (err) {
+      setLabelScanError((err as Error).message || 'Save failed');
+    } finally {
+      setSavingLabel(false);
+    }
+  }, [pendingLabelRecord, saveLabelRecord]);
+
+  const handleRetryLabel = useCallback(() => {
+    setPendingLabelRecord(null);
+    setLabelScanError(null);
+    // Open file picker for a new scan
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleDiscardLabel = useCallback(() => {
+    setPendingLabelRecord(null);
+    setLabelScanError(null);
+  }, []);
 
   // ── Search submit ────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('');
@@ -304,20 +457,62 @@ const ScanPage: React.FC = () => {
                 type="file"
                 accept="image/*"
                 capture="environment"
-                onChange={handleFileChange}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  e.target.value = '';
+                  if (scanMode === 'label') {
+                    handleLabelFileChange(file);
+                  } else {
+                    scanner.scanFromFile(file);
+                  }
+                }}
                 className="hidden"
                 aria-hidden="true"
               />
 
+              {/* ── Mode toggle ──────────────────────────────────── */}
+              <div className="flex rounded-lg border border-sellr-charcoal/10 mb-4 overflow-hidden">
+                <button
+                  onClick={() => setScanMode('cover')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                    scanMode === 'cover'
+                      ? 'bg-sellr-blue text-white'
+                      : 'bg-sellr-surface text-sellr-charcoal/60 hover:text-sellr-charcoal/80'
+                  }`}
+                >
+                  <Image className="w-4 h-4" />
+                  Cover
+                </button>
+                <button
+                  onClick={() => setScanMode('label')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+                    scanMode === 'label'
+                      ? 'bg-sellr-blue text-white'
+                      : 'bg-sellr-surface text-sellr-charcoal/60 hover:text-sellr-charcoal/80'
+                  }`}
+                >
+                  <ScanLine className="w-4 h-4" />
+                  Label
+                </button>
+              </div>
+
               <button
                 onClick={() => fileInputRef.current?.click()}
-                disabled={scanner.isScanning}
+                disabled={scanner.isScanning || labelScanLoading}
                 className="relative w-full aspect-[4/3] min-h-[200px] border-2 border-dashed border-sellr-charcoal/20 rounded-lg flex flex-col items-center justify-center gap-4 hover:border-sellr-blue/40 hover:bg-sellr-surface/50 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait"
               >
-                {scanner.isScanning ? (
+                {(scanner.isScanning || labelScanLoading) ? (
                   <>
                     <Loader2 className="w-12 h-12 text-sellr-blue animate-spin" />
-                    <span className="text-sm text-sellr-charcoal/60">Identifying and appraising...</span>
+                    <span className="text-sm text-sellr-charcoal/60">
+                      {labelScanLoading ? 'Reading label...' : 'Identifying and appraising...'}
+                    </span>
+                  </>
+                ) : scanMode === 'label' ? (
+                  <>
+                    <ScanLine className="w-12 h-12 text-sellr-charcoal/30" strokeWidth={1.2} />
+                    <span className="text-sm text-sellr-charcoal/50">Photograph the label</span>
                   </>
                 ) : (
                   <>
@@ -327,8 +522,18 @@ const ScanPage: React.FC = () => {
                 )}
               </button>
 
-              {scanner.scanError && !scanner.tierLimitReached && !scanner.noSlots && (
+              {scanner.scanError && !scanner.tierLimitReached && !scanner.noSlots && scanMode === 'cover' && (
                 <p className="mt-3 text-sm text-red-600">{scanner.scanError}</p>
+              )}
+
+              {labelScanError && scanMode === 'label' && !pendingLabelRecord && (
+                <p className="mt-3 text-sm text-red-600">{labelScanError}</p>
+              )}
+
+              {scanMode === 'label' && !pendingLabelRecord && (
+                <p className="mt-3 text-xs text-sellr-charcoal/50 text-center italic">
+                  Point at the label — the paper circle in the center. Fill the frame, avoid glare. Side A preferred.
+                </p>
               )}
 
               {session && (
@@ -435,6 +640,38 @@ const ScanPage: React.FC = () => {
           onRecordDeleted={handleRecordDeleted}
         />
       </div>
+
+      {/* ── Side B Prompt ──────────────────────────────────────── */}
+      <SideBPromptModal
+        isOpen={showSideBPrompt}
+        onScanA={handleSideBScanA}
+        onSkip={handleSideBSkip}
+      />
+
+      {/* ── Label Scan Result Modal ───────────────────────── */}
+      <LabelScanResultModal
+        isOpen={!!pendingLabelRecord}
+        brand="sellr"
+        catalogNumber={pendingLabelRecord?.labelResult?.catalog_number ?? null}
+        labelName={pendingLabelRecord?.labelResult?.label_name ?? null}
+        artist={pendingLabelRecord?.labelResult?.artist ?? null}
+        title={pendingLabelRecord?.labelResult?.album_title ?? null}
+        year={pendingLabelRecord?.year ?? null}
+        side={pendingLabelRecord?.labelResult?.side ?? null}
+        confidenceScore={pendingLabelRecord?.labelResult?.confidence_score ?? 0}
+        discogsMatch={pendingLabelRecord?.discogs_url ? {
+          artist: pendingLabelRecord.labelResult?.artist || '',
+          title: pendingLabelRecord.labelResult?.album_title || '',
+          label: pendingLabelRecord.label || '',
+          year: pendingLabelRecord.year || '',
+          thumb: pendingLabelRecord.cover_url || null,
+        } : null}
+        showMatrix
+        confirmLabel="Save to Listing"
+        onConfirm={handleConfirmLabel}
+        onRetry={handleRetryLabel}
+        onCancel={handleDiscardLabel}
+      />
     </SellrLayout>
   );
 };

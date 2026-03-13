@@ -1,5 +1,5 @@
 
-import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem, IdentifiedGear, ManualSearchResult, SetupGuide, DiscogsMatch } from '../types';
+import { Album, NewAlbum, Playlist, PlaylistItem, RawPlaylistItem, IdentifiedGear, LabelScanResult, ManualSearchResult, SetupGuide, DiscogsMatch } from '../types';
 import { supabase } from './supabaseService';
 import { compressImage } from '../utils/imageCompressor';
 
@@ -204,6 +204,38 @@ export const geminiService = {
     } catch (error) {
       if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
       console.error('Gear Identification Error:', error);
+      return null;
+    }
+  },
+
+  async identifyLabel(base64DataUrl: string, signal?: AbortSignal): Promise<LabelScanResult | null> {
+    try {
+      const [rawHeader, rawBase64] = base64DataUrl.split(',');
+      const rawMime = rawHeader.match(/:(.*?);/)?.[1] || 'image/jpeg';
+      const compressed = await compressImage(rawBase64, rawMime);
+      const base64Data = compressed.base64;
+      const mimeType = compressed.mimeType;
+
+      const response = await fetch('/api/identify-label', {
+        method: 'POST',
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ base64Data, mimeType }),
+        signal,
+      });
+
+      if (!response.ok) {
+        await handleGatingError(response);
+        return null;
+      }
+
+      const data = await response.json();
+      if (!data || typeof data.confidence_score !== 'number') {
+        return null;
+      }
+      return data as LabelScanResult;
+    } catch (error) {
+      if (error instanceof ScanLimitError || error instanceof UpgradeRequiredError) throw error;
+      console.error('Label Identification Error:', error);
       return null;
     }
   },

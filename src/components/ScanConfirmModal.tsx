@@ -7,7 +7,7 @@ import FormatBadge from './FormatBadge';
 
 interface ScanConfirmModalProps {
   scan: ScanConfirmation;
-  onConfirm: (artist: string, title: string, discogsReleaseId?: number, barcode?: string, format?: string, discogsCoverUrl?: string) => void;
+  onConfirm: (artist: string, title: string, discogsReleaseId?: number, barcode?: string, format?: string, discogsCoverUrl?: string, matrix?: string) => void;
   onCancel: () => void;
 }
 
@@ -32,6 +32,8 @@ const ScanConfirmModal: React.FC<ScanConfirmModalProps> = ({ scan, onConfirm, on
   );
 
   const selectedMatch = selectedId !== null ? matches.find(m => m.id === selectedId) : undefined;
+  const [matrixInput, setMatrixInput] = useState('');
+  const isLabelScan = scan.scanMode === 'label';
 
   /** Derive our format from a Discogs format string (e.g. "Vinyl, LP, Album" → "Vinyl"). */
   const deriveFormat = (discogsFormat?: string): string | undefined => {
@@ -44,6 +46,7 @@ const ScanConfirmModal: React.FC<ScanConfirmModalProps> = ({ scan, onConfirm, on
   };
 
   const handleConfirm = () => {
+    const matrix = matrixInput.trim() || undefined;
     if (selectedId !== null) {
       const match = matches.find(m => m.id === selectedId);
       if (match) {
@@ -56,11 +59,12 @@ const ScanConfirmModal: React.FC<ScanConfirmModalProps> = ({ scan, onConfirm, on
           scan.barcode,
           format,
           match.thumb || undefined,
+          matrix,
         );
         return;
       }
     }
-    onConfirm(scan.artist, scan.title, undefined, scan.barcode, scan.format || 'Vinyl');
+    onConfirm(scan.artist, scan.title, undefined, scan.barcode, scan.format || 'Vinyl', undefined, matrix);
   };
 
   return (
@@ -110,6 +114,48 @@ const ScanConfirmModal: React.FC<ScanConfirmModalProps> = ({ scan, onConfirm, on
               </span>
             </div>
           ) : null}
+
+          {/* From your label — only shown for label scans */}
+          {isLabelScan && scan.labelData && (
+            <div className="rounded-xl bg-th-surface/[0.04] border border-th-surface/[0.10] p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <h3 className="text-th-text3 text-[9px] uppercase tracking-widest">From your label</h3>
+                <span className={`rounded-full px-2 py-0.5 text-[9px] font-label tracking-wider ${
+                  scan.labelData.confidence_score >= 0.8
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-amber-500/15 text-amber-400'
+                }`}>
+                  {Math.round(scan.labelData.confidence_score * 100)}%
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                {scan.labelData.catalog_number && (
+                  <>
+                    <span className="text-th-text3/60">Catalog No</span>
+                    <span className="text-th-text font-medium">{scan.labelData.catalog_number}</span>
+                  </>
+                )}
+                {scan.labelData.label_name && (
+                  <>
+                    <span className="text-th-text3/60">Label</span>
+                    <span className="text-th-text font-medium">{scan.labelData.label_name}</span>
+                  </>
+                )}
+                {scan.labelData.side && (
+                  <>
+                    <span className="text-th-text3/60">Side</span>
+                    <span className="text-th-text font-medium">{scan.labelData.side}</span>
+                  </>
+                )}
+                {scan.labelData.year && (
+                  <>
+                    <span className="text-th-text3/60">Year</span>
+                    <span className="text-th-text font-medium">{scan.labelData.year}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* AI identification summary */}
           <div className="text-center">
@@ -165,6 +211,23 @@ const ScanConfirmModal: React.FC<ScanConfirmModalProps> = ({ scan, onConfirm, on
               <p className="text-th-text text-base font-bold mt-2">
                 {scan.artist} — {scan.title}
               </p>
+            </div>
+          )}
+
+          {/* Matrix / Runout — only shown for label scans */}
+          {isLabelScan && (
+            <div>
+              <label htmlFor="matrix-input" className="block text-th-text3 text-[9px] uppercase tracking-widest mb-1.5">
+                Matrix / Runout (optional)
+              </label>
+              <input
+                id="matrix-input"
+                type="text"
+                value={matrixInput}
+                onChange={(e) => setMatrixInput(e.target.value)}
+                placeholder="e.g. XSM-65637-1A VAN GELDER"
+                className="w-full bg-th-surface/[0.06] border border-th-surface/[0.10] rounded-xl px-4 py-2.5 text-sm text-th-text placeholder:text-th-text3/30 focus:outline-none focus:border-[#dd6e42]/40 transition-colors"
+              />
             </div>
           )}
         </div>

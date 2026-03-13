@@ -2,16 +2,20 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import { Disc3, ScanBarcode } from 'lucide-react';
+import { Disc3, ScanBarcode, ScanLine, Info } from 'lucide-react';
+import SideBPromptModal from './SideBPromptModal';
 
-export type ScanMode = 'cover' | 'barcode';
+export type ScanMode = 'cover' | 'barcode' | 'label';
 
 interface CameraModalProps {
   onCapture: (base64: string, scanMode: ScanMode) => void;
   onClose: () => void;
+  showSideBPrompt: boolean;
+  confirmSideBAndScanA: () => void;
+  skipSideA: () => void;
 }
 
-const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
+const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose, showSideBPrompt, confirmSideBAndScanA, skipSideA }) => {
   const { showToast } = useToast();
   const modalRef = useRef<HTMLDivElement>(null);
   const stableOnClose = useCallback(onClose, [onClose]);
@@ -129,19 +133,21 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setScanMode('cover')}
+              onClick={() => setScanMode('label')}
+              aria-pressed={scanMode === 'label'}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-label tracking-widest uppercase transition-all ${
-                scanMode === 'cover'
+                scanMode === 'label'
                   ? 'bg-[#dd6e42] text-th-text font-bold'
                   : 'glass-morphism text-th-text2 hover:text-th-text border border-th-surface/[0.10]'
               }`}
             >
-              <Disc3 className="w-3.5 h-3.5" />
-              Cover Art
+              <ScanLine className="w-3.5 h-3.5" />
+              Label
             </button>
             <button
               type="button"
               onClick={() => setScanMode('barcode')}
+              aria-pressed={scanMode === 'barcode'}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-label tracking-widest uppercase transition-all ${
                 scanMode === 'barcode'
                   ? 'bg-[#dd6e42] text-th-text font-bold'
@@ -151,10 +157,29 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
               <ScanBarcode className="w-3.5 h-3.5" />
               Barcode
             </button>
+            <button
+              type="button"
+              onClick={() => setScanMode('cover')}
+              aria-pressed={scanMode === 'cover'}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-label tracking-widest uppercase transition-all ${
+                scanMode === 'cover'
+                  ? 'bg-[#dd6e42] text-th-text font-bold'
+                  : 'glass-morphism text-th-text2 hover:text-th-text border border-th-surface/[0.10]'
+              }`}
+            >
+              <Disc3 className="w-3.5 h-3.5" />
+              Cover Art
+            </button>
           </div>
           <p className="text-th-text3 text-[10px] tracking-wider">
-            {scanMode === 'cover' ? 'Point at the album cover' : 'Point at the barcode on the sleeve or label'}
+            {scanMode === 'label' ? 'Point at the record label' : scanMode === 'cover' ? 'Point at the album cover' : 'Point at the barcode on the sleeve or label'}
           </p>
+          {scanMode === 'label' && (
+            <p className="flex items-center gap-1.5 text-th-text3/70 text-[9px] tracking-wider max-w-xs text-center leading-relaxed">
+              <Info className="w-3 h-3 shrink-0" />
+              Point your camera at the record label — the paper circle in the center. Fill the frame and avoid glare. Side A preferred.
+            </p>
+          )}
         </div>
 
         <div className="p-6 flex justify-center">
@@ -168,6 +193,8 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
 
         <canvas ref={canvasRef} className="hidden" />
       </div>
+
+      <SideBPromptModal isOpen={showSideBPrompt} onScanA={confirmSideBAndScanA} onSkip={skipSideA} />
 
       {/* Scan line animation */}
       <style>{`

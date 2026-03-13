@@ -210,8 +210,27 @@ export interface ScanConfirmation {
   title: string;
   barcode?: string;
   discogsMatches?: DiscogsMatch[];
-  scanMode?: 'cover' | 'barcode';
+  scanMode?: 'cover' | 'barcode' | 'label';
   format?: string;
+  // Label scan fields (only present when scanMode === 'label')
+  labelData?: {
+    catalog_number: string | null;
+    label_name: string | null;
+    side: string | null;
+    year: string | null;
+    confidence_score: number;
+  };
+}
+
+/** Shape returned by the /api/identify-label endpoint. */
+export interface LabelScanResult {
+  catalog_number: string | null;
+  label_name: string | null;
+  artist: string | null;
+  album_title: string | null;
+  year: string | null;
+  side: 'A' | 'B' | '1' | '2' | null;
+  confidence_score: number;
 }
 
 /** Shape returned by the /api/identify-gear endpoint. */
