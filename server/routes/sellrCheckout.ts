@@ -73,6 +73,7 @@ router.post('/api/sellr/checkout/create-intent', async (req: Request, res: Respo
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount_cents,
       currency: 'usd',
+      payment_method_types: ['card'],
       metadata: {
         session_id,
         tier,
