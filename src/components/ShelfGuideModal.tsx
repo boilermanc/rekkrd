@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import './ShelfGuideModal.css';
+import '../styles/stakkd-theme.css';
 
 interface ShelfGuideModalProps {
   isOpen: boolean;
@@ -27,13 +27,12 @@ const ShelfGuideModal: React.FC<ShelfGuideModalProps> = ({ isOpen, onClose }) =>
       className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-2 md:p-6 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
     >
       <div
-        className="sog-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500"
-        style={{ background: '#1a2528' }}
+        className="sog-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500 bg-sk-bg"
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-[#1a2528]/80 text-[#e8e2d6] flex items-center justify-center hover:bg-[#e8e2d6] hover:text-[#1a2528] transition-all"
+          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-sk-bg/80 text-sk-text flex items-center justify-center hover:bg-sk-text hover:text-sk-bg transition-all"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -74,7 +73,7 @@ const ShelfGuideModal: React.FC<ShelfGuideModalProps> = ({ isOpen, onClose }) =>
             <div className={`sog-panel${activeTab === 'quickstart' ? ' active' : ''}`}>
               <div className="sog-eyebrow">// Getting Started</div>
               <h2>Shelf Organizer<br /><em>Quick Start</em></h2>
-              <p>The Shelf Organizer lets you mirror your real-world vinyl storage inside Rekk<span className="text-[#c45a30]">r</span>d. Define your physical shelves, choose how you want your records sorted, and let the app figure out exactly where each album belongs. Then fine-tune with drag-and-drop.</p>
+              <p>The Shelf Organizer lets you mirror your real-world vinyl storage inside Rekk<span className="text-sk-accent-hover">r</span>d. Define your physical shelves, choose how you want your records sorted, and let the app figure out exactly where each album belongs. Then fine-tune with drag-and-drop.</p>
 
               <h3>Setting Up Your First Shelf</h3>
               <p>Head to the <strong>Setup</strong> tab and follow these steps to get your first shelf configured in under a minute.</p>
@@ -180,7 +179,7 @@ const ShelfGuideModal: React.FC<ShelfGuideModalProps> = ({ isOpen, onClose }) =>
               <h3>Rebalancing</h3>
               <p>Over time, your shelf sections can become unbalanced — some too full, others half-empty. The <strong>Rebalance</strong> button appears when the system detects an uneven distribution.</p>
               <p>When you click Rebalance, the app generates a move plan that shows you:</p>
-              <ul style={{ color: '#a8b8bc', paddingLeft: '1.5rem', marginBottom: '1.5rem', lineHeight: 1.8 }}>
+              <ul className="text-sk-text2" style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem', lineHeight: 1.8 }}>
                 <li>A <strong>before and after</strong> distribution chart</li>
                 <li>A list of every album that needs to move</li>
                 <li>Which section each album is moving from and to</li>

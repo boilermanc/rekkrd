@@ -102,7 +102,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
 
         {/* Header */}
         <div className="p-4 flex justify-between items-center border-b border-th-surface/[0.10] flex-shrink-0">
-          <h2 className="font-label text-[#dd6e42] font-bold tracking-widest text-sm uppercase">
+          <h2 className="font-label text-sk-accent font-bold tracking-widest text-sm uppercase">
             Confirm Gear
           </h2>
           <button
@@ -154,7 +154,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as GearCategory)}
-                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text focus:outline-none focus:ring-1 focus:ring-sk-accent/50"
               >
                 {GEAR_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -175,7 +175,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
                   placeholder="e.g. Technics"
-                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-sk-accent/50"
                 />
               </div>
               <div>
@@ -187,7 +187,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   placeholder="e.g. SL-1200MK7"
-                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-sk-accent/50"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
                 placeholder="e.g. 1972 or early 1980s"
-                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-sk-accent/50"
               />
             </div>
 
@@ -216,7 +216,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="AI-generated background..."
                 rows={3}
-                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text/80 placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50 resize-none"
+                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text/80 placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-sk-accent/50 resize-none"
               />
             </div>
 
@@ -261,7 +261,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                     value={purchasePrice}
                     onChange={(e) => setPurchasePrice(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl pl-8 pr-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                    className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl pl-8 pr-4 py-3 text-sm text-th-text placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-sk-accent/50"
                   />
                 </div>
               </div>
@@ -275,7 +275,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                   type="date"
                   value={purchaseDate}
                   onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                  className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text focus:outline-none focus:ring-1 focus:ring-sk-accent/50"
                 />
               </div>
             </div>
@@ -290,7 +290,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Personal notes, where you bought it, condition..."
                 rows={2}
-                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text/80 placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50 resize-none"
+                className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text/80 placeholder:text-th-text3/50 focus:outline-none focus:ring-1 focus:ring-sk-accent/50 resize-none"
               />
             </div>
           </div>
@@ -307,7 +307,7 @@ const GearConfirmModal: React.FC<GearConfirmModalProps> = ({
           <button
             onClick={handleSave}
             disabled={!canSave}
-            className="flex-1 bg-[#dd6e42] text-th-text font-bold py-3 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 bg-sk-accent text-th-text font-bold py-3 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Save to Stakkd
           </button>

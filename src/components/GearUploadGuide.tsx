@@ -29,7 +29,7 @@ const StepDots: React.FC<{ current: UploadStep; frontUploaded: boolean; labelUpl
             completed
               ? 'bg-emerald-400'
               : isCurrent
-              ? 'bg-[#dd6e42] scale-125'
+              ? 'bg-sk-accent scale-125'
               : 'border border-th-text3/40 bg-transparent'
           }`}
         >
@@ -114,14 +114,14 @@ const UploadZone: React.FC<{
         onDragLeave={handleDragLeave}
         className={`w-full max-w-sm aspect-[4/3] rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-4 cursor-pointer ${
           isDragging
-            ? 'border-[#dd6e42] bg-[#dd6e42]/10 scale-[1.02]'
-            : 'border-th-surface/[0.20] hover:border-[#dd6e42]/50 hover:bg-th-surface/[0.04]'
+            ? 'border-sk-accent bg-sk-accent/10 scale-[1.02]'
+            : 'border-th-surface/[0.20] hover:border-sk-accent/50 hover:bg-th-surface/[0.04]'
         }`}
       >
         <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
-          isDragging ? 'bg-[#dd6e42]/20' : 'bg-th-surface/[0.06]'
+          isDragging ? 'bg-sk-accent/20' : 'bg-th-surface/[0.06]'
         }`}>
-          <svg className="w-8 h-8 text-[#dd6e42]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-8 h-8 text-sk-accent/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
           </svg>
         </div>
@@ -129,7 +129,7 @@ const UploadZone: React.FC<{
           <p className="text-th-text font-bold text-sm">{label}</p>
           <p className="text-th-text3/60 text-xs mt-1">{hint}</p>
         </div>
-        <span className="font-label text-[10px] font-bold uppercase tracking-widest text-[#dd6e42]/80">
+        <span className="font-label text-[10px] font-bold uppercase tracking-widest text-sk-accent/80">
           Tap to browse
         </span>
       </button>
@@ -389,7 +389,7 @@ const GearUploadGuide: React.FC<GearUploadGuideProps> = ({ isOpen, onClose, onCo
             <div className="w-full max-w-sm space-y-3">
               <button
                 onClick={handleIdentify}
-                className="w-full bg-[#dd6e42] text-th-text font-bold py-3.5 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px]"
+                className="w-full bg-sk-accent text-th-text font-bold py-3.5 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px]"
               >
                 Identify My Gear
               </button>

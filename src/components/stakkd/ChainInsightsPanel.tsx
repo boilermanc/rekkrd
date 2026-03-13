@@ -90,8 +90,8 @@ function scrollToGapMarker(category: string) {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     // Brief highlight pulse
-    el.classList.add('ring-2', 'ring-[#dd6e42]/50');
-    setTimeout(() => el.classList.remove('ring-2', 'ring-[#dd6e42]/50'), 1500);
+    el.classList.add('ring-2', 'ring-sk-accent/50');
+    setTimeout(() => el.classList.remove('ring-2', 'ring-sk-accent/50'), 1500);
   }
 }
 

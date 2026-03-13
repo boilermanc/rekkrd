@@ -38,7 +38,7 @@ const WALL_COLOR = '#c8c0b8';
 
 /** Feature colors — matching RoomFeaturesEditor */
 const FEATURE_COLORS: Record<StakkdRoomFeature['feature_type'], string> = {
-  door: '#dd6e42',
+  door: '#8B3252',
   window: '#4a90d9',
   closet: '#8b7355',
   fireplace: '#e85d3a',
@@ -388,9 +388,9 @@ const CompassRose: React.FC<{ x: number; y: number }> = ({ x, y }) => {
       <line x1={x} y1={y - r} x2={x} y2={y + r} stroke="#6b6560" strokeWidth={0.8} />
       <line x1={x - r} y1={y} x2={x + r} y2={y} stroke="#6b6560" strokeWidth={0.8} />
       {/* North arrow (emphasized) */}
-      <polygon points={`${x},${y - r} ${x - 2.5},${y - r + 5} ${x + 2.5},${y - r + 5}`} fill="#dd6e42" />
+      <polygon points={`${x},${y - r} ${x - 2.5},${y - r + 5} ${x + 2.5},${y - r + 5}`} fill="#8B3252" />
       {/* Labels */}
-      <text x={x} y={y - labelOffset} textAnchor="middle" fill="#dd6e42" style={{ ...textStyle, fontWeight: 700, fontSize: 6 }}>N</text>
+      <text x={x} y={y - labelOffset} textAnchor="middle" fill="#8B3252" style={{ ...textStyle, fontWeight: 700, fontSize: 6 }}>N</text>
       <text x={x} y={y + labelOffset + 5} textAnchor="middle" fill="#6b6560" style={textStyle}>S</text>
       <text x={x + labelOffset + 1} y={y + 2} textAnchor="start" fill="#6b6560" style={textStyle}>E</text>
       <text x={x - labelOffset - 1} y={y + 2} textAnchor="end" fill="#6b6560" style={textStyle}>W</text>
@@ -611,13 +611,13 @@ const GearIcon: React.FC<GearIconProps> = ({ placement, rW, rH, category, intera
         r={halfIcon + 1}
         fill="#1a1816"
         fillOpacity={0.85}
-        stroke="#dd6e42"
+        stroke="#8B3252"
         strokeWidth={isHovered ? 1.2 : 0.8}
         strokeOpacity={isHovered ? 1 : 0.7}
       />
       {/* Icon */}
       <g transform={`translate(${cx - halfIcon * 0.5} ${cy - halfIcon * 0.5}) scale(${iconSize / 24 * 0.5})`}>
-        <path d={gearIconPath(category)} fill="#dd6e42" fillOpacity={0.9} />
+        <path d={gearIconPath(category)} fill="#8B3252" fillOpacity={0.9} />
       </g>
       {/* Facing arrow */}
       <line
@@ -625,7 +625,7 @@ const GearIcon: React.FC<GearIconProps> = ({ placement, rW, rH, category, intera
         y1={cy + arrow.dy * (halfIcon + 1)}
         x2={arrowTipX}
         y2={arrowTipY}
-        stroke="#dd6e42"
+        stroke="#8B3252"
         strokeWidth={0.8}
         strokeOpacity={0.6}
         markerEnd="url(#arrow-marker)"
@@ -635,7 +635,7 @@ const GearIcon: React.FC<GearIconProps> = ({ placement, rW, rH, category, intera
         x={cx}
         y={cy + halfIcon + 6}
         textAnchor="middle"
-        fill="#dd6e42"
+        fill="#8B3252"
         fillOpacity={0.85}
         style={{ fontSize: 3.5, fontWeight: 600, letterSpacing: '0.02em' }}
       >
@@ -731,7 +731,7 @@ const StereoTriangleOverlay: React.FC<StereoTriangleOverlayProps> = ({
   const py = PAD_TOP + (listeningPosition.y_pct / 100) * rH;
 
   const isHovered = hoveredId === 'stereo-triangle';
-  const triColor = '#dd6e42';
+  const triColor = '#8B3252';
 
   // Angle arc at listening position
   const arcR = 8;
@@ -906,7 +906,7 @@ const RoomDiagram: React.FC<RoomDiagramProps> = ({
         {/* Arrow marker definition for gear facing arrows */}
         <defs>
           <marker id="arrow-marker" viewBox="0 0 6 6" refX={5} refY={3} markerWidth={4} markerHeight={4} orient="auto-start-reverse">
-            <path d="M 0 0 L 6 3 L 0 6 z" fill="#dd6e42" fillOpacity={0.6} />
+            <path d="M 0 0 L 6 3 L 0 6 z" fill="#8B3252" fillOpacity={0.6} />
           </marker>
         </defs>
 
@@ -961,7 +961,7 @@ const RoomDiagram: React.FC<RoomDiagramProps> = ({
               rx={3}
               fill="#1a1816"
               fillOpacity={0.92}
-              stroke="#dd6e42"
+              stroke="#8B3252"
               strokeWidth={0.5}
             />
             <text

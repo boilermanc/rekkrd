@@ -582,7 +582,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
         <p className="text-th-text2 text-sm mb-4">Could not load your gear</p>
         <button
           onClick={fetchGear}
-          className="bg-[#dd6e42] text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px]"
+          className="bg-sk-accent text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px]"
         >
           Retry
         </button>
@@ -637,7 +637,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
         <div className="mb-10">
           <button
             onClick={handleOpenMethodModal}
-            className="bg-[#dd6e42] text-th-text font-bold py-3 px-8 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
+            className="bg-sk-accent text-th-text font-bold py-3 px-8 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -651,7 +651,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
           <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible">
             {/* AI Identification */}
             <div className="flex-shrink-0 w-56 md:w-auto snap-start rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.03] p-4 text-left">
-              <svg className="w-6 h-6 text-[#dd6e42]/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <svg className="w-6 h-6 text-sk-accent/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
               </svg>
@@ -662,7 +662,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
             </div>
             {/* Manual Finder */}
             <div className="flex-shrink-0 w-56 md:w-auto snap-start rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.03] p-4 text-left">
-              <svg className="w-6 h-6 text-[#dd6e42]/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <svg className="w-6 h-6 text-sk-accent/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
               </svg>
               <h3 className="text-th-text text-sm font-semibold mb-1">Manual Finder</h3>
@@ -672,7 +672,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
             </div>
             {/* Setup Guide */}
             <div className="flex-shrink-0 w-56 md:w-auto snap-start rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.03] p-4 text-left">
-              <svg className="w-6 h-6 text-[#dd6e42]/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <svg className="w-6 h-6 text-sk-accent/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.06a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L4.343 8.82" />
               </svg>
               <h3 className="text-th-text text-sm font-semibold mb-1">Setup Guide</h3>
@@ -741,7 +741,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
                   <div
                     key={i}
                     className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                      i < gear.length ? 'bg-[#dd6e42]' : 'bg-th-surface/[0.2]'
+                      i < gear.length ? 'bg-sk-accent' : 'bg-th-surface/[0.2]'
                     }`}
                   />
                 ))}
@@ -788,7 +788,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
           </button>
           <button
             onClick={handleOpenMethodModal}
-            className="bg-[#dd6e42] text-th-text font-bold py-2.5 px-5 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
+            className="bg-sk-accent text-th-text font-bold py-2.5 px-5 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -813,7 +813,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
               onClick={() => setActiveCategory(null)}
               className={`shrink-0 snap-start px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
                 activeCategory === null
-                  ? 'bg-[#dd6e42] text-th-text'
+                  ? 'bg-sk-accent text-th-text'
                   : 'border border-th-surface/[0.15] text-th-text3 hover:border-th-surface/[0.3] hover:text-th-text2'
               }`}
             >
@@ -827,7 +827,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
                 onClick={() => setActiveCategory(activeCategory === category ? null : category)}
                 className={`shrink-0 snap-start px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
                   activeCategory === category
-                    ? 'bg-[#dd6e42] text-th-text'
+                    ? 'bg-sk-accent text-th-text'
                     : 'border border-th-surface/[0.15] text-th-text3 hover:border-th-surface/[0.3] hover:text-th-text2'
                 }`}
               >
@@ -842,7 +842,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as SortMode)}
               aria-label="Sort gear by"
-              className="bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-th-text2 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50 sm:w-auto"
+              className="bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-th-text2 focus:outline-none focus:ring-1 focus:ring-sk-accent/50 sm:w-auto"
             >
               {SORT_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -852,7 +852,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
               <button
                 onClick={() => setIsCustomOrder(false)}
                 aria-label="Reset to automatic signal flow order"
-                className="text-[#dd6e42]/80 hover:text-[#dd6e42] text-[10px] font-semibold tracking-wide transition-colors whitespace-nowrap"
+                className="text-sk-accent/80 hover:text-sk-accent text-[10px] font-semibold tracking-wide transition-colors whitespace-nowrap"
               >
                 Reset flow
               </button>
@@ -874,15 +874,15 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
                 <button
                   onClick={() => handleOpenSavedGuide(g.id)}
                   disabled={loadingSavedGuideId === g.id}
-                  className="flex-1 flex items-center gap-3 rounded-lg px-3 py-2.5 bg-th-surface/[0.08] border border-th-surface/[0.15] hover:bg-th-surface/[0.18] hover:border-[#dd6e42]/30 transition-all text-left disabled:opacity-50"
+                  className="flex-1 flex items-center gap-3 rounded-lg px-3 py-2.5 bg-th-surface/[0.08] border border-th-surface/[0.15] hover:bg-th-surface/[0.18] hover:border-sk-accent/30 transition-all text-left disabled:opacity-50"
                 >
                   {loadingSavedGuideId === g.id ? (
-                    <svg className="w-3.5 h-3.5 text-[#dd6e42] animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-sk-accent animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
                   ) : (
-                    <svg className="w-3.5 h-3.5 text-[#dd6e42]/90 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <svg className="w-3.5 h-3.5 text-sk-accent/90 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                     </svg>
                   )}
@@ -907,7 +907,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
       {/* First-time hint — visible for 1-2 gear items */}
       {gear.length >= 1 && gear.length <= 2 && !hintDismissed && (
         <div className="mb-4 rounded-xl border border-th-surface/[0.15] bg-th-surface/[0.05] px-4 py-3 flex items-center gap-3">
-          <svg className="w-4 h-4 text-[#dd6e42]/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <svg className="w-4 h-4 text-sk-accent/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
           </svg>
           <p className="text-th-text3 text-xs flex-1">
@@ -990,7 +990,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
             <div key={item.id}>
               {/* Drop indicator — shown above the hovered card */}
               {canReorder && dragOverIndex === index && dragIndex !== null && dragIndex !== index && (
-                <div className="h-0.5 bg-[#dd6e42] rounded-full mx-4 my-1 shadow-[0_0_6px_rgba(221,110,66,0.5)]" />
+                <div className="h-0.5 bg-sk-accent rounded-full mx-4 my-1 shadow-[0_0_6px_rgba(139,50,82,0.5)]" />
               )}
 
               <div
@@ -1005,7 +1005,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
                 className={`relative transition-all duration-300 ${
                   canReorder && dragIndex === index ? 'opacity-50 scale-[0.98]' : ''
                 } ${
-                  justMovedId === item.id ? 'ring-2 ring-[#dd6e42]/60 rounded-xl' : ''
+                  justMovedId === item.id ? 'ring-2 ring-sk-accent/60 rounded-xl' : ''
                 }`}
                 aria-label={canReorder
                   ? `Drag to reorder. Currently position ${index + 1} of ${displayedGear.length}`
@@ -1020,7 +1020,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
                     {index > 0 && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleMoveUp(index); }}
-                        className="bg-th-surface/[0.2] backdrop-blur-sm border border-th-surface/[0.15] p-1.5 rounded-full active:bg-[#dd6e42]/30 transition-colors"
+                        className="bg-th-surface/[0.2] backdrop-blur-sm border border-th-surface/[0.15] p-1.5 rounded-full active:bg-sk-accent/30 transition-colors"
                         aria-label={`Move ${item.brand} ${item.model} up in signal chain`}
                       >
                         <svg className="w-3.5 h-3.5 text-th-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -1031,7 +1031,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
                     {index < displayedGear.length - 1 && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleMoveDown(index); }}
-                        className="bg-th-surface/[0.2] backdrop-blur-sm border border-th-surface/[0.15] p-1.5 rounded-full active:bg-[#dd6e42]/30 transition-colors"
+                        className="bg-th-surface/[0.2] backdrop-blur-sm border border-th-surface/[0.15] p-1.5 rounded-full active:bg-sk-accent/30 transition-colors"
                         aria-label={`Move ${item.brand} ${item.model} down in signal chain`}
                       >
                         <svg className="w-3.5 h-3.5 text-th-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -1167,7 +1167,7 @@ const StakkdPage: React.FC<StakkdPageProps> = ({ onUpgradeRequired, onGoHome }) 
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => onUpgradeRequired?.('gear_limit')}
-              className="text-[#dd6e42] text-xs font-bold uppercase tracking-widest hover:underline"
+              className="text-sk-accent text-xs font-bold uppercase tracking-widest hover:underline"
             >
               Upgrade
             </button>

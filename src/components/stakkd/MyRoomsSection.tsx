@@ -100,12 +100,12 @@ interface RoomCardProps {
 const RoomCard: React.FC<RoomCardProps> = ({ room, hasAccess, onEdit, onDelete, onFeatures, onLayout }) => {
   const featureCount = room.feature_count ?? 0;
   const gatedClass = hasAccess
-    ? 'text-th-text3/60 hover:text-[#dd6e42] hover:bg-th-surface/[0.1]'
+    ? 'text-th-text3/60 hover:text-sk-accent hover:bg-th-surface/[0.1]'
     : 'text-th-text3/40 opacity-60';
 
   return (
     <div
-      className="rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.03] p-4 hover:border-[#dd6e42]/30 hover:bg-th-surface/[0.06] transition-all group"
+      className="rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.03] p-4 hover:border-sk-accent/30 hover:bg-th-surface/[0.06] transition-all group"
       tabIndex={0}
       role="article"
       aria-label={`${room.name}, ${room.width_ft} by ${room.length_ft} feet`}
@@ -158,7 +158,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, hasAccess, onEdit, onDelete, 
 
       {/* Dimensions badge */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#dd6e42]/10 text-[#dd6e42] text-[10px] font-bold tracking-wide">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sk-accent/10 text-sk-accent text-[10px] font-bold tracking-wide">
           {room.width_ft} &times; {room.length_ft} ft
         </span>
         {featureCount > 0 && (
@@ -341,8 +341,8 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
           aria-label={hasAccess ? 'Add new room' : 'Add new room — upgrade to Enthusiast required'}
           className={`font-bold py-2 px-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2 ${
             hasAccess
-              ? 'bg-[#dd6e42] text-th-text hover:bg-[#c45e38]'
-              : 'bg-[#dd6e42]/60 text-th-text'
+              ? 'bg-sk-accent text-th-text hover:bg-sk-accent-hover'
+              : 'bg-sk-accent/60 text-th-text'
           }`}
         >
           {!hasAccess && <LockIcon className="w-3 h-3" />}
@@ -371,7 +371,7 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
               <button
                 onClick={handleAddRoom}
                 aria-label="Add your first room"
-                className="bg-[#dd6e42] text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2"
+                className="bg-sk-accent text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -387,7 +387,7 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
               <button
                 onClick={() => setShowUpgradePrompt(true)}
                 aria-label="Upgrade to Enthusiast for Room Planner"
-                className="bg-[#dd6e42]/60 text-th-text font-bold py-2.5 px-6 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2"
+                className="bg-sk-accent/60 text-th-text font-bold py-2.5 px-6 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2"
               >
                 <LockIcon className="w-3.5 h-3.5" />
                 Upgrade
@@ -453,7 +453,7 @@ const MyRoomsSection: React.FC<MyRoomsSectionProps> = ({ onGoHome }) => {
       {/* Loading overlay (features or layout) */}
       {(featuresLoading || layoutLoading) && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/80 backdrop-blur-sm">
-          <div className="w-6 h-6 border-2 border-[#dd6e42] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-sk-accent border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 

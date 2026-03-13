@@ -126,7 +126,7 @@ const GearCard: React.FC<GearCardProps> = ({ gear, onClick }) => {
       {/* Content */}
       <div className="flex-1 min-w-0 p-3 md:p-4 flex flex-col justify-center">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="inline-flex items-center gap-1 bg-[#dd6e42]/15 border border-[#dd6e42]/25 text-[#f0a882] text-[9px] font-label font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 bg-sk-accent/15 border border-sk-accent/25 text-sk-blush text-[9px] font-label font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full">
             <CategoryBadgeIcon className="w-3 h-3" aria-hidden="true" />
             {label}
           </span>

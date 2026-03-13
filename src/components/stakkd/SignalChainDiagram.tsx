@@ -237,7 +237,7 @@ const SignalChainDiagram: React.FC<SignalChainDiagramProps> = ({
         {onAddGear && (
           <button
             onClick={onAddGear}
-            className="bg-[#dd6e42] text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
+            className="bg-sk-accent text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -392,7 +392,7 @@ function GapMarkerNode({ gap, onAddGear }: GapMarkerNodeProps) {
       tabIndex={0}
       data-gap-category={gap.category}
       aria-label={`Missing ${label} - ${priorityLabel}: ${gap.reason}`}
-      className="group w-32 md:w-36 shrink-0 rounded-xl border border-dashed border-th-surface/[0.15] bg-th-surface/[0.02] hover:border-[#dd6e42]/25 hover:bg-th-surface/[0.05] transition-all duration-200 cursor-pointer overflow-hidden opacity-60 hover:opacity-80"
+      className="group w-32 md:w-36 shrink-0 rounded-xl border border-dashed border-th-surface/[0.15] bg-th-surface/[0.02] hover:border-sk-accent/25 hover:bg-th-surface/[0.05] transition-all duration-200 cursor-pointer overflow-hidden opacity-60 hover:opacity-80"
     >
       {/* Placeholder thumbnail */}
       <div className="relative w-full aspect-square flex items-center justify-center bg-th-bg/20">
@@ -446,7 +446,7 @@ const DiagramNode: React.FC<DiagramNodeProps> = ({ gear, onClick }) => {
       role="button"
       tabIndex={0}
       aria-label={`${name} - ${label}`}
-      className="group w-32 md:w-36 shrink-0 rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.04] hover:border-[#dd6e42]/30 hover:bg-th-surface/[0.08] transition-all duration-200 cursor-pointer overflow-hidden"
+      className="group w-32 md:w-36 shrink-0 rounded-xl border border-th-surface/[0.10] bg-th-surface/[0.04] hover:border-sk-accent/30 hover:bg-th-surface/[0.08] transition-all duration-200 cursor-pointer overflow-hidden"
     >
       {/* Thumbnail */}
       <div className="relative w-full aspect-square overflow-hidden bg-th-bg/40 flex items-center justify-center">

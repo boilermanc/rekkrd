@@ -168,7 +168,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ mode, initialData, onSave, onCancel
   };
 
   // Shared input class matching GearCatalogEditor pattern
-  const inputClass = 'w-full px-3 py-2 text-sm rounded-lg border border-th-surface/20 bg-th-bg text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/30 focus:border-[#dd6e42]/60 transition-colors';
+  const inputClass = 'w-full px-3 py-2 text-sm rounded-lg border border-th-surface/20 bg-th-bg text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-sk-accent/30 focus:border-sk-accent/60 transition-colors';
   const labelClass = 'block text-xs font-medium mb-1.5 text-th-text3';
   const errorBorder = 'border-red-400 focus:ring-red-400/30 focus:border-red-400';
 
@@ -215,7 +215,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ mode, initialData, onSave, onCancel
                   {i > 0 && (
                     <div
                       className={`flex-1 h-px mx-2 transition-colors ${
-                        isCompleted || isActive ? 'bg-[#dd6e42]' : 'bg-th-surface/[0.15]'
+                        isCompleted || isActive ? 'bg-sk-accent' : 'bg-th-surface/[0.15]'
                       }`}
                     />
                   )}
@@ -226,9 +226,9 @@ const RoomForm: React.FC<RoomFormProps> = ({ mode, initialData, onSave, onCancel
                       aria-current={isActive ? 'step' : undefined}
                       className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                         isActive
-                          ? 'bg-[#dd6e42] text-white ring-2 ring-[#dd6e42]/30'
+                          ? 'bg-sk-accent text-white ring-2 ring-sk-accent/30'
                           : isCompleted
-                            ? 'bg-[#dd6e42]/20 text-[#dd6e42]'
+                            ? 'bg-sk-accent/20 text-sk-accent'
                             : 'border border-th-surface/[0.20] text-th-text3/50'
                       }`}
                     >
@@ -456,10 +456,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ mode, initialData, onSave, onCancel
                   type="button"
                   onClick={handleNext}
                   aria-label="Go to next step"
-                  className="text-sm font-medium px-5 py-2 rounded-lg text-white transition-colors flex items-center gap-1.5"
-                  style={{ backgroundColor: '#dd6e42' }}
-                  onMouseEnter={e => { (e.currentTarget.style.backgroundColor = '#c45a30'); }}
-                  onMouseLeave={e => { (e.currentTarget.style.backgroundColor = '#dd6e42'); }}
+                  className="text-sm font-medium px-5 py-2 rounded-lg text-white transition-colors flex items-center gap-1.5 bg-sk-accent hover:bg-sk-accent-hover"
                 >
                   Next
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -471,10 +468,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ mode, initialData, onSave, onCancel
                   type="submit"
                   disabled={saving}
                   aria-label={mode === 'create' ? 'Save room' : 'Update room'}
-                  className="text-sm font-medium px-5 py-2 rounded-lg text-white transition-colors disabled:opacity-50 flex items-center gap-2"
-                  style={{ backgroundColor: '#dd6e42' }}
-                  onMouseEnter={e => { if (!saving) (e.currentTarget.style.backgroundColor = '#c45a30'); }}
-                  onMouseLeave={e => { (e.currentTarget.style.backgroundColor = '#dd6e42'); }}
+                  className="text-sm font-medium px-5 py-2 rounded-lg text-white transition-colors disabled:opacity-50 flex items-center gap-2 bg-sk-accent hover:bg-sk-accent-hover"
                 >
                   {saving && (
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />

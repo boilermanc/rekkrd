@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import './RoomGuideModal.css';
+import '../../styles/stakkd-theme.css';
 
 interface RoomGuideModalProps {
   isOpen: boolean;
@@ -27,13 +27,12 @@ const RoomGuideModal: React.FC<RoomGuideModalProps> = ({ isOpen, onClose }) => {
       className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-2 md:p-6 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
     >
       <div
-        className="rog-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500"
-        style={{ background: '#1a2528' }}
+        className="rog-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500 bg-sk-bg"
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-[#1a2528]/80 text-[#e8e2d6] flex items-center justify-center hover:bg-[#e8e2d6] hover:text-[#1a2528] transition-all"
+          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-sk-bg/80 text-sk-text flex items-center justify-center hover:bg-sk-text hover:text-sk-bg transition-all"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

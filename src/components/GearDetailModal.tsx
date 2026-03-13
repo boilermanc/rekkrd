@@ -83,7 +83,7 @@ function HeroPlaceholderIcon({ category }: { category: GearCategory }) {
   }
 }
 
-const INPUT_CLS = "w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50";
+const INPUT_CLS = "w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-1 focus:ring-sk-accent/50";
 const LABEL_CLS = "block text-th-text3/70 text-[10px] uppercase tracking-widest mb-1";
 
 interface GearDetailModalProps {
@@ -124,6 +124,9 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
   const [editPurchaseDate, setEditPurchaseDate] = useState('');
   const [editNotes, setEditNotes] = useState('');
 
+  // Fullscreen description overlay (mobile readability)
+  const [descExpanded, setDescExpanded] = useState(false);
+
   // Photo upload state
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -152,6 +155,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
       setEditNotes(gear.notes || '');
       setManualResult(null);
       setManualSaved(false);
+      setDescExpanded(false);
     }
   }, [gear?.id]);
 
@@ -466,7 +470,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="inline-flex items-center gap-1.5 text-th-text3/70 text-[10px] uppercase tracking-widest hover:text-[#dd6e42] transition-colors disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 text-th-text3/70 text-[10px] uppercase tracking-widest hover:text-sk-accent transition-colors disabled:opacity-40"
               >
                 {uploadingPhoto ? (
                   <>
@@ -498,12 +502,12 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
           {/* Header */}
           <header>
             <div className="flex items-center gap-2 mb-2">
-              <span className="inline-block bg-[#dd6e42]/15 border border-[#dd6e42]/25 text-[#f0a882] text-[9px] font-label font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full">
+              <span className="inline-block bg-sk-accent/15 border border-sk-accent/25 text-sk-blush text-[9px] font-label font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full">
                 {editing ? (
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value as GearCategory)}
-                    className="bg-transparent text-[#f0a882] text-[9px] font-bold uppercase tracking-[0.15em] border-none outline-none cursor-pointer"
+                    className="bg-transparent text-sk-blush text-[9px] font-bold uppercase tracking-[0.15em] border-none outline-none cursor-pointer"
                   >
                     {GEAR_CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
@@ -562,7 +566,54 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                 className={`${INPUT_CLS} resize-none text-th-text/80`}
               />
             ) : gear.description ? (
-              <p className="text-th-text/85 leading-relaxed text-sm italic">"{gear.description}"</p>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setDescExpanded(true)}
+                  className="text-left w-full group"
+                >
+                  <p className="text-th-text/85 leading-relaxed text-sm italic line-clamp-4 md:line-clamp-none">
+                    "{gear.description}"
+                  </p>
+                  {/* Visible only on mobile when text is long enough to be clipped */}
+                  <span className="md:hidden inline-flex items-center gap-1 text-sk-accent text-[10px] uppercase tracking-widest mt-2 group-hover:text-sk-blush transition-colors">
+                    Read more
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0V15" />
+                    </svg>
+                  </span>
+                </button>
+
+                {/* Fullscreen description overlay */}
+                {descExpanded && (
+                  <div
+                    className="fixed inset-0 z-[70] bg-th-bg/98 backdrop-blur-xl flex flex-col animate-in fade-in duration-200"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Full description"
+                  >
+                    <div className="flex items-center justify-between p-4 border-b border-th-surface/[0.10] flex-shrink-0">
+                      <div>
+                        <p className="text-th-text3/70 text-[9px] font-label tracking-[0.3em] uppercase">Background</p>
+                        <p className="text-th-text text-sm font-bold mt-0.5">{gear.brand} {gear.model}</p>
+                      </div>
+                      <button
+                        onClick={() => setDescExpanded(false)}
+                        className="w-10 h-10 rounded-full bg-th-surface/[0.08] text-th-text flex items-center justify-center hover:bg-th-text hover:text-th-bg transition-all"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                      <p className="text-th-text/90 leading-relaxed text-base italic">
+                        "{gear.description}"
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <p className="text-th-text3/60 text-sm italic">No description available</p>
             )}
@@ -605,9 +656,9 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                   href={gear.manual_pdf_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#dd6e42]/10 border border-[#dd6e42]/25 rounded-xl px-4 py-2.5 text-sm text-th-text hover:bg-[#dd6e42]/20 transition-all"
+                  className="inline-flex items-center gap-2 bg-sk-accent/10 border border-sk-accent/25 rounded-xl px-4 py-2.5 text-sm text-th-text hover:bg-sk-accent/20 transition-all"
                 >
-                  <svg className="w-4 h-4 text-[#f0a882]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <svg className="w-4 h-4 text-sk-blush" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                   </svg>
                   View Manual (PDF)
@@ -701,14 +752,14 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                         href={manualResult.manual_url!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#f0a882] text-sm hover:text-[#dd6e42] transition-colors underline underline-offset-2 break-all text-left"
+                        className="text-sk-blush text-sm hover:text-sk-accent transition-colors underline underline-offset-2 break-all text-left"
                       >
                         {manualResult.source || manualResult.manual_url}
                       </a>
                     ) : (
                       <button
                         onClick={() => handlePickAlternative(manualResult.manual_url!)}
-                        className="text-[#f0a882] text-sm hover:text-[#dd6e42] transition-colors underline underline-offset-2 break-all text-left"
+                        className="text-sk-blush text-sm hover:text-sk-accent transition-colors underline underline-offset-2 break-all text-left"
                       >
                         {manualResult.source || manualResult.manual_url}
                       </button>
@@ -726,7 +777,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
                         <li key={i}>
                           <button
                             onClick={() => handlePickAlternative(url)}
-                            className="text-[#f0a882] text-sm hover:text-[#dd6e42] transition-colors underline underline-offset-2 break-all text-left"
+                            className="text-sk-blush text-sm hover:text-sk-accent transition-colors underline underline-offset-2 break-all text-left"
                           >
                             {url}
                           </button>
@@ -841,7 +892,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
               <button
                 onClick={handleSave}
                 disabled={!canSave || saving}
-                className="flex-1 bg-[#dd6e42] text-th-text font-bold py-3 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 bg-sk-accent text-th-text font-bold py-3 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -861,7 +912,7 @@ const GearDetailModal: React.FC<GearDetailModalProps> = ({
               </button>
               <button
                 onClick={enterEditMode}
-                className="flex-1 bg-[#dd6e42] text-th-text font-bold py-3 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px]"
+                className="flex-1 bg-sk-accent text-th-text font-bold py-3 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px]"
               >
                 Edit
               </button>

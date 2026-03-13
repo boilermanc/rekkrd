@@ -142,7 +142,7 @@ const AddGearFlow: React.FC<AddGearFlowProps> = ({
         <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-th-bg/80 backdrop-blur-md">
           <SpinningRecord size="w-64 h-64 md:w-96 md:h-96" />
           <div className="mt-8 md:mt-12 text-center px-6">
-            <p className="font-label text-[#dd6e42] text-xl md:text-2xl font-bold animate-pulse tracking-[0.3em] uppercase">
+            <p className="font-label text-sk-accent text-xl md:text-2xl font-bold animate-pulse tracking-[0.3em] uppercase">
               Identifying Your Gear...
             </p>
           </div>

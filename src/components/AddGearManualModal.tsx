@@ -21,7 +21,7 @@ const CATEGORY_LABELS: Record<GearCategory, string> = {
   cables_other: 'Cables / Other',
 };
 
-const INPUT_CLS = 'w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-1 focus:ring-[#dd6e42]/50';
+const INPUT_CLS = 'w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3 text-sm text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-1 focus:ring-sk-accent/50';
 const LABEL_CLS = 'block text-th-text3/70 text-[10px] uppercase tracking-widest mb-1';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -406,7 +406,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
 
         {/* Header */}
         <div className="p-4 flex justify-between items-center border-b border-th-surface/[0.10] flex-shrink-0">
-          <h2 className="font-label text-[#dd6e42] font-bold tracking-widest text-sm uppercase">
+          <h2 className="font-label text-sk-accent font-bold tracking-widest text-sm uppercase">
             Add Gear
           </h2>
           <button
@@ -476,7 +476,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
                       <button
                         type="button"
                         onClick={() => { onClose(); onScanWithAI(); }}
-                        className="bg-[#dd6e42] text-th-text font-bold py-3 px-6 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
+                        className="bg-sk-accent text-th-text font-bold py-3 px-6 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -516,7 +516,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
                   <button
                     type="button"
                     onClick={handleSearchAgain}
-                    className="text-[#dd6e42]/80 text-[10px] uppercase tracking-widest hover:text-[#dd6e42] transition-colors"
+                    className="text-sk-accent/80 text-[10px] uppercase tracking-widest hover:text-sk-accent transition-colors"
                   >
                     Search again
                   </button>
@@ -529,7 +529,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
                   <button
                     type="button"
                     onClick={handleSearchAgain}
-                    className="text-[#dd6e42]/80 text-[10px] uppercase tracking-widest hover:text-[#dd6e42] transition-colors"
+                    className="text-sk-accent/80 text-[10px] uppercase tracking-widest hover:text-sk-accent transition-colors"
                   >
                     Search again
                   </button>
@@ -617,7 +617,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
                           setTimeout(() => photoInputRef.current?.click(), 0);
                         }}
                         disabled={uploadingPhoto}
-                        className="inline-flex items-center gap-1.5 text-[#dd6e42]/80 text-[10px] uppercase tracking-widest hover:text-[#dd6e42] transition-colors"
+                        className="inline-flex items-center gap-1.5 text-sk-accent/80 text-[10px] uppercase tracking-widest hover:text-sk-accent transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -652,7 +652,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
                     type="button"
                     onClick={() => photoInputRef.current?.click()}
                     disabled={uploadingPhoto}
-                    className="flex items-center gap-3 w-full border border-dashed border-th-surface/[0.15] rounded-xl px-4 py-4 text-th-text3/60 hover:border-[#dd6e42]/40 hover:text-th-text3 transition-all disabled:opacity-40"
+                    className="flex items-center gap-3 w-full border border-dashed border-th-surface/[0.15] rounded-xl px-4 py-4 text-th-text3/60 hover:border-sk-accent/40 hover:text-th-text3 transition-all disabled:opacity-40"
                   >
                     {uploadingPhoto ? (
                       <>
@@ -701,7 +701,7 @@ const AddGearManualModal: React.FC<AddGearManualModalProps> = ({
           <button
             onClick={handleSave}
             disabled={!canSave}
-            className="flex-1 bg-[#dd6e42] text-th-text font-bold py-3 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 bg-sk-accent text-th-text font-bold py-3 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save to Stakkd'}
           </button>

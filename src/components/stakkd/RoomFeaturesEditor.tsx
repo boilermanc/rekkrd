@@ -77,7 +77,7 @@ const FEATURE_ICONS: Record<FeatureType, React.ReactNode> = {
 };
 
 const FEATURE_COLORS: Record<FeatureType, string> = {
-  door: '#dd6e42',
+  door: '#8B3252',
   window: '#4a90d9',
   closet: '#8b7355',
   fireplace: '#e85d3a',
@@ -138,15 +138,15 @@ const AddFeatureForm: React.FC<AddFeatureFormProps> = ({
   };
 
   const inputClass =
-    'w-full px-3 py-2 text-sm rounded-lg border border-th-surface/20 bg-th-bg text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/30 focus:border-[#dd6e42]/60 transition-colors';
+    'w-full px-3 py-2 text-sm rounded-lg border border-th-surface/20 bg-th-bg text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-sk-accent/30 focus:border-sk-accent/60 transition-colors';
   const labelClass = 'block text-xs font-medium mb-1 text-th-text3';
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 rounded-xl border border-[#dd6e42]/20 bg-th-surface/[0.04] p-4 space-y-3"
+      className="mt-3 rounded-xl border border-sk-accent/20 bg-th-surface/[0.04] p-4 space-y-3"
     >
-      <p className="text-xs font-semibold text-[#dd6e42] uppercase tracking-widest">
+      <p className="text-xs font-semibold text-sk-accent uppercase tracking-widest">
         Add to {wall} wall
       </p>
 
@@ -179,7 +179,7 @@ const AddFeatureForm: React.FC<AddFeatureFormProps> = ({
           value={positionPct}
           onChange={e => setPositionPct(Number(e.target.value))}
           aria-label={`Position along ${wall} wall`}
-          className="w-full accent-[#dd6e42]"
+          className="w-full accent-sk-accent"
         />
       </div>
 
@@ -229,10 +229,7 @@ const AddFeatureForm: React.FC<AddFeatureFormProps> = ({
           type="submit"
           disabled={saving}
           aria-label="Save feature"
-          className="text-xs font-medium px-3 py-1.5 rounded-lg text-white transition-colors disabled:opacity-50 flex items-center gap-1.5"
-          style={{ backgroundColor: '#dd6e42' }}
-          onMouseEnter={e => { if (!saving) (e.currentTarget.style.backgroundColor = '#c45a30'); }}
-          onMouseLeave={e => { (e.currentTarget.style.backgroundColor = '#dd6e42'); }}
+          className="text-xs font-medium px-3 py-1.5 rounded-lg text-white transition-colors disabled:opacity-50 flex items-center gap-1.5 bg-sk-accent hover:bg-sk-accent-hover"
         >
           {saving && (
             <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -389,7 +386,7 @@ const RoomPreview: React.FC<RoomPreviewProps> = ({ room, features, addingWall, a
           y={ghost.y}
           width={ghost.w}
           height={ghost.h}
-          fill="#dd6e42"
+          className="fill-sk-accent"
           opacity={0.35}
           rx={0.5}
         />
@@ -470,7 +467,7 @@ const RoomFeaturesEditor: React.FC<RoomFeaturesEditorProps> = ({
   const featuresOnWall = (wall: Wall) => features.filter(f => f.wall === wall);
 
   const inputClass =
-    'w-full px-3 py-2 text-sm rounded-lg border border-th-surface/20 bg-th-bg text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/30 focus:border-[#dd6e42]/60 transition-colors';
+    'w-full px-3 py-2 text-sm rounded-lg border border-th-surface/20 bg-th-bg text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-sk-accent/30 focus:border-sk-accent/60 transition-colors';
 
   return (
     <div
@@ -534,7 +531,7 @@ const RoomFeaturesEditor: React.FC<RoomFeaturesEditorProps> = ({
                         type="button"
                         onClick={() => { setAddingWall(wall); setAddingPositionPct(50); }}
                         aria-label={`Add feature to ${label} wall`}
-                        className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#dd6e42] hover:text-[#c45a30] transition-colors"
+                        className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-sk-accent hover:text-sk-accent-hover transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

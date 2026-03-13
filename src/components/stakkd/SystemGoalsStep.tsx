@@ -102,7 +102,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
         {/* Header */}
         <div className="p-4 flex justify-between items-center border-b border-th-surface/[0.10] shrink-0">
           <div>
-            <h2 className="font-label text-[#dd6e42] font-bold tracking-widest text-sm uppercase">
+            <h2 className="font-label text-sk-accent font-bold tracking-widest text-sm uppercase">
               System Goals
             </h2>
             <p className="text-th-text3 text-[11px] mt-0.5">
@@ -133,7 +133,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
                     key={opt}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
                       checked
-                        ? 'border-[#dd6e42]/40 bg-[#dd6e42]/[0.08]'
+                        ? 'border-sk-accent/40 bg-sk-accent/[0.08]'
                         : 'border-th-surface/[0.10] bg-th-surface/[0.03] hover:border-th-surface/[0.20]'
                     }`}
                   >
@@ -142,7 +142,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
                       checked={checked}
                       onChange={() => toggleUseCase(opt)}
                       aria-label={opt}
-                      className="accent-[#dd6e42] w-4 h-4 shrink-0"
+                      className="accent-sk-accent w-4 h-4 shrink-0"
                     />
                     <span className="text-th-text2 text-xs">{opt}</span>
                   </label>
@@ -164,7 +164,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
                     key={opt}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
                       selected
-                        ? 'border-[#dd6e42]/40 bg-[#dd6e42]/[0.08]'
+                        ? 'border-sk-accent/40 bg-sk-accent/[0.08]'
                         : 'border-th-surface/[0.10] bg-th-surface/[0.03] hover:border-th-surface/[0.20]'
                     }`}
                   >
@@ -174,7 +174,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
                       checked={selected}
                       onChange={() => setListeningPriority(opt)}
                       aria-label={opt}
-                      className="accent-[#dd6e42] w-4 h-4 shrink-0"
+                      className="accent-sk-accent w-4 h-4 shrink-0"
                     />
                     <span className="text-th-text2 text-xs">{opt}</span>
                   </label>
@@ -200,7 +200,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
                       <label
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
                           checked
-                            ? 'border-[#dd6e42]/40 bg-[#dd6e42]/[0.08] rounded-b-none'
+                            ? 'border-sk-accent/40 bg-sk-accent/[0.08] rounded-b-none'
                             : 'border-th-surface/[0.10] bg-th-surface/[0.03] hover:border-th-surface/[0.20]'
                         }`}
                       >
@@ -209,12 +209,12 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
                           checked={checked}
                           onChange={() => toggleSpecialist(item.id)}
                           aria-label={`${item.name} serves a specialized role`}
-                          className="accent-[#dd6e42] w-4 h-4 shrink-0"
+                          className="accent-sk-accent w-4 h-4 shrink-0"
                         />
                         <span className="text-th-text2 text-xs truncate">{item.name}</span>
                       </label>
                       {checked && (
-                        <div className="border border-t-0 border-[#dd6e42]/40 bg-th-surface/[0.02] rounded-b-xl px-3 py-2">
+                        <div className="border border-t-0 border-sk-accent/40 bg-th-surface/[0.02] rounded-b-xl px-3 py-2">
                           <input
                             type="text"
                             value={specialistRoles[item.id] || ''}
@@ -247,7 +247,7 @@ const SystemGoalsStep: React.FC<SystemGoalsStepProps> = ({
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="ml-auto bg-[#dd6e42] text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#dd6e42]"
+            className="ml-auto bg-sk-accent text-th-text font-bold py-2.5 px-6 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-sk-accent"
           >
             Analyze with Goals
           </button>

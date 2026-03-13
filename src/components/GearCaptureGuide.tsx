@@ -30,28 +30,28 @@ const FrontPanelHint: React.FC = () => (
     {/* Brand area — dotted highlight */}
     <rect
       x="14" y="18" width="70" height="14" rx="3"
-      stroke="#dd6e42" strokeWidth="1.2" strokeDasharray="4 2"
+      stroke="#8B3252" strokeWidth="1.2" strokeDasharray="4 2"
     />
     <line x1="20" y1="25" x2="75" y2="25" stroke="#c0d6df" strokeWidth="1" opacity="0.5" />
     {/* Model number area — dotted highlight */}
     <rect
       x="14" y="38" width="50" height="10" rx="2"
-      stroke="#dd6e42" strokeWidth="1" strokeDasharray="3 2"
+      stroke="#8B3252" strokeWidth="1" strokeDasharray="3 2"
     />
     <line x1="20" y1="43" x2="55" y2="43" stroke="#c0d6df" strokeWidth="0.8" opacity="0.4" />
     {/* Knobs row */}
     <circle cx="120" cy="50" r="10" stroke="#c0d6df" strokeWidth="1.2" />
     <circle cx="120" cy="50" r="4" stroke="#c0d6df" strokeWidth="0.6" opacity="0.5" />
-    <circle cx="120" cy="50" r="1.5" fill="#dd6e42" opacity="0.4" />
+    <circle cx="120" cy="50" r="1.5" fill="#8B3252" opacity="0.4" />
     <circle cx="150" cy="50" r="8" stroke="#c0d6df" strokeWidth="1.2" />
     <circle cx="150" cy="50" r="3" stroke="#c0d6df" strokeWidth="0.6" opacity="0.5" />
     <circle cx="175" cy="50" r="8" stroke="#c0d6df" strokeWidth="1.2" />
     <circle cx="175" cy="50" r="3" stroke="#c0d6df" strokeWidth="0.6" opacity="0.5" />
     {/* VU meter */}
     <rect x="100" y="18" width="40" height="16" rx="2" stroke="#c0d6df" strokeWidth="0.8" opacity="0.5" />
-    <line x1="120" y1="30" x2="126" y2="20" stroke="#dd6e42" strokeWidth="0.8" opacity="0.6" />
+    <line x1="120" y1="30" x2="126" y2="20" stroke="#8B3252" strokeWidth="0.8" opacity="0.6" />
     {/* Power indicator */}
-    <circle cx="200" cy="50" r="3" fill="#dd6e42" opacity="0.3" />
+    <circle cx="200" cy="50" r="3" fill="#8B3252" opacity="0.3" />
     <circle cx="200" cy="50" r="5" stroke="#c0d6df" strokeWidth="0.6" opacity="0.4" />
   </svg>
 );
@@ -83,7 +83,7 @@ const BackLabelHint: React.FC = () => (
     {/* Label/sticker area — dotted highlight */}
     <rect
       x="30" y="40" width="90" height="26" rx="3"
-      stroke="#dd6e42" strokeWidth="1.5" strokeDasharray="5 3"
+      stroke="#8B3252" strokeWidth="1.5" strokeDasharray="5 3"
     />
     {/* Label text lines */}
     <line x1="38" y1="48" x2="110" y2="48" stroke="#c0d6df" strokeWidth="1" opacity="0.5" />
@@ -113,7 +113,7 @@ const StepDots: React.FC<{ current: CaptureStep; frontCaptured: boolean; labelCa
             completed
               ? 'bg-emerald-400'
               : isCurrent
-              ? 'bg-[#dd6e42] scale-125'
+              ? 'bg-sk-accent scale-125'
               : 'border border-th-text3/40 bg-transparent'
           }`}
         >
@@ -398,9 +398,9 @@ const GearCaptureGuide: React.FC<GearCaptureGuideProps> = ({ isOpen, onClose, on
                   onClick={handleCaptureFront}
                   disabled={!isStreaming || !!frontImage}
                   aria-label="Capture front panel photo"
-                  className="w-20 h-20 rounded-full border-4 border-th-text flex items-center justify-center active:scale-95 transition-transform hover:border-[#dd6e42] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-20 h-20 rounded-full border-4 border-th-text flex items-center justify-center active:scale-95 transition-transform hover:border-sk-accent disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <div className="w-16 h-16 rounded-full bg-th-text hover:bg-[#dd6e42] transition-colors" />
+                  <div className="w-16 h-16 rounded-full bg-th-text hover:bg-sk-accent transition-colors" />
                 </button>
               </div>
             )}
@@ -479,9 +479,9 @@ const GearCaptureGuide: React.FC<GearCaptureGuideProps> = ({ isOpen, onClose, on
                   onClick={handleCaptureLabel}
                   disabled={!isStreaming || !!labelImage}
                   aria-label="Capture back label photo"
-                  className="w-20 h-20 rounded-full border-4 border-th-text flex items-center justify-center active:scale-95 transition-transform hover:border-[#dd6e42] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-20 h-20 rounded-full border-4 border-th-text flex items-center justify-center active:scale-95 transition-transform hover:border-sk-accent disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <div className="w-16 h-16 rounded-full bg-th-text hover:bg-[#dd6e42] transition-colors" />
+                  <div className="w-16 h-16 rounded-full bg-th-text hover:bg-sk-accent transition-colors" />
                 </button>
               )}
               <button
@@ -566,7 +566,7 @@ const GearCaptureGuide: React.FC<GearCaptureGuideProps> = ({ isOpen, onClose, on
             <div className="w-full max-w-sm space-y-3">
               <button
                 onClick={handleIdentify}
-                className="w-full bg-[#dd6e42] text-th-text font-bold py-3.5 rounded-xl hover:bg-[#c45e38] transition-all uppercase tracking-[0.2em] text-[10px]"
+                className="w-full bg-sk-accent text-th-text font-bold py-3.5 rounded-xl hover:bg-sk-accent-hover transition-all uppercase tracking-[0.2em] text-[10px]"
               >
                 Identify My Gear
               </button>

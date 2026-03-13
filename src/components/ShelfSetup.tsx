@@ -283,7 +283,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
     return (
       <main className="max-w-7xl mx-auto px-4 md:px-6 mt-8 pb-8">
         <div className="flex flex-col items-center justify-center py-32">
-          <div className="w-10 h-10 border-2 border-[#dd6e42] border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-2 border-sk-accent border-t-transparent rounded-full animate-spin" />
           <p className="font-label text-[10px] tracking-widest mt-4 text-th-text3 uppercase">Loading shelves</p>
         </div>
       </main>
@@ -326,7 +326,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
             onClick={() => setActiveTab('setup')}
             className={`px-4 py-2 rounded-md text-sm font-label tracking-wide transition-all ${
               activeTab === 'setup'
-                ? 'bg-[#dd6e42] text-white shadow'
+                ? 'bg-sk-accent text-white shadow'
                 : 'text-th-text2 hover:text-th-text'
             }`}
           >
@@ -338,7 +338,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
             onClick={() => setActiveTab('view')}
             className={`px-4 py-2 rounded-md text-sm font-label tracking-wide transition-all ${
               activeTab === 'view'
-                ? 'bg-[#dd6e42] text-white shadow'
+                ? 'bg-sk-accent text-white shadow'
                 : 'text-th-text2 hover:text-th-text'
             }`}
           >
@@ -362,7 +362,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
               <p className="text-th-text3/70 text-sm mb-3">No shelf configured yet.</p>
               <button
                 onClick={() => setActiveTab('setup')}
-                className="text-[#dd6e42] text-sm font-label tracking-wide hover:underline"
+                className="text-sk-accent text-sm font-label tracking-wide hover:underline"
                 aria-label="Go to setup tab"
               >
                 Set up a shelf first
@@ -381,7 +381,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                       onClick={() => setViewShelfId(s.id)}
                       className={`px-3.5 py-2 rounded-lg text-sm font-label tracking-wide transition-all border ${
                         activeShelf?.id === s.id
-                          ? 'bg-[#dd6e42] border-[#dd6e42] text-white shadow-lg'
+                          ? 'bg-sk-accent border-sk-accent text-white shadow-lg'
                           : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text hover:border-th-surface/[0.20]'
                       }`}
                     >
@@ -406,7 +406,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                   {unassignedCount} record{unassignedCount !== 1 ? 's' : ''} not yet assigned to a shelf.{' '}
                   <button
                     onClick={() => setActiveTab('setup')}
-                    className="text-[#dd6e42] hover:underline"
+                    className="text-sk-accent hover:underline"
                   >
                     Distribute All
                   </button>{' '}
@@ -438,7 +438,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
               aria-checked={sortScheme === opt.value}
               className={`px-3.5 py-2 rounded-lg text-sm font-label tracking-wide transition-all border ${
                 sortScheme === opt.value
-                  ? 'bg-[#dd6e42] border-[#dd6e42] text-white shadow-lg'
+                  ? 'bg-sk-accent border-sk-accent text-white shadow-lg'
                   : 'bg-th-surface/[0.04] border-th-surface/[0.10] text-th-text2 hover:text-th-text hover:border-th-surface/[0.20]'
               }`}
             >
@@ -467,7 +467,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
               placeholder="e.g. Kallax 4x4, Living Room Shelf"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-sm text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all"
+              className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-sm text-th-text placeholder:text-th-text3/60 focus:outline-none focus:ring-2 focus:ring-sk-accent/50 transition-all"
               aria-label="Shelf name"
             />
           </div>
@@ -480,7 +480,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
               max={50}
               value={newUnits}
               onChange={(e) => setNewUnits(Math.min(50, Math.max(1, Number(e.target.value) || 1)))}
-              className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all"
+              className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-sk-accent/50 transition-all"
               aria-label="Number of sections"
             />
           </div>
@@ -493,7 +493,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
               max={200}
               value={newCapacity}
               onChange={(e) => setNewCapacity(Math.min(200, Math.max(10, Number(e.target.value) || 50)))}
-              className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50 transition-all"
+              className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2.5 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-sk-accent/50 transition-all"
               aria-label="Capacity per section"
             />
           </div>
@@ -501,7 +501,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
             <button
               onClick={handleAdd}
               disabled={adding || !newName.trim()}
-              className="w-full px-4 py-2.5 rounded-lg bg-[#dd6e42] text-white font-label text-sm tracking-wide hover:bg-[#c45a30] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2.5 rounded-lg bg-sk-accent text-white font-label text-sm tracking-wide hover:bg-sk-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label="Add shelf"
             >
               {adding ? 'Adding...' : 'Add Shelf'}
@@ -544,7 +544,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
               <button
                 onClick={handleDistributeAll}
                 disabled={distributing || shelves.length === 0 || albums.length === 0}
-                className="px-3 py-2 rounded-lg bg-[#dd6e42] text-white font-label text-sm tracking-wide hover:bg-[#c45a30] transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-3 py-2 rounded-lg bg-sk-accent text-white font-label text-sm tracking-wide hover:bg-sk-accent-hover transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Distribute all albums across all shelves"
               >
                 {distributing && (
@@ -568,7 +568,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50"
+                      className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-sk-accent/50"
                       aria-label="Edit shelf name"
                     />
                     <div className="grid grid-cols-2 gap-3">
@@ -580,7 +580,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                           max={50}
                           value={editUnits}
                           onChange={(e) => setEditUnits(Math.min(50, Math.max(1, Number(e.target.value) || 1)))}
-                          className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50"
+                          className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-sk-accent/50"
                           aria-label="Edit sections count"
                         />
                       </div>
@@ -592,7 +592,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                           max={200}
                           value={editCapacity}
                           onChange={(e) => setEditCapacity(Math.min(200, Math.max(10, Number(e.target.value) || 50)))}
-                          className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-[#dd6e42]/50"
+                          className="w-full bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-lg px-3 py-2 text-sm text-th-text focus:outline-none focus:ring-2 focus:ring-sk-accent/50"
                           aria-label="Edit capacity per section"
                         />
                       </div>
@@ -601,7 +601,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                       <button
                         onClick={handleSaveEdit}
                         disabled={saving || !editName.trim()}
-                        className="flex-1 px-3 py-2 rounded-lg bg-[#dd6e42] text-white text-sm font-label tracking-wide hover:bg-[#c45a30] transition-colors disabled:opacity-40"
+                        className="flex-1 px-3 py-2 rounded-lg bg-sk-accent text-white text-sm font-label tracking-wide hover:bg-sk-accent-hover transition-colors disabled:opacity-40"
                         aria-label="Save shelf changes"
                       >
                         {saving ? 'Saving...' : 'Save'}
@@ -681,7 +681,7 @@ const ShelfSetup: React.FC<ShelfSetupProps> = ({ userId, albums, onUpgradeRequir
                       </div>
                       <div className="h-2 bg-th-surface/[0.08] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#dd6e42] rounded-full transition-all duration-500"
+                          className="h-full bg-sk-accent rounded-full transition-all duration-500"
                           style={{
                             width: `${Math.min(100, (getShelfAssignedCount(shelf.id) / (shelf.unit_count * shelf.capacity_per_unit)) * 100)}%`,
                           }}

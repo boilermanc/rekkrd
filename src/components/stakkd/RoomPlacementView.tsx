@@ -276,12 +276,12 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
                                 if (e.key === 'Escape') { setRenamingId(null); setRenameValue(''); }
                               }}
                               autoFocus
-                              className="flex-1 bg-th-surface/[0.08] rounded-lg px-2.5 py-1.5 text-xs text-th-text outline-none focus:ring-1 focus:ring-[#dd6e42]/50"
+                              className="flex-1 bg-th-surface/[0.08] rounded-lg px-2.5 py-1.5 text-xs text-th-text outline-none focus:ring-1 focus:ring-sk-accent/50"
                             />
                             <button
                               type="button"
                               onClick={() => handleRename(l.id)}
-                              className="text-[#dd6e42] text-xs font-bold"
+                              className="text-sk-accent text-xs font-bold"
                             >
                               Save
                             </button>
@@ -315,7 +315,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
                             >
                               <div className="flex items-center gap-2">
                                 {l.is_active && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#dd6e42] shrink-0" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-sk-accent shrink-0" />
                                 )}
                                 <span className={`text-xs truncate ${l.is_active ? 'text-th-text font-semibold' : 'text-th-text3'}`}>
                                   {l.name}
@@ -377,8 +377,8 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
               aria-busy={generating}
               className={`font-bold py-2 px-4 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] flex items-center gap-2 ${
                 hasAccess
-                  ? 'bg-[#dd6e42] text-white hover:bg-[#c45e38]'
-                  : 'bg-[#dd6e42]/40 text-white/60 cursor-not-allowed'
+                  ? 'bg-sk-accent text-white hover:bg-sk-accent-hover'
+                  : 'bg-sk-accent/40 text-white/60 cursor-not-allowed'
               }`}
             >
               {result ? (
@@ -416,7 +416,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
         {/* Loading saved layout */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-            <div className="w-8 h-8 border-2 border-[#dd6e42] border-t-transparent rounded-full animate-spin mb-3" />
+            <div className="w-8 h-8 border-2 border-sk-accent border-t-transparent rounded-full animate-spin mb-3" />
             <p className="text-th-text3 text-sm">Loading saved layout...</p>
           </div>
         )}
@@ -441,8 +441,8 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
                 aria-label={hasAccess ? 'Generate room layout' : 'Generate room layout — upgrade to Enthusiast required'}
                 className={`font-bold py-2.5 px-6 rounded-xl transition-all uppercase tracking-[0.2em] text-[10px] inline-flex items-center gap-2 ${
                   hasAccess
-                    ? 'bg-[#dd6e42] text-white hover:bg-[#c45e38]'
-                    : 'bg-[#dd6e42]/40 text-white/60 cursor-not-allowed'
+                    ? 'bg-sk-accent text-white hover:bg-sk-accent-hover'
+                    : 'bg-sk-accent/40 text-white/60 cursor-not-allowed'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -462,7 +462,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
                 <RoomDiagram room={room} features={features} interactive={false} />
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-th-bg/60 backdrop-blur-sm rounded-xl">
-                <div className="w-8 h-8 border-2 border-[#dd6e42] border-t-transparent rounded-full animate-spin mb-3" />
+                <div className="w-8 h-8 border-2 border-sk-accent border-t-transparent rounded-full animate-spin mb-3" />
                 <p className="text-th-text text-sm font-medium">Analyzing your room and gear...</p>
                 <p className="text-th-text3 text-xs mt-1">This may take a few seconds</p>
               </div>
@@ -506,7 +506,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
                     >
                       <div className="flex items-start justify-between gap-2 mb-1.5">
                         <span className="text-sm font-semibold text-th-text">{p.gear_name}</span>
-                        <span className="text-[10px] text-[#dd6e42] font-bold uppercase tracking-widest shrink-0">
+                        <span className="text-[10px] text-sk-accent font-bold uppercase tracking-widest shrink-0">
                           {FACING_LABELS[p.facing] || p.facing}
                         </span>
                       </div>
@@ -540,7 +540,7 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
                     Stereo Triangle
                   </h3>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-sm font-bold text-[#dd6e42]">
+                    <span className="text-sm font-bold text-sk-accent">
                       {result.stereo_triangle.angle_degrees}&deg;
                     </span>
                     <span className="text-xs text-th-text3">triangle angle</span>
@@ -557,14 +557,14 @@ const RoomPlacementView: React.FC<RoomPlacementViewProps> = ({ room, features, o
 
               {/* Tips */}
               {result.tips.length > 0 && (
-                <div className="rounded-xl border border-[#dd6e42]/15 bg-[#dd6e42]/[0.04] p-4">
-                  <h3 className="text-xs font-semibold text-[#dd6e42] uppercase tracking-widest mb-2">
+                <div className="rounded-xl border border-sk-accent/15 bg-sk-accent/[0.04] p-4">
+                  <h3 className="text-xs font-semibold text-sk-accent uppercase tracking-widest mb-2">
                     Room Tips
                   </h3>
                   <ul className="space-y-2">
                     {result.tips.map((tip, i) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-th-text3">
-                        <span className="text-[#dd6e42] mt-0.5 shrink-0">
+                        <span className="text-sk-accent mt-0.5 shrink-0">
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                           </svg>

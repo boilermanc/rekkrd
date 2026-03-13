@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import './SignalChainGuideModal.css';
+import '../styles/stakkd-theme.css';
 
 interface SignalChainGuideModalProps {
   isOpen: boolean;
@@ -27,12 +27,12 @@ const SignalChainGuideModal: React.FC<SignalChainGuideModalProps> = ({ isOpen, o
       className="fixed inset-0 z-[60] flex items-center justify-center bg-th-bg/95 p-2 md:p-6 backdrop-blur-xl animate-in fade-in duration-300 outline-none"
     >
       <div className="scg-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500"
-        style={{ background: '#1a2528' }}
+        style={{ background: 'var(--sk-bg)' }}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-[#1a2528]/80 text-[#e8e2d6] flex items-center justify-center hover:bg-[#e8e2d6] hover:text-[#1a2528] transition-all"
+          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-sk-bg/80 text-sk-text flex items-center justify-center hover:bg-sk-text hover:text-sk-bg transition-all"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -157,7 +157,7 @@ const SignalChainGuideModal: React.FC<SignalChainGuideModalProps> = ({ isOpen, o
               </blockquote>
 
               <h3>See It in Stakkd</h3>
-              <p>The best part? You don't have to guess what your signal chain looks like. The <strong>Stakkd</strong> feature in your Rekk<span className="text-[#c45a30]">r</span>d app visualizes it for you automatically. When you add your gear, Stakkd lays it all out — showing you the exact path your music is taking. You can even drag and drop components to experiment with different configurations.</p>
+              <p>The best part? You don't have to guess what your signal chain looks like. The <strong>Stakkd</strong> feature in your Rekk<span className="text-sk-accent-hover">r</span>d app visualizes it for you automatically. When you add your gear, Stakkd lays it all out — showing you the exact path your music is taking. You can even drag and drop components to experiment with different configurations.</p>
               <p>Understanding your signal chain is the first step to troubleshooting problems and making meaningful upgrades to your system. Now that you know the basics, you're ready to explore the deeper magic of how it all works together.</p>
 
               <div className="scg-cta">
@@ -305,7 +305,7 @@ const SignalChainGuideModal: React.FC<SignalChainGuideModalProps> = ({ isOpen, o
                   <div className="scg-step-number">1</div>
                   <div className="scg-step-content">
                     <h4>Open the Stakkd Feature</h4>
-                    <p>Navigate to the Stakkd section in your Rekk<span className="text-[#c45a30]">r</span>d app from the main navigation.</p>
+                    <p>Navigate to the Stakkd section in your Rekk<span className="text-sk-accent-hover">r</span>d app from the main navigation.</p>
                   </div>
                 </div>
                 <div className="scg-step-item">

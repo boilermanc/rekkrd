@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import './StakkdGuideModal.css';
+import '../styles/stakkd-theme.css';
 
 interface StakkdGuideModalProps {
   isOpen: boolean;
@@ -28,12 +28,12 @@ const StakkdGuideModal: React.FC<StakkdGuideModalProps> = ({ isOpen, onClose }) 
     >
       <div
         className="stakkd-modal relative w-full max-w-3xl max-h-[98vh] md:max-h-[95vh] rounded-3xl overflow-hidden border border-th-surface/[0.10] flex flex-col animate-in zoom-in-95 duration-500"
-        style={{ background: '#1a2528' }}
+        style={{ background: 'var(--sk-bg)' }}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-[#1a2528]/80 text-[#e8e2d6] flex items-center justify-center hover:bg-[#e8e2d6] hover:text-[#1a2528] transition-all"
+          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-sk-bg/80 text-sk-text flex items-center justify-center hover:bg-sk-text hover:text-sk-bg transition-all"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

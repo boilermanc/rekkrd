@@ -186,7 +186,7 @@ const DraggableAlbumRow: React.FC<DraggableAlbumRowProps> = ({
         <div className="relative flex-shrink-0" ref={unpinRef}>
           <button
             onClick={handlePinClick}
-            className="p-1 text-[#dd6e42]/70 hover:text-[#dd6e42] transition-colors"
+            className="p-1 text-sk-accent/70 hover:text-sk-accent transition-colors"
             aria-label={`${album.title} is manually placed. Click to unpin.`}
             title="Manually placed — won't move during rebalance"
           >
@@ -246,7 +246,7 @@ const DroppableSection: React.FC<DroppableSectionProps> = ({
     <section
       ref={setNodeRef}
       className={`glass-morphism rounded-xl overflow-hidden transition-all duration-200 ${
-        isOver ? 'ring-2 ring-[#dd6e42]/60 ring-offset-1 ring-offset-transparent' : ''
+        isOver ? 'ring-2 ring-sk-accent/60 ring-offset-1 ring-offset-transparent' : ''
       }`}
     >
       {/* Unit header */}
@@ -277,7 +277,7 @@ const DroppableSection: React.FC<DroppableSectionProps> = ({
 
       {/* Album list */}
       {unitAlbums.length === 0 ? (
-        <div className={`px-4 py-6 text-center ${isOver ? 'bg-[#dd6e42]/5' : ''}`}>
+        <div className={`px-4 py-6 text-center ${isOver ? 'bg-sk-accent/5' : ''}`}>
           <p className="text-th-text3/30 text-xs">
             {isOver ? 'Drop here' : 'Empty section'}
           </p>
@@ -703,7 +703,7 @@ const ShelfView: React.FC<ShelfViewProps> = ({
               </span>
             )}
             {manualMoves.size > 0 && (
-              <span className="ml-2 text-[#dd6e42] font-label tracking-wide">
+              <span className="ml-2 text-sk-accent font-label tracking-wide">
                 — {manualMoves.size} manual move{manualMoves.size !== 1 ? 's' : ''}
               </span>
             )}
@@ -801,7 +801,7 @@ const ShelfView: React.FC<ShelfViewProps> = ({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-[#dd6e42] text-white font-label text-sm tracking-wide hover:bg-[#c45a30] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-sk-accent text-white font-label text-sm tracking-wide hover:bg-sk-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
               aria-label="Save shelf assignments"
             >
               {saving && (

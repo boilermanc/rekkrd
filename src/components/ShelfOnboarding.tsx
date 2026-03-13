@@ -63,7 +63,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
         </div>
         <div className="h-1 bg-th-surface/[0.08] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#dd6e42] rounded-full transition-all duration-500"
+            className="h-full bg-sk-accent rounded-full transition-all duration-500"
             style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
           />
         </div>
@@ -80,8 +80,8 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
           {/* ── Step 0: Welcome ── */}
           {step === 0 && (
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-[#dd6e42]/10 border border-[#dd6e42]/20 flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-20 h-20 rounded-2xl bg-sk-accent/10 border border-sk-accent/20 flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="7" height="7" />
                   <rect x="14" y="3" width="7" height="7" />
                   <rect x="3" y="14" width="7" height="7" />
@@ -89,26 +89,26 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
                 </svg>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-th-text mb-3">
-                Welcome to <span className="text-[#dd6e42]">Shelf Organizer</span>
+                Welcome to <span className="text-sk-accent">Shelf Organizer</span>
               </h2>
               <p className="text-th-text3/70 text-sm leading-relaxed max-w-sm">
                 Map your digital vinyl collection to your physical shelves. The Shelf Organizer helps you know exactly where every record belongs — so your real shelves match your digital catalog.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <div className="flex items-center gap-2 text-xs text-th-text3/70">
-                  <svg className="w-4 h-4 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   Smart sorting
                 </div>
                 <div className="flex items-center gap-2 text-xs text-th-text3/70">
-                  <svg className="w-4 h-4 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   Drag &amp; drop
                 </div>
                 <div className="flex items-center gap-2 text-xs text-th-text3/70">
-                  <svg className="w-4 h-4 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   Auto rebalance
@@ -120,14 +120,14 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
           {/* ── Step 1: Define Your Shelves ── */}
           {step === 1 && (
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-[#dd6e42]/10 border border-[#dd6e42]/20 flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-20 h-20 rounded-2xl bg-sk-accent/10 border border-sk-accent/20 flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10H3M21 6H3M21 14H3M21 18H3" />
                   <rect x="1" y="3" width="22" height="18" rx="2" />
                 </svg>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-th-text mb-3">
-                Define Your <span className="text-[#dd6e42]">Shelves</span>
+                Define Your <span className="text-sk-accent">Shelves</span>
               </h2>
               <p className="text-th-text3/70 text-sm leading-relaxed max-w-sm mb-6">
                 Tell us about your physical storage. Each shelf has a name, a number of sections (cubes or compartments), and a capacity per section.
@@ -136,7 +136,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
               {/* Mini shelf preview */}
               <div className="w-full max-w-xs bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#dd6e42]" />
+                  <div className="w-2 h-2 rounded-full bg-sk-accent" />
                   <span className="text-th-text text-xs font-label tracking-wide">Kallax 4x4</span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
@@ -154,13 +154,13 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
           {/* ── Step 2: Sort Scheme ── */}
           {step === 2 && (
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-[#dd6e42]/10 border border-[#dd6e42]/20 flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-20 h-20 rounded-2xl bg-sk-accent/10 border border-sk-accent/20 flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 6h18M3 12h12M3 18h6" />
                 </svg>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-th-text mb-3">
-                Choose Your <span className="text-[#dd6e42]">Sort Scheme</span>
+                Choose Your <span className="text-sk-accent">Sort Scheme</span>
               </h2>
               <p className="text-th-text3/70 text-sm leading-relaxed max-w-sm mb-6">
                 How should your records be arranged on the shelf? Pick a sort order and your collection will be distributed accordingly.
@@ -191,14 +191,14 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
           {/* ── Step 3: Drag, Drop & Rebalance ── */}
           {step === 3 && (
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-[#dd6e42]/10 border border-[#dd6e42]/20 flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-[#dd6e42]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-20 h-20 rounded-2xl bg-sk-accent/10 border border-sk-accent/20 flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-sk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M7 16V4m0 0L3 8m4-4l4 4" />
                   <path d="M17 8v12m0 0l4-4m-4 4l-4-4" />
                 </svg>
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-th-text mb-3">
-                Drag, Drop &amp; <span className="text-[#dd6e42]">Rebalance</span>
+                Drag, Drop &amp; <span className="text-sk-accent">Rebalance</span>
               </h2>
               <p className="text-th-text3/70 text-sm leading-relaxed max-w-sm mb-6">
                 In Shelf View, you can fine-tune your organization with drag-and-drop. Moved albums get pinned in place. When things get unbalanced, hit Rebalance to even things out — pinned albums stay put.
@@ -207,7 +207,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
               {/* Feature highlights */}
               <div className="w-full max-w-xs space-y-3">
                 <div className="flex items-center gap-3 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3">
-                  <svg className="w-5 h-5 text-[#dd6e42] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-5 h-5 text-sk-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="9" cy="5" r="1" /><circle cx="9" cy="9" r="1" /><circle cx="9" cy="13" r="1" />
                     <circle cx="15" cy="5" r="1" /><circle cx="15" cy="9" r="1" /><circle cx="15" cy="13" r="1" />
                   </svg>
@@ -217,7 +217,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3">
-                  <svg className="w-5 h-5 text-[#dd6e42] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-5 h-5 text-sk-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2l0 10" />
                     <path d="M18.364 18.364A9 9 0 005.636 5.636" />
                     <circle cx="12" cy="12" r="2" />
@@ -228,7 +228,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-th-surface/[0.04] border border-th-surface/[0.10] rounded-xl px-4 py-3">
-                  <svg className="w-5 h-5 text-[#dd6e42] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-5 h-5 text-sk-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 14h6m0 0l-3-3m3 3l-3 3" />
                     <path d="M20 10h-6m0 0l3-3m-3 3l3 3" />
                   </svg>
@@ -257,7 +257,7 @@ const ShelfOnboarding: React.FC<ShelfOnboardingProps> = ({ onComplete }) => {
         </div>
         <button
           onClick={handleNext}
-          className="px-6 py-2.5 rounded-xl bg-[#dd6e42] text-white text-sm font-label tracking-wide font-bold hover:bg-[#c45a30] transition-all"
+          className="px-6 py-2.5 rounded-xl bg-sk-accent text-white text-sm font-label tracking-wide font-bold hover:bg-sk-accent-hover transition-all"
         >
           {step === TOTAL_STEPS - 1 ? 'Get Started' : 'Next'}
         </button>
